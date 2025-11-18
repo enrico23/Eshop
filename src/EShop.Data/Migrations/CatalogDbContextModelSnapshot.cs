@@ -37,6 +37,23 @@ namespace EShop.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Brands", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Microsoft"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Apple"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Samsung"
+                        });
                 });
 
             modelBuilder.Entity("EShop.Domain.Category", b =>
@@ -55,6 +72,23 @@ namespace EShop.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Laptops"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Smartphones"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Tablets"
+                        });
                 });
 
             modelBuilder.Entity("EShop.Domain.Product", b =>
