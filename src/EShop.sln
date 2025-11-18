@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Data", "EShop.Data\ES
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Domain", "EShop.Domain\EShop.Domain.csproj", "{90305A40-30DA-ED02-A383-AE9EBB87D536}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.MigrationService", "EShop.MigrationService\EShop.MigrationService.csproj", "{B05B0495-2C7F-8F5C-D996-7D7ED642060F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{90305A40-30DA-ED02-A383-AE9EBB87D536}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{90305A40-30DA-ED02-A383-AE9EBB87D536}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{90305A40-30DA-ED02-A383-AE9EBB87D536}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B05B0495-2C7F-8F5C-D996-7D7ED642060F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B05B0495-2C7F-8F5C-D996-7D7ED642060F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B05B0495-2C7F-8F5C-D996-7D7ED642060F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B05B0495-2C7F-8F5C-D996-7D7ED642060F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -10,7 +10,6 @@ public class CatalogDbContext : DbContext
 
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Category> Categories => Set<Category>();
-
     public DbSet<Brand> Brands => Set<Brand>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
