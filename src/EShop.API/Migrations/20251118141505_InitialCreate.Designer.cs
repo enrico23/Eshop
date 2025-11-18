@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EShop.API.Migrations
 {
     [DbContext(typeof(CatalogDbContext))]
-    [Migration("20251118134542_InitialCreate")]
+    [Migration("20251118141505_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -54,12 +54,13 @@ namespace EShop.API.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
