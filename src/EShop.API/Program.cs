@@ -1,4 +1,11 @@
+using EShop.API.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("CatalogDb");
+builder.Services.AddDbContext<CatalogDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
