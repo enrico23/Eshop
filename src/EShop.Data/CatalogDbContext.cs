@@ -1,8 +1,8 @@
-﻿using EShop.API.Domain;
-using EShop.API.Infrastructure.EntityConfigurations;
+﻿using EShop.Data.EntityConfigurations;
+using EShop.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace EShop.API.Infrastructure;
+namespace EShop.Data;
 
 public class CatalogDbContext : DbContext
 {
