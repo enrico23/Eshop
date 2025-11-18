@@ -8,6 +8,8 @@ namespace EShop.API.Infrastructure.EntityConfigurations
     {
         public void Configure(EntityTypeBuilder<Product> builder)
         {
+            builder.ToTable("Products");
+
             builder.HasKey(p => p.Id);
 
             builder.Property(p => p.Name).IsRequired().HasMaxLength(100);
@@ -19,6 +21,8 @@ namespace EShop.API.Infrastructure.EntityConfigurations
             builder.Property(p => p.Stock).HasDefaultValue(0);
 
             builder.HasOne(p => p.Category).WithMany(c => c.Products).HasForeignKey(p => p.CategoryId);
+
+            builder.HasOne(p => p.Brand).WithMany(c => c.Products).HasForeignKey(p => p.BrandId);
         }
     }
 }
