@@ -1,4 +1,4 @@
-﻿namespace EShop.API.Domain;
+﻿namespace EShop.Domain;
 
 public class Brand
 {

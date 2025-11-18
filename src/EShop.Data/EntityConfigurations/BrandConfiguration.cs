@@ -1,8 +1,8 @@
-﻿using EShop.API.Domain;
+﻿using EShop.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace EShop.API.Infrastructure.EntityConfigurations;
+namespace EShop.Data.EntityConfigurations;
 
 public class BrandConfiguration : IEntityTypeConfiguration<Brand>
 {
