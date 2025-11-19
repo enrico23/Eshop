@@ -16,7 +16,7 @@ public partial class BrandsController : Controller
         _brandService = brandService;
     }
 
-    // GET: api/products?page=1&pageSize=20
+    // GET: api/brands?page=1&pageSize=20
     [HttpGet]
     [ProducesResponseType(typeof(PaginatedResult<BrandDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult> GetPagedAsync([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)

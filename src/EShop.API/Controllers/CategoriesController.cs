@@ -1,5 +1,4 @@
 ﻿using EShop.API.Representations;
-using EShop.API.Representations.Brand;
 using EShop.API.Representations.Category;
 using EShop.API.Services;
 using Microsoft.AspNetCore.Mvc;
