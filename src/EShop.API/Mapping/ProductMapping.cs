@@ -1,6 +1,7 @@
 ﻿using EShop.Api.Representations.Products;
 using EShop.API.Representations.Products;
 using EShop.Domain;
+using EShop.Shared.Representations.Products;
 using Mapster;
 
 namespace EShop.API.Mapping;
