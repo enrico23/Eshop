@@ -1,5 +1,8 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-builder.AddProject<Projects.EShop_API>("api");
+var api = builder.AddProject<Projects.EShop_API>("api");
+
+builder.AddProject<Projects.Eshop_Web>("blazor").WaitFor(api);
 
 builder.Build().Run();
+ 
