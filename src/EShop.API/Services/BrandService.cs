@@ -1,4 +1,6 @@
-﻿using EShop.API.Representations;
+﻿using EShop.API.Exceptions;
+using EShop.API.Representations;
+using EShop.API.Representations.Brand;
 using EShop.Data;
 using EShop.Domain;
 using Mapster;
@@ -7,14 +9,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EShop.API.Services;
 
-public class BrandService(CatalogDbContext context, IMapper mapper) : IBrandService
+public class BrandService : IBrandService
 {
+    private readonly CatalogDbContext _context;
+
+    private readonly IMapper _mapper;
+
+    public BrandService(CatalogDbContext context, IMapper mapper)
+    {
+        _context = context;
+        _mapper = mapper;
+    }
+
     public async Task<PaginatedResult<BrandDto>> GetPagedAsync(int page, int pageSize, CancellationToken ct = default)
     {
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 200);
 
-        var query = context.Brands.AsNoTracking().OrderBy(b => b.Name);
+        var query = _context.Brands.AsNoTracking().OrderBy(b => b.Name);
 
         var total = await query.LongCountAsync(ct);
 
@@ -29,12 +41,14 @@ public class BrandService(CatalogDbContext context, IMapper mapper) : IBrandServ
 
     public async Task<bool> BrandExistsAsync(int brandId, CancellationToken ct = default)
     {
-        return await context.Brands.AsNoTracking().AnyAsync(b => b.Id == brandId, ct);
+        return await _context.Brands
+            .AsNoTracking()
+            .AnyAsync(b => b.Id == brandId, ct);
     }
 
     public async Task<BrandDto?> GetByIdAsync(int brandId, CancellationToken ct = default)
     {
-       return await context.Brands
+       return await _context.Brands
             .AsNoTracking()
             .Where(b => b.Id == brandId)
             .ProjectToType<BrandDto>()
@@ -46,13 +60,13 @@ public class BrandService(CatalogDbContext context, IMapper mapper) : IBrandServ
         if (updateBrandDto is null) 
             throw new ArgumentNullException(nameof(updateBrandDto));
 
-        var entity = await context.Brands.FirstOrDefaultAsync(b => b.Id == id, ct);
+        var entity = await _context.Brands.FirstOrDefaultAsync(b => b.Id == id, ct);
         if (entity is null)
             return false;
 
         updateBrandDto.Adapt(entity);
 
-        await context.SaveChangesAsync(ct);
+        await _context.SaveChangesAsync(ct);
         return true;
     }
 
@@ -61,28 +75,28 @@ public class BrandService(CatalogDbContext context, IMapper mapper) : IBrandServ
         if (createBrandDto is null) 
             throw new ArgumentNullException(nameof(createBrandDto));
 
-        var brand = mapper.From(createBrandDto).AdaptToType<Brand>();
-
-        var alreadyExists = await context.Brands.AnyAsync(b => b.Name == createBrandDto.Name, ct);
+        var alreadyExists = await _context.Brands.AnyAsync(b => b.Name.ToLower() == createBrandDto.Name.ToLower(), ct);
         if (alreadyExists)
             throw new DomainException($"A brand with name '{createBrandDto.Name}' already exists.");
 
-        await context.Brands.AddAsync(brand, ct);
-        await context.SaveChangesAsync(ct);
+        var name = createBrandDto.Name?.Trim();
+        var brand = _mapper.From(createBrandDto).AdaptToType<Brand>();
+
+        await _context.Brands.AddAsync(brand, ct);
+        await _context.SaveChangesAsync(ct);
 
         return brand.Adapt<BrandDto>();
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken ct)
     {
-        var entity = await context.Brands
-                .FirstOrDefaultAsync(b => b.Id == id, ct);
+        var entity = await _context.Brands.FirstOrDefaultAsync(b => b.Id == id, ct);
 
         if (entity is null)
             return false;
 
-        context.Brands.Remove(entity);
-        await context.SaveChangesAsync(ct);
+        _context.Brands.Remove(entity);
+        await _context.SaveChangesAsync(ct);
 
         return true;
     }

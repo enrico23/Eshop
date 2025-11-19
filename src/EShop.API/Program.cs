@@ -14,6 +14,7 @@ builder.Services.AddMapster();
 TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
 
 builder.Services.AddScoped<IBrandService, BrandService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
