@@ -20,7 +20,7 @@ namespace EShop.API.Controllers
         // GET: api/categories?page=1&pageSize=20
         [HttpGet]
         [ProducesResponseType(typeof(PaginatedResult<CategoryDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAsync([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
+        public async Task<IActionResult> GetPagedAsync([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
         {
             var categories = await _categoryService.GetPagedAsync(page, pageSize,ct);
 
@@ -32,7 +32,7 @@ namespace EShop.API.Controllers
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK)]
-        public async Task<ActionResult<CategoryDto>> GetProductAsync(int id, CancellationToken ct = default)
+        public async Task<ActionResult<CategoryDto>> GetByIdAsync(int id, CancellationToken ct = default)
         {
             var category = await _categoryService.GetByIdAsync(id, ct);
             if (category is null)
@@ -67,13 +67,13 @@ namespace EShop.API.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<CategoryDto>> PostProductAsync(CreateCategoryDto createCategoryDto, CancellationToken ct = default)
+        public async Task<ActionResult<CategoryDto>> PostAsync(CreateCategoryDto createCategoryDto, CancellationToken ct = default)
         {
             if (createCategoryDto is null)
                 return BadRequest();
 
             var categoryDto = await _categoryService.AddAsync(createCategoryDto, ct);
-            var url = $"{Request.Scheme}://{Request.Host}/api/Products/{categoryDto.Id}";
+            var url = $"{Request.Scheme}://{Request.Host}/api/Categories/{categoryDto.Id}";
             return Created(url, categoryDto);
         }
         // </snippet_Create>
