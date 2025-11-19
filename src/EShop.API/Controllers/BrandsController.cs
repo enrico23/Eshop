@@ -1,4 +1,5 @@
 ﻿using EShop.API.Representations;
+using EShop.API.Representations.Brand;
 using EShop.API.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,7 +19,7 @@ public partial class BrandsController : Controller
     // GET: api/products?page=1&pageSize=20
     [HttpGet]
     [ProducesResponseType(typeof(PaginatedResult<BrandDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult> GetAsync([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
+    public async Task<ActionResult> GetPagedAsync([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
     {
         var results = await _brandService.GetPagedAsync(page, pageSize, ct);
 
@@ -30,7 +31,7 @@ public partial class BrandsController : Controller
     [HttpGet("{id:int}")]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(BrandDto), StatusCodes.Status200OK)]
-    public async Task<ActionResult<BrandDto>> GetProductAsync(int id, CancellationToken ct = default)
+    public async Task<ActionResult<BrandDto>> GetByIdAsync(int id, CancellationToken ct = default)
     {
         var brand = await _brandService.GetByIdAsync(id, ct);
         if (brand is null)
@@ -65,14 +66,14 @@ public partial class BrandsController : Controller
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<BrandDto>> PostProductAsync(CreateBrandDto createBrandDto, CancellationToken ct = default)
+    public async Task<ActionResult<BrandDto>> PostAsync(CreateBrandDto createBrandDto, CancellationToken ct = default)
     {
         if (createBrandDto is null)
             return BadRequest();
 
-        var productDto = await _brandService.AddAsync(createBrandDto, ct);
-        var url = $"{Request.Scheme}://{Request.Host}/api/Products/{productDto.Id}";
-        return Created(url, productDto);
+        var brandDto = await _brandService.AddAsync(createBrandDto, ct);
+        var url = $"{Request.Scheme}://{Request.Host}/api/Brands/{brandDto.Id}";
+        return Created(url, brandDto);
     }
     // </snippet_Create>
 
@@ -80,7 +81,7 @@ public partial class BrandsController : Controller
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> DeleteTodoItem(int id, CancellationToken ct = default)
+    public async Task<IActionResult> DeleteAsync(int id, CancellationToken ct = default)
     {
         var deleted = await _brandService.DeleteAsync(id, ct);
         if(!deleted)
@@ -88,5 +89,4 @@ public partial class BrandsController : Controller
 
         return NoContent();
     }
-
 }

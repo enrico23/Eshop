@@ -29,4 +29,12 @@
     <ProjectReference Include="..\EShop.Domain\EShop.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\dev\EShop\src\EShop.API\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="C:\dev\EShop\src\EShop.API\.editorconfig" />
+  </ItemGroup>
+
 </Project>

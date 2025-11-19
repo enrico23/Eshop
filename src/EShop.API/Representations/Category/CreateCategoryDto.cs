@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EShop.API.Representations;
+namespace EShop.API.Representations.Category;
 
-public class CreateBrandDto
+public class CreateCategoryDto
 {
     [Required]
     public required string Name { get; set; }

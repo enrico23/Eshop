@@ -1,4 +1,4 @@
-﻿using EShop.API.Representations;
+﻿using EShop.API.Representations.Brand;
 using EShop.Domain;
 using Mapster;
 

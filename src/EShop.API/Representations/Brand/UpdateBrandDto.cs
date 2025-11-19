@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EShop.API.Representations;
+namespace EShop.API.Representations.Brand;
 
 public class UpdateBrandDto
 {
