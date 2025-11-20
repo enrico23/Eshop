@@ -3,6 +3,7 @@ using EShop.API.Representations;
 using EShop.API.Representations.Category;
 using EShop.Data;
 using EShop.Domain;
+using EShop.Shared.Representations;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;

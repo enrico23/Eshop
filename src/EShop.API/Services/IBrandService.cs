@@ -1,5 +1,5 @@
-﻿using EShop.API.Representations;
-using EShop.API.Representations.Brand;
+﻿using EShop.API.Representations.Brand;
+using EShop.Shared.Representations;
 
 namespace EShop.API.Services;
 

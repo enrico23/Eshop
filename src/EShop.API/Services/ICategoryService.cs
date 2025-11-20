@@ -1,5 +1,5 @@
-﻿using EShop.API.Representations;
-using EShop.API.Representations.Category;
+﻿using EShop.API.Representations.Category;
+using EShop.Shared.Representations;
 
 namespace EShop.API.Services;
 

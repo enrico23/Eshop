@@ -1,6 +1,6 @@
 ﻿using EShop.Api.Representations.Products;
-using EShop.API.Representations;
 using EShop.API.Representations.Products;
+using EShop.Shared.Representations;
 using EShop.Shared.Representations.Products;
 
 namespace EShop.API.Services;
