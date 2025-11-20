@@ -1,8 +1,8 @@
 ﻿using EShop.API.Exceptions;
-using EShop.API.Representations;
 using EShop.API.Representations.Brand;
 using EShop.Data;
 using EShop.Domain;
+using EShop.Shared.Representations;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;

@@ -1,7 +1,7 @@
 ﻿using EShop.Api.Representations.Products;
-using EShop.API.Representations;
 using EShop.API.Representations.Products;
 using EShop.API.Services;
+using EShop.Shared.Representations;
 using EShop.Shared.Representations.Products;
 using Microsoft.AspNetCore.Mvc;
 

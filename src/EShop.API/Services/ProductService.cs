@@ -1,9 +1,9 @@
 ﻿using EShop.Api.Representations.Products;
 using EShop.API.Exceptions;
-using EShop.API.Representations;
 using EShop.API.Representations.Products;
 using EShop.Data;
 using EShop.Domain;
+using EShop.Shared.Representations;
 using EShop.Shared.Representations.Products;
 using Mapster;
 using MapsterMapper;
