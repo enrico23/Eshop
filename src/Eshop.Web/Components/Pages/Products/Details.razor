@@ -1,8 +1,49 @@
 ﻿@page "/products/details"
+@inject IHttpClientFactory HttpFactory
+@using EShop.Shared.Representations.Products
+@using EShop.Shared.Representations
 
-<h3>Details @Id</h3>
+<div class="container">
+@if(product is null)
+{
+    <div class="row">Loading...</div>
+}
+else
+{
+    <div class="row">
+        <h3>Details @product.Name</h3>
+    </div>
+        <dl class="row">
+            <dt class="col-sm-2">Price</dt>
+            <dd class="col-sm-10">@product.Price.ToString("C2")</dd>
+            <dt class="col-sm-2">Stock</dt>
+            <dd class="col-sm-10">@product.Stock</dd>
+            <dt class="col-sm-2">Description</dt>
+            <dd class="col-sm-10">@product.Description</dd>
+            <dt class="col-sm-2">Category:</dt>
+            <dd class="col-sm-10">@product.CategoryName</dd>
+            <dt class="col-sm-2">Brand:</dt>
+            <dd class="col-sm-10">@product.BrandName</dd>
+        </dl>
+        <div>
+            <a href="@($"/products/edit?id={product.Id}")">Edit</a> |
+            <a href="@($"/products")">Back to List</a>
+        </div>
+}
+</div>
 
 @code {
     [SupplyParameterFromQuery]
     private int Id { get; set; }
+
+    private HttpClient? client;
+
+    private ProductDto? product = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        client = HttpFactory.CreateClient("CatalogApi");
+        var url = $"api/products/{Id}";
+        product = await client.GetFromJsonAsync<ProductDto>(url);
+    }
 }
