@@ -8,6 +8,7 @@ using EShop.Shared.Representations.Products;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Dynamic.Core;
 
 namespace EShop.API.Services;
 
@@ -23,12 +24,19 @@ public class ProductService : IProductService
         _mapper = mapper;
     }
  
-    public async Task<PaginatedResult<ProductDto>> GetPagedAsync(int page, int pageSize, CancellationToken ct = default)
+    public async Task<PaginatedResult<ProductDto>> GetPagedAsync(int page, int pageSize, 
+        string orderBy = "Name", string orderDirection = "asc",  CancellationToken ct = default)
     {
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 200);
 
-        var query = _context.Products.AsNoTracking().OrderBy(b => b.Name);
+        IQueryable<Product> query = _context.Products.AsNoTracking();
+
+        if(!string.IsNullOrEmpty(orderBy))
+        {
+            var ordering = $"{orderBy} {orderDirection}";
+            query = query.OrderBy(ordering);
+        }
 
         var total = await query.LongCountAsync(ct);
 

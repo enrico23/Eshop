@@ -5,7 +5,8 @@ namespace EShop.API.Services;
 
 public interface IBrandService
 {
-    Task<PaginatedResult<BrandDto>> GetPagedAsync(int page, int pageSize, CancellationToken ct = default);
+    Task<PaginatedResult<BrandDto>> GetPagedAsync(int page, int pageSize, 
+        string orderBy = "Name", string orderDirection = "asc", CancellationToken ct = default);
 
     Task<bool> BrandExistsAsync(int brandId, CancellationToken ct = default);
 
