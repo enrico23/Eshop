@@ -1,5 +1,5 @@
-﻿using EShop.API.Representations.Brand;
-using EShop.Domain;
+﻿using EShop.Domain;
+using EShop.Shared.Representations.Brand;
 using Mapster;
 
 namespace EShop.API.Mapping

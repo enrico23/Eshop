@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EShop.API.Representations.Brand;
+namespace EShop.Shared.Representations.Brand;
 
 public class CreateBrandDto
 {

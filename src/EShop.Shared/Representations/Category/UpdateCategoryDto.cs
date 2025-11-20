@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EShop.API.Representations.Category;
+namespace EShop.Shared.Representations.Category;
 
 public class UpdateCategoryDto
 {

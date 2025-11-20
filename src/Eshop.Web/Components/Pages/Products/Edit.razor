@@ -1,8 +1,202 @@
 ﻿@page "/products/edit"
+@rendermode InteractiveServer
+@inject IHttpClientFactory HttpFactory
+@using EShop.Shared.Representations.Brand
+@using EShop.Shared.Representations.Category
+@using EShop.Shared.Representations.Product
+@using EShop.Shared.Representations
+@using System.Net
+@inject NavigationManager NavigationManager
 
-<h3>Edit @Id</h3>
+<div class="container">
+@if(isLoading)
+{
+    <div class="row">Loading...</div>
+}
+else if (updateProductDto is null)
+{
+    <div class="row">Product not found.</div>
+}
+else
+{
+    <div class="row">
+        <h3>Edit @updateProductDto.Name</h3>
+    </div>
+
+    @if (!string.IsNullOrEmpty(serverError))
+    {
+        <div class="row">
+            <div class="alert alert-danger">@serverError</div>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-4">
+                <EditForm method="post" OnValidSubmit="UpdateProduct" EditContext="@editContext" FormName="edit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary role="alert" />
+
+                    <div class="mb-3">
+                        <label for="Name" class="form-label">Name:</label>
+                        <InputText id="Name" @bind-Value="updateProductDto.Name" class="form-control" />
+                        <ValidationMessage For="() => updateProductDto.Name" class="text-danger" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Price" class="form-label">Price:</label>
+                        <InputNumber id="Price" @bind-Value="updateProductDto.Price" class="form-control" />
+                        <ValidationMessage For="() => updateProductDto.Price" class="text-danger" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Stock" class="form-label">Stock:</label>
+                        <InputNumber id="Stock" @bind-Value="updateProductDto.Stock" class="form-control" />
+                        <ValidationMessage For="() => updateProductDto.Stock" class="text-danger" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Description" class="form-label">Stock:</label>
+                        <InputText id="Description" @bind-Value="updateProductDto.Description" class="form-control" />
+                        <ValidationMessage For="() => updateProductDto.Description" class="text-danger" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Category</label>
+                        <InputSelect class="form-select" @bind-Value="updateProductDto.CategoryId">
+                            <option value="">-- Select category --</option>
+                            @foreach (var c in categories)
+                            {
+                                <option value="@c.Id">@c.Name</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => updateProductDto.CategoryId" class="text-danger" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Brand</label>
+                        <InputSelect class="form-select" @bind-Value="updateProductDto.BrandId">
+                            <option value="">-- Select brand --</option>
+                            @foreach (var b in brands)
+                            {
+                                <option value="@b.Id">@b.Name</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => updateProductDto.BrandId" class="text-danger" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                        @if (isSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="ms-2">Saving...</span>
+                        }
+                        else
+                        {
+                            <span>Save</span>
+                        }
+                    </button>
+            </EditForm>
+        </div>
+    </div>
+}
+</div>
 
 @code {
     [SupplyParameterFromQuery]
     private int Id { get; set; }
+
+    private HttpClient? client;
+
+    private UpdateProductDto? updateProductDto = new();
+    private ProductDto productDto = new();
+    private List<CategoryDto> categories = new();
+    private List<BrandDto> brands = new();
+
+    private bool isLoading = true;
+    private bool isSubmitting = false;
+    private string? serverError;
+
+    private EditContext? editContext;
+
+    protected override async Task OnInitializedAsync()
+    {
+        client = HttpFactory.CreateClient("CatalogApi");
+        var jsonOptions = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+        try
+        {
+            var productResponse = await client.GetAsync($"api/products/{Id}");
+
+            if (productResponse.StatusCode == HttpStatusCode.NotFound)
+            {
+                updateProductDto = null;
+                editContext = null;
+                return;
+            }
+
+            productResponse.EnsureSuccessStatusCode();
+            var productDto = await productResponse.Content.ReadFromJsonAsync<ProductDto>();
+            updateProductDto = new UpdateProductDto()
+            {
+                Name = productDto!.Name,
+                Description = productDto.Description,
+                Price = productDto.Price,
+                Stock = productDto.Stock,
+                BrandId = productDto.BrandId,
+                CategoryId = productDto.CategoryId
+            };
+            editContext = new EditContext(updateProductDto);
+
+            var categoriesTask = client.GetFromJsonAsync<List<CategoryDto>>("api/categories/all", jsonOptions);
+            var brandsTask = client.GetFromJsonAsync<List<BrandDto>>("api/brands/all", jsonOptions);
+            await Task.WhenAll(categoriesTask, brandsTask);
+            categories = await categoriesTask ?? new List<CategoryDto>();
+            brands = await brandsTask ?? new List<BrandDto>();
+        }
+        catch (Exception ex)
+        {
+            serverError = $"Failed to load data: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task UpdateProduct()
+    {
+        if (client is null || updateProductDto is null)
+            return;
+
+        serverError = null;
+        isSubmitting = true;
+
+        try
+        {
+            var response = await client.PutAsJsonAsync($"api/products/{Id}", updateProductDto);
+
+            if (response.IsSuccessStatusCode)
+            {
+                NavigationManager.NavigateTo("/products");
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                var text = await response.Content.ReadAsStringAsync();
+                serverError = string.IsNullOrWhiteSpace(text) ? "Validation failed." : text;
+            }
+            else
+            {
+                var text = await response.Content.ReadAsStringAsync();
+                serverError = $"Update failed ({(int)response.StatusCode}): {text}";
+            }
+        }
+        catch (Exception ex)
+        {
+            serverError = $"Error while updating product: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
 }

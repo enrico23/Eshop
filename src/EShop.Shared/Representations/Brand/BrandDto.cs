@@ -1,4 +1,4 @@
-﻿namespace EShop.API.Representations.Brand
+﻿namespace EShop.Shared.Representations.Brand
 {
     public class BrandDto
     {

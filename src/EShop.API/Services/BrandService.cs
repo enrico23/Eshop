@@ -1,8 +1,8 @@
 ﻿using EShop.API.Exceptions;
-using EShop.API.Representations.Brand;
 using EShop.Data;
 using EShop.Domain;
 using EShop.Shared.Representations;
+using EShop.Shared.Representations.Brand;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
@@ -45,6 +45,14 @@ public class BrandService : IBrandService
             .ToListAsync(ct);
 
         return new PaginatedResult<BrandDto>(items, page, pageSize, total);
+    }
+
+    public async Task<ICollection<BrandDto>> GetAllAsync(CancellationToken ct)
+    {
+       return await _context.Brands
+            .AsNoTracking()
+            .ProjectToType<BrandDto>()
+            .ToListAsync(ct);
     }
 
     public async Task<bool> BrandExistsAsync(int brandId, CancellationToken ct = default)
@@ -108,4 +116,6 @@ public class BrandService : IBrandService
 
         return true;
     }
+
+    
 }

@@ -36,4 +36,8 @@
     <EditorConfigFiles Remove="C:\dev\EShop\src\EShop.API\.editorconfig" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Representations\" />
+  </ItemGroup>
+
 </Project>

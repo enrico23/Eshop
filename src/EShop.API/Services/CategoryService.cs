@@ -1,9 +1,8 @@
 ﻿using EShop.API.Exceptions;
-using EShop.API.Representations;
-using EShop.API.Representations.Category;
 using EShop.Data;
 using EShop.Domain;
 using EShop.Shared.Representations;
+using EShop.Shared.Representations.Category;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
@@ -46,6 +45,15 @@ public class CategoryService : ICategoryService
             .ToListAsync(ct);
 
         return new PaginatedResult<CategoryDto>(items, page, pageSize, total);
+    }
+
+    public async Task<ICollection<CategoryDto>> GetAllAsync(CancellationToken ct)
+    {
+        return await _context.Categories
+            .AsNoTracking()
+            .OrderBy(c => c.Name)
+            .ProjectToType<CategoryDto>()
+            .ToListAsync(ct);
     }
 
     public async Task<bool> ExistsAsync(int id, CancellationToken ct = default)

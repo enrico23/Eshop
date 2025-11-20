@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EShop.API.Representations.Products;
+namespace EShop.Shared.Representations.Product;
 
 public class UpdateProductDto
 {

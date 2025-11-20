@@ -1,6 +1,6 @@
-﻿using EShop.API.Representations.Brand;
-using EShop.API.Services;
+﻿using EShop.API.Services;
 using EShop.Shared.Representations;
+using EShop.Shared.Representations.Brand;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EShop.API.Controllers;
@@ -26,6 +26,18 @@ public partial class BrandsController : Controller
 
         return Ok(results);
     }
+
+    // GET: api/brands/all
+    // <snippet_GetAll>
+    [HttpGet("all")]
+    [ProducesResponseType(typeof(ICollection<BrandDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult> GetAllAsync(CancellationToken ct = default)
+    {
+        var results = await _brandService.GetAllAsync(ct);
+
+        return Ok(results);
+    }
+    // </snippet_GetAll>
 
     // GET: api/brands/5
     // <snippet_GetByID>

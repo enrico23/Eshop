@@ -1,6 +1,6 @@
-﻿using EShop.API.Representations.Category;
-using EShop.API.Services;
+﻿using EShop.API.Services;
 using EShop.Shared.Representations;
+using EShop.Shared.Representations.Category;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EShop.API.Controllers
@@ -26,6 +26,18 @@ namespace EShop.API.Controllers
 
             return Ok(categories);
         }
+
+        // GET: api/categories/all
+        // <snippet_GetAll>
+        [HttpGet("all")]
+        [ProducesResponseType(typeof(ICollection<CategoryDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult> GetAllAsync(CancellationToken ct = default)
+        {
+            var results = await _categoryService.GetAllAsync(ct);
+
+            return Ok(results);
+        }
+        // </snippet_GetAll>
 
         // GET: api/categories/5
         // <snippet_GetByID>
