@@ -1,5 +1,5 @@
-﻿using EShop.API.Representations.Category;
-using EShop.Domain;
+﻿using EShop.Domain;
+using EShop.Shared.Representations.Category;
 using Mapster;
 
 namespace EShop.API.Mapping

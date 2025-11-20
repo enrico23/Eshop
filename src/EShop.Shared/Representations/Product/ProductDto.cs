@@ -1,4 +1,4 @@
-﻿namespace EShop.Shared.Representations.Products;
+﻿namespace EShop.Shared.Representations.Product;
 
 public class ProductDto
 {

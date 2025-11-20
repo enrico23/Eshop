@@ -1,8 +1,6 @@
-﻿using EShop.Api.Representations.Products;
-using EShop.API.Representations.Products;
-using EShop.API.Services;
+﻿using EShop.API.Services;
 using EShop.Shared.Representations;
-using EShop.Shared.Representations.Products;
+using EShop.Shared.Representations.Product;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EShop.API.Controllers;

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EShop.Api.Representations.Products;
+namespace EShop.Shared.Representations.Product;
 
 public class CreateProductDto
 {

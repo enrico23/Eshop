@@ -1,5 +1,5 @@
-﻿using EShop.API.Representations.Brand;
-using EShop.Shared.Representations;
+﻿using EShop.Shared.Representations;
+using EShop.Shared.Representations.Brand;
 
 namespace EShop.API.Services;
 
@@ -7,6 +7,8 @@ public interface IBrandService
 {
     Task<PaginatedResult<BrandDto>> GetPagedAsync(int page, int pageSize, 
         string orderBy = "Name", string orderDirection = "asc", CancellationToken ct = default);
+
+    Task<ICollection<BrandDto>> GetAllAsync(CancellationToken ct);
 
     Task<bool> BrandExistsAsync(int brandId, CancellationToken ct = default);
 

@@ -1,5 +1,5 @@
-﻿using EShop.API.Representations.Category;
-using EShop.Shared.Representations;
+﻿using EShop.Shared.Representations;
+using EShop.Shared.Representations.Category;
 
 namespace EShop.API.Services;
 
@@ -7,6 +7,8 @@ public interface ICategoryService
 {
     Task<PaginatedResult<CategoryDto>> GetPagedAsync(int page, int pageSize,
         string orderBy = "Name", string orderDirection = "asc", CancellationToken ct = default);
+
+    Task<ICollection<CategoryDto>> GetAllAsync(CancellationToken ct);
 
     Task<bool> ExistsAsync(int id, CancellationToken ct = default);
 
