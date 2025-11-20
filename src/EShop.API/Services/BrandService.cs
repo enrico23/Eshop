@@ -49,11 +49,10 @@ public class BrandService : IBrandService
 
     public async Task<ICollection<BrandDto>> GetAllAsync(CancellationToken ct)
     {
-       var items = await _context.Brands
+       return await _context.Brands
             .AsNoTracking()
             .ProjectToType<BrandDto>()
             .ToListAsync(ct);
-        return items;
     }
 
     public async Task<bool> BrandExistsAsync(int brandId, CancellationToken ct = default)

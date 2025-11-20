@@ -49,12 +49,11 @@ public class CategoryService : ICategoryService
 
     public async Task<ICollection<CategoryDto>> GetAllAsync(CancellationToken ct)
     {
-        var items = await _context.Categories
+        return await _context.Categories
             .AsNoTracking()
             .OrderBy(c => c.Name)
             .ProjectToType<CategoryDto>()
             .ToListAsync(ct);
-        return items;
     }
 
     public async Task<bool> ExistsAsync(int id, CancellationToken ct = default)
