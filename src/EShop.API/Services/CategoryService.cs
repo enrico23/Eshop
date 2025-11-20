@@ -1,12 +1,12 @@
 ﻿using EShop.API.Exceptions;
 using EShop.API.Representations;
-using EShop.API.Representations.Brand;
 using EShop.API.Representations.Category;
 using EShop.Data;
 using EShop.Domain;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Dynamic.Core;
 
 namespace EShop.API.Services;
 
@@ -22,12 +22,19 @@ public class CategoryService : ICategoryService
         _mapper = mapper;
     }
 
-    public async Task<PaginatedResult<CategoryDto>> GetPagedAsync(int page, int pageSize, CancellationToken ct = default)
+    public async Task<PaginatedResult<CategoryDto>> GetPagedAsync(int page, int pageSize,
+        string orderBy = "Name", string orderDirection = "asc", CancellationToken ct = default)
     {
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 200);
 
-        var query = _context.Categories.AsNoTracking().OrderBy(b => b.Name);
+        IQueryable<Category> query = _context.Categories.AsNoTracking();
+
+        if (!string.IsNullOrEmpty(orderBy))
+        {
+            var ordering = $"{orderBy} {orderDirection}";
+            query = query.OrderBy(ordering);
+        }
 
         var total = await query.LongCountAsync(ct);
 
