@@ -1,0 +1,28 @@
+﻿@if (IsVisible)
+{
+    <div class="alert-overlay">
+        <div class="alert @CssClass">
+            @Message
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string CssClass { get; set; } = "alert-success";
+    [Parameter] public int Duration { get; set; } = 5000; // ms
+
+    public bool IsVisible { get; private set; }
+    public string Message { get; private set; } = "";
+
+    public async Task ShowAsync(string message)
+    {
+        Message = message;
+        IsVisible = true;
+        await InvokeAsync(StateHasChanged);
+
+        await Task.Delay(Duration);
+
+        IsVisible = false;
+        await InvokeAsync(StateHasChanged);
+    }
+}
