@@ -1,3 +1,4 @@
+using Eshop.Web.Clients;
 using Eshop.Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +8,11 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddHttpClient("CatalogApi", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["EShopApiBaseUrl"]!);
+});
+
+builder.Services.AddHttpClient<CategoryApiClient>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["EShopApiBaseUrl"]!);
 });
