@@ -1,175 +1,45 @@
 ﻿@page "/categories"
-@rendermode InteractiveServer
-@using EShop.Shared.Clients
-@using EShop.Shared.Representations
 @using EShop.Shared.Representations.Category
-@inject CategoryApiClient CategoryApiClient
+@using EShop.Web.Clients
 
 <h3>Index</h3>
 
-@if (isLoading)
-{
-    <p>Loading categories...</p>
-}
-else if (!string.IsNullOrEmpty(errorMessage))
-{
-    <p class="text-danger">@errorMessage</p>
-}
-else
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <td @onclick="@(() => SortBy("Id"))" style="cursor:pointer">Name @SortIcon("Id")</td>
-                <td @onclick="@(() => SortBy("Name"))" style="cursor:pointer">Name @SortIcon("Name")</td>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var category in categories!.Items)
-            {
-                <tr>
-                    <td>@category.Id</td>
-                    <td>@category.Name</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-
-    <nav>
-        <ul class="pagination">
-            <li class="page-item @(categories.Page == 1 ? "disabled" : "")">
-                <button class="page-link" @onclick="PreviousPage">Previous</button>
-            </li>
-
-            @foreach (var p in VisiblePageNumbers())
-            {
-                <li class="page-item @(p == page ? "active" : "")">
-                    <button class="page-link" @onclick="() => GoToPage(p)">@p</button>
-                </li>
-            }
-
-            <li class="page-item @(categories.Page* categories.PageSize >= categories.Total ? "disabled" : "")">
-                <button class="page-link" @onclick="NextPage">Next</button>
-            </li>
-        </ul>
-    </nav>
-}
+<MudDataGrid @ref="dataGrid" T="CategoryDto" ServerData="@(state => ServerReload(state, CancellationToken.None))" Filterable="false">
+    <Columns>
+        <PropertyColumn Property="x => x.Id" />
+        <PropertyColumn Property="x => x.Name" />
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="CategoryDto" />
+    </PagerContent>
+</MudDataGrid>
 
 @code {
-    private bool isLoading = true;
-    private string? errorMessage;
+    MudDataGrid<CategoryDto> dataGrid = null!;
+    [Inject] CategoryApiClient CategoryApiClient { get; set; } = null!;
 
-    private PagedResult<CategoryDto>? categories;
-    private int page = 1;
-    private int pageSize = 10;
-    private string orderBy = "Name";
-    private string orderDirection = "asc";
-
-
-    protected override async Task OnInitializedAsync()
+    private async Task<GridData<CategoryDto>> ServerReload(GridState<CategoryDto> state, CancellationToken ct)
     {
-        await LoadDataAsync();
-    }
+        var sortBy = "Name";
+        var sortDirection = "asc";
+        var currentPage = state.Page;
+        var pageSize = state.PageSize;
 
-    private async Task LoadDataAsync()
-    {
-        isLoading = true;
-        errorMessage = null;
-
-        try
+        var sortDefinition = state.SortDefinitions.FirstOrDefault();
+        if (sortDefinition != null)
         {
-            categories = await CategoryApiClient.GetPagedCategoriesAsync(page, pageSize, orderBy, orderDirection)
-                ?? new(Array.Empty<CategoryDto>(), 1, 10, 0);
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"Error loading categories: {ex.Message}";
-        }
-        finally
-        {
-            isLoading = false;
-        }
-    }
-
-    // ---------- Sorting ----------
-    private async Task SortBy(string column)
-    {
-        if (orderBy == column)
-            orderDirection = orderDirection == "asc" ? "desc" : "asc";
-        else
-        {
-            orderBy = column;
-            orderDirection = "asc";
+            sortBy = sortDefinition.SortBy;
+            sortDirection = sortDefinition.Descending ? "desc" : "asc";
         }
 
-        page = 1;
-        await LoadDataAsync();
-    }
+        var pagedData = await CategoryApiClient.GetPagedCategoriesAsync(
+            currentPage * pageSize,
+           pageSize, sortBy, sortDirection, ct);
 
-    private MarkupString SortIcon(string column)
-    {
-        if (orderBy != column) return new MarkupString("");
-
-        return orderDirection == "asc"
-            ? new MarkupString("▲")
-            : new MarkupString("▼");
-    }
-
-    // ---------- Paging ----------
-
-    private async Task PreviousPage()
-    {
-        if (page > 1)
+        return new GridData<CategoryDto>
         {
-            page--;
-            await LoadDataAsync();
-        }
-    }
-
-    private async Task NextPage()
-    {
-        if (pageSize <= 0) return;
-
-        var maxPage = (int)Math.Ceiling((double)categories!.Total / pageSize);
-
-        if (page < maxPage)
-        {
-            page++;
-            await LoadDataAsync();
-        }
-    }
-
-    private IEnumerable<int> VisiblePageNumbers()
-    {
-        if (pageSize <= 0) yield break;
-
-        const int maxButtons = 5;
-        var totalPages = (int)Math.Ceiling((double)(categories?.Total ?? 0) / pageSize);
-
-        if (totalPages <= 0)
-        {
-            yield break;
-        }
-
-        int start = Math.Max(1, page - 2);
-        int end = Math.Min(totalPages, start + maxButtons - 1);
-
-        if (end - start < maxButtons - 1)
-            start = Math.Max(1, end - (maxButtons - 1));
-
-        for (int i = start; i <= end; i++)
-            yield return i;
-    }
-
-    private async Task GoToPage(int p)
-    {
-        if (p < 1) return;
-        if (pageSize <= 0) return;
-
-        int maxPage = (int)Math.Ceiling((double)categories!.Total / pageSize);
-        if (p > maxPage) return;
-
-        page = p;
-        await LoadDataAsync();
+            TotalItems = pagedData!.Total,
+            Items = pagedData.Items
+        };
     }
 }

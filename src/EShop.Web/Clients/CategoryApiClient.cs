@@ -1,9 +1,7 @@
 ﻿using EShop.Shared.Representations;
 using EShop.Shared.Representations.Category;
-using Microsoft.Extensions.Logging;
-using System.Net.Http.Json;
 
-namespace EShop.Shared.Clients;
+namespace EShop.Web.Clients;
 
 public class CategoryApiClient
 {
@@ -44,7 +42,7 @@ public class CategoryApiClient
         var response = await _httpClient.GetAsync(url, ct);
         if (response.IsSuccessStatusCode)
         {
-           return await response.Content.ReadFromJsonAsync<PagedResult<CategoryDto>>(ct);
+            return await response.Content.ReadFromJsonAsync<PagedResult<CategoryDto>>(ct);
         }
         else
         {

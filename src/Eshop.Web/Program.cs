@@ -1,20 +1,19 @@
-using Eshop.Web.Components;
-using EShop.Shared.Clients;
+using EShop.Web.Clients;
+using EShop.Web.Components;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add MudBlazor services
+builder.Services.AddMudServices();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddHttpClient("CatalogApi", client =>
-{
-    client.BaseAddress = new Uri(builder.Configuration["EShopApiBaseUrl"]!);
-});
-
 builder.Services.AddHttpClient<CategoryApiClient>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["EShopApiBaseUrl"]!);
+    client.BaseAddress = new Uri(builder.Configuration["EShopApiBaseUrl"] ?? "http://localhost:5002/");
 });
 
 var app = builder.Build();
@@ -26,8 +25,9 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+
 app.UseHttpsRedirection();
+
 
 app.UseAntiforgery();
 
