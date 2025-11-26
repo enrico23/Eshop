@@ -6,6 +6,7 @@ using EShop.Shared.Representations.Brand;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Linq.Dynamic.Core;
 
 namespace EShop.API.Services;
@@ -22,7 +23,7 @@ public class BrandService : IBrandService
         _mapper = mapper;
     }
 
-    public async Task<PaginatedResult<BrandDto>> GetPagedAsync(int page, int pageSize, 
+    public async Task<Shared.Representations.PagedResult<BrandDto>> GetPagedAsync(int page, int pageSize, 
         string orderBy = "Name", string orderDirection = "asc", CancellationToken ct = default)
     {
         page = Math.Max(1, page);
@@ -36,15 +37,13 @@ public class BrandService : IBrandService
             query = query.OrderBy(ordering);
         }
 
-        var total = await query.LongCountAsync(ct);
-
         var items = await query
             .ProjectToType<BrandDto>()
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(ct);
 
-        return new PaginatedResult<BrandDto>(items, page, pageSize, total);
+        return new Shared.Representations.PagedResult<BrandDto>(items, page, pageSize, items.Count);
     }
 
     public async Task<ICollection<BrandDto>> GetAllAsync(CancellationToken ct)

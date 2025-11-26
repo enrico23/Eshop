@@ -19,7 +19,7 @@ public class ProductsController : ControllerBase
 
     // GET: api/products?page=1&pageSize=20
     [HttpGet]
-    [ProducesResponseType(typeof(PaginatedResult<ProductDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<ProductDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult> GetPagedAsync([FromQuery] int page = 1, [FromQuery] int pageSize = 20,
         [FromQuery] string orderBy = "Name", [FromQuery] string orderDirection = "asc", CancellationToken ct = default)
     {

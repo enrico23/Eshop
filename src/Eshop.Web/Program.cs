@@ -1,5 +1,5 @@
-using Eshop.Web.Clients;
 using Eshop.Web.Components;
+using EShop.Shared.Clients;
 
 var builder = WebApplication.CreateBuilder(args);
 

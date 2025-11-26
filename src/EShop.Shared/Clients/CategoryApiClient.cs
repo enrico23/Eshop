@@ -3,7 +3,7 @@ using EShop.Shared.Representations.Category;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
 
-namespace Eshop.Web.Clients;
+namespace EShop.Shared.Clients;
 
 public class CategoryApiClient
 {
@@ -32,7 +32,7 @@ public class CategoryApiClient
         }
     }
 
-    public async Task<PaginatedResult<CategoryDto>?> GetPagedCategoriesAsync(
+    public async Task<PagedResult<CategoryDto>?> GetPagedCategoriesAsync(
         int page = 1,
         int pageSize = 20,
         string orderBy = "Name",
@@ -44,7 +44,7 @@ public class CategoryApiClient
         var response = await _httpClient.GetAsync(url, ct);
         if (response.IsSuccessStatusCode)
         {
-           return await response.Content.ReadFromJsonAsync<PaginatedResult<CategoryDto>>(ct);
+           return await response.Content.ReadFromJsonAsync<PagedResult<CategoryDto>>(ct);
         }
         else
         {

@@ -18,7 +18,7 @@ public partial class BrandsController : Controller
 
     // GET: api/brands?page=1&pageSize=20
     [HttpGet]
-    [ProducesResponseType(typeof(PaginatedResult<BrandDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<BrandDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult> GetPagedAsync([FromQuery] int page = 1, [FromQuery] int pageSize = 20,
         [FromQuery] string orderBy = "Name", [FromQuery] string orderDirection = "asc", CancellationToken ct = default)
     {

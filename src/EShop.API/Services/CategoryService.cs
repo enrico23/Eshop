@@ -22,7 +22,7 @@ public class CategoryService : ICategoryService
         _mapper = mapper;
     }
 
-    public async Task<PaginatedResult<CategoryDto>> GetPagedAsync(int page, int pageSize,
+    public async Task<Shared.Representations.PagedResult<CategoryDto>> GetPagedAsync(int page, int pageSize,
         string orderBy = "Name", string orderDirection = "asc", CancellationToken ct = default)
     {
         page = Math.Max(1, page);
@@ -36,15 +36,13 @@ public class CategoryService : ICategoryService
             query = query.OrderBy(ordering);
         }
 
-        var total = await query.LongCountAsync(ct);
-
         var items = await query
             .ProjectToType<CategoryDto>()
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(ct);
 
-        return new PaginatedResult<CategoryDto>(items, page, pageSize, total);
+        return new Shared.Representations.PagedResult<CategoryDto>(items, page, pageSize, items.Count);
     }
 
     public async Task<ICollection<CategoryDto>> GetAllAsync(CancellationToken ct)
