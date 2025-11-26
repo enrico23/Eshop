@@ -18,7 +18,7 @@ namespace EShop.API.Controllers
 
         // GET: api/categories?page=1&pageSize=20
         [HttpGet]
-        [ProducesResponseType(typeof(PaginatedResult<CategoryDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PagedResult<CategoryDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetPagedAsync([FromQuery] int page = 1, [FromQuery] int pageSize = 20,
             [FromQuery] string orderBy = "Name", [FromQuery] string orderDirection = "asc", CancellationToken ct = default)
         {

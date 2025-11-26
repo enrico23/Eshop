@@ -1,8 +1,8 @@
 ﻿@page "/categories"
 @rendermode InteractiveServer
+@using EShop.Shared.Clients
 @using EShop.Shared.Representations
 @using EShop.Shared.Representations.Category
-@using Eshop.Web.Clients
 @inject CategoryApiClient CategoryApiClient
 
 <h3>Index</h3>
@@ -59,7 +59,7 @@ else
     private bool isLoading = true;
     private string? errorMessage;
 
-    private PaginatedResult<CategoryDto>? categories;
+    private PagedResult<CategoryDto>? categories;
     private int page = 1;
     private int pageSize = 10;
     private string orderBy = "Name";

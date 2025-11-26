@@ -22,7 +22,7 @@ public class ProductService : IProductService
         _mapper = mapper;
     }
  
-    public async Task<PaginatedResult<ProductDto>> GetPagedAsync(int page, int pageSize, 
+    public async Task<Shared.Representations.PagedResult<ProductDto>> GetPagedAsync(int page, int pageSize, 
         string orderBy = "Name", string orderDirection = "asc",  CancellationToken ct = default)
     {
         page = Math.Max(1, page);
@@ -36,15 +36,13 @@ public class ProductService : IProductService
             query = query.OrderBy(ordering);
         }
 
-        var total = await query.LongCountAsync(ct);
-
         var items = await query
             .ProjectToType<ProductDto>()
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(ct);
 
-        return new PaginatedResult<ProductDto>(items, page, pageSize, total);
+        return new Shared.Representations.PagedResult<ProductDto>(items, page, pageSize, items.Count);
     }
 
     public async Task<bool> ExistsAsync(int id, CancellationToken ct = default)

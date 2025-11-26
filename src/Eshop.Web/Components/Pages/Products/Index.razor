@@ -67,7 +67,7 @@
             {
                 var ct = req.CancellationToken;
                 var url = $"api/products?page={pageNumber}&pageSize={count}&orderBy={sortItem.orderBy}&orderDirection={sortItem.orderDirection}";
-                var result = await client.GetFromJsonAsync<PaginatedResult<ProductDto>>(url, ct);
+                var result = await client.GetFromJsonAsync<PagedResult<ProductDto>>(url, ct);
                 var items = result?.Items?.ToList() ?? new List<ProductDto>();
                 var total = result?.Total ?? 0;
 
