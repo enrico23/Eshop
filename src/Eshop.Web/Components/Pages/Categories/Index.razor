@@ -1,10 +1,18 @@
 ﻿@page "/categories"
 @using EShop.Shared.Representations.Category
 @using EShop.Web.Clients
+@inject IDialogService DialogService
 
 <h3>Index</h3>
 
 <MudDataGrid @ref="dataGrid" T="CategoryDto" ServerData="@(state => ServerReload(state, CancellationToken.None))" Filterable="false">
+    <ToolBarContent>
+        <MudButtonGroup Class="ma-0 pa-0" Color="Color.Success" Variant="Variant.Filled">
+            <MudButton @onclick="OpenDialogAsync">
+                Add New Item
+            </MudButton>
+        </MudButtonGroup>
+    </ToolBarContent>
     <Columns>
         <PropertyColumn Property="x => x.Id" />
         <PropertyColumn Property="x => x.Name" />
@@ -41,5 +49,17 @@
             TotalItems = pagedData!.Total,
             Items = pagedData.Items
         };
+    }
+
+    private async Task OpenDialogAsync()
+    {
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<CreateCategoryDialog>("Add New Category", options);
+        var result = await dialog.Result;
+
+        if (result!.Canceled is not true)
+        {
+            await dataGrid.ReloadServerData();
+        }
     }
 }
