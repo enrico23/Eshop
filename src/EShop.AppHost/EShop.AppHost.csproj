@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EShop.API\EShop.API.csproj" />
-    <ProjectReference Include="..\Eshop.Web\Eshop.Web.csproj" />
   </ItemGroup>
 
 </Project>
