@@ -2,6 +2,7 @@
 @using EShop.Shared.Representations.Category
 @using EShop.Web.Clients
 @inject IDialogService DialogService
+@inject ISnackbar Snackbar
 
 <h3>Index</h3>
 
@@ -16,6 +17,13 @@
     <Columns>
         <PropertyColumn Property="x => x.Id" />
         <PropertyColumn Property="x => x.Name" />
+        <TemplateColumn>
+            <HeaderTemplate>Actions</HeaderTemplate>
+            <CellTemplate Context="context">
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" 
+                               OnClick="@(async () => await OpenEditDialogAsync(context.Item))"></MudIconButton>
+            </CellTemplate>
+        </TemplateColumn>
     </Columns>
     <PagerContent>
         <MudDataGridPager T="CategoryDto" />
@@ -24,6 +32,7 @@
 
 @code {
     MudDataGrid<CategoryDto> dataGrid = null!;
+
     [Inject] CategoryApiClient CategoryApiClient { get; set; } = null!;
 
     private async Task<GridData<CategoryDto>> ServerReload(GridState<CategoryDto> state, CancellationToken ct)
@@ -40,8 +49,10 @@
             sortDirection = sortDefinition.Descending ? "desc" : "asc";
         }
 
+        var pageNumber = currentPage + 1;
+
         var pagedData = await CategoryApiClient.GetPagedCategoriesAsync(
-            currentPage * pageSize,
+            pageNumber,
            pageSize, sortBy, sortDirection, ct);
 
         return new GridData<CategoryDto>
@@ -59,6 +70,26 @@
 
         if (result!.Canceled is not true)
         {
+            var categoryName = (CreateCategoryDto)result.Data!;
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+            Snackbar.Add($"Category '{categoryName}' created", Severity.Success);
+
+            await dataGrid.ReloadServerData();
+        }
+    }
+
+    private async Task OpenEditDialogAsync(CategoryDto item)
+    {
+        var parameters = new DialogParameters { ["CategoryParam"] = item };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+
+        var dialog = await DialogService.ShowAsync<EditCategoryDialog>("Edit Category", parameters, options);
+        var result = await dialog.Result;
+
+        if (result!.Canceled is not true)
+        {
+            var updated = (UpdateCategoryDto)result.Data!;
+            Snackbar.Add($"Category '{updated.Name}' updated", Severity.Info);
             await dataGrid.ReloadServerData();
         }
     }

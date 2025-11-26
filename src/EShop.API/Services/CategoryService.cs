@@ -36,13 +36,15 @@ public class CategoryService : ICategoryService
             query = query.OrderBy(ordering);
         }
 
+        var total = await query.CountAsync(ct);
+
         var items = await query
             .ProjectToType<CategoryDto>()
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(ct);
 
-        return new Shared.Representations.PagedResult<CategoryDto>(items, page, pageSize, items.Count);
+        return new Shared.Representations.PagedResult<CategoryDto>(items, page, pageSize, total);
     }
 
     public async Task<ICollection<CategoryDto>> GetAllAsync(CancellationToken ct)
