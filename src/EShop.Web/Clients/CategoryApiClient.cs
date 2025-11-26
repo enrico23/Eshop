@@ -66,4 +66,19 @@ public class CategoryApiClient
 
         throw new ApiException(response.StatusCode, content);
     }
+
+    public async Task UpdateAsync(int id, UpdateCategoryDto updateCategoryDto, CancellationToken ct = default)
+    {
+        var response = await _httpClient.PutAsJsonAsync($"api/categories/{id}", updateCategoryDto, ct);
+
+        if (response.IsSuccessStatusCode)
+            return;
+
+        var content = await response.Content.ReadAsStringAsync(ct);
+
+        _logger.LogError("Failed to update category. Status code: {StatusCode}, Response: {Content}",
+            response.StatusCode, content);
+
+        throw new ApiException(response.StatusCode, content);
+    }
 }

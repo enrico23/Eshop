@@ -47,7 +47,7 @@
     {
         try
         {
-            await CategoryApiClient.CreateAsync(new CreateCategoryDto {Name = string.Empty});
+            await CategoryApiClient.CreateAsync(NewCategory);
             MudDialog.Close(DialogResult.Ok(NewCategory));
         }
         catch (Exception ex)
