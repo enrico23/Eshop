@@ -1,5 +1,6 @@
 ﻿using EShop.Shared.Representations;
 using EShop.Shared.Representations.Category;
+using EShop.Web.Exceptions;
 
 namespace EShop.Web.Clients;
 
@@ -49,5 +50,20 @@ public class CategoryApiClient
             _logger.LogError("Failed to fetch paged categories. Status code: {StatusCode}", response.StatusCode);
             throw new HttpRequestException($"Failed to fetch paged categories. Status code: {response.StatusCode}");
         }
+    }
+
+    public async Task CreateAsync(CreateCategoryDto createCategoryDto, CancellationToken ct = default)
+    {
+        var response = await _httpClient.PostAsJsonAsync("api/categories", createCategoryDto, ct);
+
+        if (response.IsSuccessStatusCode)
+            return;
+
+        var content = await response.Content.ReadAsStringAsync(ct);
+
+        _logger.LogError("Failed to create category. Status code: {StatusCode}, Response: {Content}",
+            response.StatusCode, content);
+
+        throw new ApiException(response.StatusCode, content);
     }
 }
