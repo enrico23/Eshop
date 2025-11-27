@@ -6,7 +6,8 @@ namespace EShop.API.Services;
 public interface IProductService
 {
     Task<PagedResult<ProductDto>> GetPagedAsync(int page, int pageSize, 
-        string orderBy = "Name", string orderDirection = "asc", CancellationToken ct = default);
+        string orderBy = "Name", string orderDirection = "asc", 
+        string? filter = null, CancellationToken ct = default);
 
     Task<bool> ExistsAsync(int id, CancellationToken ct = default);
 

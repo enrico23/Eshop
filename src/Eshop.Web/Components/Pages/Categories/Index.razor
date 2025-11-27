@@ -4,26 +4,27 @@
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 
-<h3>Index</h3>
-
 <MudDataGrid @ref="dataGrid" T="CategoryDto" ServerData="@(state => ServerReloadAsync(state, CancellationToken.None))" Filterable="false">
     <ToolBarContent>
-        <MudButtonGroup Class="ma-0 pa-0" Color="Color.Primary" Variant="Variant.Filled">
-            <MudButton @onclick="OpenDialogAsync">
+        <MudItem xs="12" sm="6">
+            <MudTextField T="string" Placeholder="Search" 
+                ValueChanged="@(s => OnSearch(s))" @bind-Value="_searchString" @bind-Value:event="oninput" DebounceInterval="300"
+                Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </MudItem>
+         <MudItem xs="12" sm="6" Class="d-flex justify-end">
+            <MudButton @onclick="OpenDialogAsync" Color="Color.Success" Variant="Variant.Filled">
                 Add Category
             </MudButton>
-        </MudButtonGroup>
+        </MudItem>
     </ToolBarContent>
     <Columns>
-        <PropertyColumn Property="x => x.Id" />
-        <PropertyColumn Property="x => x.Name" />
+        <PropertyColumn Property="x => x.Id" MinWidth="80px" />
+        <PropertyColumn Property="x => x.Name" MinWidth="200px" />
         <TemplateColumn>
             <HeaderTemplate>Actions</HeaderTemplate>
             <CellTemplate Context="context">
                 <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@(async () => await OpenEditDialogAsync(context.Item))"></MudIconButton>
-
-                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" 
-                    OnClick="@(async () => await OpenDeleteDialogAsync(context.Item))"></MudIconButton>
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" OnClick="@(async () => await OpenDeleteDialogAsync(context.Item))"></MudIconButton>
             </CellTemplate>
         </TemplateColumn>
     </Columns>
@@ -37,12 +38,16 @@
 
     [Inject] ICategoryApiClient CategoryApiClient { get; set; } = null!;
 
+    private string? _searchString;
+
     private async Task<GridData<CategoryDto>> ServerReloadAsync(GridState<CategoryDto> state, CancellationToken ct)
     {
         var sortBy = "Name";
         var sortDirection = "asc";
         var currentPage = state.Page;
         var pageSize = state.PageSize;
+        var searchStringFilter = _searchString;
+
 
         var sortDefinition = state.SortDefinitions.FirstOrDefault();
         if (sortDefinition != null)
@@ -55,13 +60,19 @@
 
         var pagedData = await CategoryApiClient.GetPagedCategoriesAsync(
             pageNumber,
-           pageSize, sortBy, sortDirection, ct);
+            pageSize, sortBy, sortDirection, searchStringFilter, ct);
 
         return new GridData<CategoryDto>
         {
             TotalItems = pagedData!.Total,
             Items = pagedData.Items
         };
+    }
+
+    private async Task OnSearch(string text)
+    {
+        _searchString = text;
+        await dataGrid.ReloadServerData();
     }
 
     private async Task OpenDialogAsync()

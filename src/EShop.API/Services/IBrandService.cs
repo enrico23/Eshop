@@ -6,7 +6,7 @@ namespace EShop.API.Services;
 public interface IBrandService
 {
     Task<PagedResult<BrandDto>> GetPagedAsync(int page, int pageSize, 
-        string orderBy = "Name", string orderDirection = "asc", CancellationToken ct = default);
+        string orderBy = "Name", string orderDirection = "asc", string? filter = null, CancellationToken ct = default);
 
     Task<ICollection<BrandDto>> GetAllAsync(CancellationToken ct);
 

@@ -1,7 +1,6 @@
 ﻿using EShop.API.Exceptions;
 using EShop.Data;
 using EShop.Domain;
-using EShop.Shared.Representations;
 using EShop.Shared.Representations.Category;
 using Mapster;
 using MapsterMapper;
@@ -22,13 +21,20 @@ public class CategoryService : ICategoryService
         _mapper = mapper;
     }
 
-    public async Task<Shared.Representations.PagedResult<CategoryDto>> GetPagedAsync(int page, int pageSize,
-        string orderBy = "Name", string orderDirection = "asc", CancellationToken ct = default)
+    public async Task<Shared.Representations.PagedResult<CategoryDto>> GetPagedAsync(
+        int page, int pageSize,
+        string orderBy = "Name", string orderDirection = "asc", 
+        string? filter = null, CancellationToken ct = default)
     {
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 200);
 
         IQueryable<Category> query = _context.Categories.AsNoTracking();
+
+        if (!string.IsNullOrEmpty(filter))
+        {
+            query = query.Where("Name.ToLower().Contains(@0)", filter.ToLower());
+        }
 
         if (!string.IsNullOrEmpty(orderBy))
         {
