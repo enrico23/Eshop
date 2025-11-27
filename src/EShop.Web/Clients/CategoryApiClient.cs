@@ -1,35 +1,15 @@
 ﻿using EShop.Shared.Representations;
 using EShop.Shared.Representations.Category;
-using EShop.Web.Exceptions;
 
 namespace EShop.Web.Clients;
 
-public class CategoryApiClient : ICategoryApiClient
+public class CategoryApiClient(HttpClient httpClient, ILogger<CategoryApiClient> logger) 
+    : ApiClientBase(httpClient, logger), ICategoryApiClient
 {
-    private readonly HttpClient _httpClient;
-    private readonly ILogger<CategoryApiClient> _logger;
+    private const string BasePath = "api/categories";
 
-    public CategoryApiClient(HttpClient httpClient, ILogger<CategoryApiClient> logger)
-    {
-        _httpClient = httpClient;
-        _logger = logger;
-    }
-
-    public async Task<List<CategoryDto>> GetAllCategoriesAsync(CancellationToken ct = default)
-    {
-        var response = await _httpClient.GetAsync("api/categories/all", ct);
-
-        if (response.IsSuccessStatusCode)
-        {
-            var categories = await response.Content.ReadFromJsonAsync<List<CategoryDto>>(ct);
-            return categories ?? new List<CategoryDto>();
-        }
-        else
-        {
-            _logger.LogError("Failed to fetch paged categories. Status code: {StatusCode}", response.StatusCode);
-            throw new HttpRequestException($"Failed to fetch categories. Status code: {response.StatusCode}");
-        }
-    }
+    public Task<List<CategoryDto>?> GetAllCategoriesAsync(CancellationToken ct = default) =>
+        SendAsync<List<CategoryDto>>(() => HttpClient.GetAsync($"{BasePath}/all", ct), ct);
 
     public async Task<PagedResult<CategoryDto>?> GetPagedCategoriesAsync(
         int page = 1,
@@ -38,62 +18,19 @@ public class CategoryApiClient : ICategoryApiClient
         string orderDirection = "asc",
         CancellationToken ct = default)
     {
-        var url = $"api/categories?page={page}&pageSize={pageSize}&orderBy={orderBy}&orderDirection={orderDirection}";
+        var orderByEscaped = Uri.EscapeDataString(orderBy ?? "Name");
+        var orderDirEscaped = Uri.EscapeDataString(orderDirection ?? "asc");
 
-        var response = await _httpClient.GetAsync(url, ct);
-        if (response.IsSuccessStatusCode)
-        {
-            return await response.Content.ReadFromJsonAsync<PagedResult<CategoryDto>>(ct);
-        }
-        else
-        {
-            _logger.LogError("Failed to fetch paged categories. Status code: {StatusCode}", response.StatusCode);
-            throw new HttpRequestException($"Failed to fetch paged categories. Status code: {response.StatusCode}");
-        }
+        var url = $"{BasePath}?page={page}&pageSize={pageSize}&orderBy={orderByEscaped}&orderDirection={orderDirEscaped}";
+        return await SendAsync<PagedResult<CategoryDto>>(() => HttpClient.GetAsync(url, ct), ct);
     }
 
-    public async Task CreateAsync(CreateCategoryDto createCategoryDto, CancellationToken ct = default)
-    {
-        var response = await _httpClient.PostAsJsonAsync("api/categories", createCategoryDto, ct);
+    public Task CreateAsync(CreateCategoryDto model, CancellationToken ct = default) =>
+        SendAsync(() => HttpClient.PostAsJsonAsync(BasePath, model, ct), ct);
 
-        if (response.IsSuccessStatusCode)
-            return;
+    public Task UpdateAsync(int id, UpdateCategoryDto model, CancellationToken ct = default) =>
+        SendAsync(() => HttpClient.PutAsJsonAsync($"{BasePath}/{id}", model, ct), ct);
 
-        var content = await response.Content.ReadAsStringAsync(ct);
-
-        _logger.LogError("Failed to create category. Status code: {StatusCode}, Response: {Content}",
-            response.StatusCode, content);
-
-        throw new ApiException(response.StatusCode, content);
-    }
-
-    public async Task UpdateAsync(int id, UpdateCategoryDto updateCategoryDto, CancellationToken ct = default)
-    {
-        var response = await _httpClient.PutAsJsonAsync($"api/categories/{id}", updateCategoryDto, ct);
-
-        if (response.IsSuccessStatusCode)
-            return;
-
-        var content = await response.Content.ReadAsStringAsync(ct);
-
-        _logger.LogError("Failed to update category. Status code: {StatusCode}, Response: {Content}",
-            response.StatusCode, content);
-
-        throw new ApiException(response.StatusCode, content);
-    }
-
-    public async Task DeleteAsync(int id, CancellationToken ct = default)
-    {
-        var response = await _httpClient.DeleteAsync($"api/categories/{id}", ct);
-
-        if (response.IsSuccessStatusCode)
-            return;
-
-        var content = await response.Content.ReadAsStringAsync(ct);
-
-        _logger.LogError("Failed to delete category. Status code: {StatusCode}, Response: {Content}",
-            response.StatusCode, content);
-
-        throw new ApiException(response.StatusCode, content);
-    }
+    public Task DeleteAsync(int id, CancellationToken ct = default) =>
+        SendAsync(() => HttpClient.DeleteAsync($"{BasePath}/{id}", ct), ct);
 }
