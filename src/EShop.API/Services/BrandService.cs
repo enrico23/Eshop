@@ -37,13 +37,15 @@ public class BrandService : IBrandService
             query = query.OrderBy(ordering);
         }
 
+        var total = await query.CountAsync(ct);
+
         var items = await query
             .ProjectToType<BrandDto>()
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(ct);
 
-        return new Shared.Representations.PagedResult<BrandDto>(items, page, pageSize, items.Count);
+        return new Shared.Representations.PagedResult<BrandDto>(items, page, pageSize, total);
     }
 
     public async Task<ICollection<BrandDto>> GetAllAsync(CancellationToken ct)

@@ -11,7 +11,7 @@ builder.Services.AddMudServices();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddHttpClient<CategoryApiClient>(client =>
+builder.Services.AddHttpClient<ICategoryApiClient, CategoryApiClient>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["EShopApiBaseUrl"] ?? "http://localhost:5002/");
 });
