@@ -4,7 +4,7 @@ using EShop.Web.Exceptions;
 
 namespace EShop.Web.Clients;
 
-public class CategoryApiClient
+public class CategoryApiClient : ICategoryApiClient
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<CategoryApiClient> _logger;
@@ -77,6 +77,21 @@ public class CategoryApiClient
         var content = await response.Content.ReadAsStringAsync(ct);
 
         _logger.LogError("Failed to update category. Status code: {StatusCode}, Response: {Content}",
+            response.StatusCode, content);
+
+        throw new ApiException(response.StatusCode, content);
+    }
+
+    public async Task DeleteAsync(int id, CancellationToken ct = default)
+    {
+        var response = await _httpClient.DeleteAsync($"api/categories/{id}", ct);
+
+        if (response.IsSuccessStatusCode)
+            return;
+
+        var content = await response.Content.ReadAsStringAsync(ct);
+
+        _logger.LogError("Failed to delete category. Status code: {StatusCode}, Response: {Content}",
             response.StatusCode, content);
 
         throw new ApiException(response.StatusCode, content);

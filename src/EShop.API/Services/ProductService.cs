@@ -36,13 +36,15 @@ public class ProductService : IProductService
             query = query.OrderBy(ordering);
         }
 
+        var total = await query.CountAsync(ct);
+
         var items = await query
             .ProjectToType<ProductDto>()
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(ct);
 
-        return new Shared.Representations.PagedResult<ProductDto>(items, page, pageSize, items.Count);
+        return new Shared.Representations.PagedResult<ProductDto>(items, page, pageSize, total);
     }
 
     public async Task<bool> ExistsAsync(int id, CancellationToken ct = default)

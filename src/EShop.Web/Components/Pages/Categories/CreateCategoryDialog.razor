@@ -1,11 +1,9 @@
-﻿@inject CategoryApiClient CategoryApiClient
-@using EShop.Shared.Representations.Category
+﻿@using EShop.Shared.Representations.Category
 @using EShop.Web.Clients
 @using MudBlazor
 
 <MudDialog>
     <DialogContent>
-        <MudText Typo="Typo.h6">Create New Category</MudText>
         <MudForm @ref="form">
             <MudTextField @bind-Value="NewCategory.Name" Label="Name" Required="true" For="@(() => NewCategory.Name)" />
         </MudForm>
@@ -16,16 +14,29 @@
             <MudText Color="Color.Error">@ServerError</MudText>
         }
 
+        @if (IsSubmitting)
+        {
+            <MudSpacer />
+            <MudProgressCircular Color="Color.Primary" Size="Size.Medium" Indeterminate="true" />
+        }
+
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Primary" OnClick="SubmitForm">Save</MudButton>
-        <MudButton Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="SubmitForm" Disabled="@IsSubmitting">Save</MudButton>
     </DialogActions>
 </MudDialog>
 
 @code {
     [CascadingParameter] 
     IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] 
+    public CancellationToken CancellationToken { get; set; }
+
+    [Inject] ICategoryApiClient CategoryApiClient { get; set; } = null!;
+
+    private bool IsSubmitting = false;
 
     private MudForm form = null!;
 
@@ -38,21 +49,25 @@
         await form.Validate();
 
         if (form.IsValid)
-        {
             await Save();
-        }
     }
 
     private async Task Save()
     {
+        IsSubmitting = true;
+
         try
         {
-            await CategoryApiClient.CreateAsync(NewCategory);
+            await CategoryApiClient.CreateAsync(NewCategory, CancellationToken);
             MudDialog.Close(DialogResult.Ok(NewCategory));
         }
         catch (Exception ex)
         {
             ServerError = ex.Message;
+        }
+        finally
+        {
+            IsSubmitting = false;
         }
     }
 
