@@ -20,10 +20,12 @@ public class ProductsController : ControllerBase
     // GET: api/products?page=1&pageSize=20
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<ProductDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult> GetPagedAsync([FromQuery] int page = 1, [FromQuery] int pageSize = 20,
-        [FromQuery] string orderBy = "Name", [FromQuery] string orderDirection = "asc", CancellationToken ct = default)
+    public async Task<ActionResult> GetPagedAsync(
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
+        [FromQuery] string orderBy = "Name", [FromQuery] string orderDirection = "asc", 
+        [FromQuery] string? filter = null, CancellationToken ct = default)
     {
-        var results = await _productService.GetPagedAsync(page, pageSize, orderBy, orderDirection, ct);
+        var results = await _productService.GetPagedAsync(page, pageSize, orderBy, orderDirection, filter, ct);
 
         return Ok(results);
     }

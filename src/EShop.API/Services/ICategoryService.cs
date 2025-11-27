@@ -6,7 +6,7 @@ namespace EShop.API.Services;
 public interface ICategoryService
 {
     Task<PagedResult<CategoryDto>> GetPagedAsync(int page, int pageSize,
-        string orderBy = "Name", string orderDirection = "asc", CancellationToken ct = default);
+        string orderBy = "Name", string orderDirection = "asc", string? filter = null, CancellationToken ct = default);
 
     Task<ICollection<CategoryDto>> GetAllAsync(CancellationToken ct);
 

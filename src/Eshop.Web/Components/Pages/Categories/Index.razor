@@ -1,29 +1,28 @@
 ﻿@page "/categories"
+@inherits CategoryIndexBase
 @using EShop.Shared.Representations.Category
-@using EShop.Web.Clients
-@inject IDialogService DialogService
-@inject ISnackbar Snackbar
-
-<h3>Index</h3>
 
 <MudDataGrid @ref="dataGrid" T="CategoryDto" ServerData="@(state => ServerReloadAsync(state, CancellationToken.None))" Filterable="false">
     <ToolBarContent>
-        <MudButtonGroup Class="ma-0 pa-0" Color="Color.Primary" Variant="Variant.Filled">
-            <MudButton @onclick="OpenDialogAsync">
+        <MudItem xs="12" sm="6">
+            <MudTextField T="string" Placeholder="Search" 
+                ValueChanged="@(s => OnSearch(s))" @bind-Value="_searchString" @bind-Value:event="oninput" DebounceInterval="300"
+                Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </MudItem>
+         <MudItem xs="12" sm="6" Class="d-flex justify-end">
+            <MudButton @onclick="OpenDialogAsync" Color="Color.Success" Variant="Variant.Filled">
                 Add Category
             </MudButton>
-        </MudButtonGroup>
+        </MudItem>
     </ToolBarContent>
     <Columns>
-        <PropertyColumn Property="x => x.Id" />
-        <PropertyColumn Property="x => x.Name" />
+        <PropertyColumn Property="x => x.Id" MinWidth="80px" />
+        <PropertyColumn Property="x => x.Name" MinWidth="200px" />
         <TemplateColumn>
             <HeaderTemplate>Actions</HeaderTemplate>
             <CellTemplate Context="context">
                 <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@(async () => await OpenEditDialogAsync(context.Item))"></MudIconButton>
-
-                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" 
-                    OnClick="@(async () => await OpenDeleteDialogAsync(context.Item))"></MudIconButton>
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" OnClick="@(async () => await OpenDeleteDialogAsync(context.Item))"></MudIconButton>
             </CellTemplate>
         </TemplateColumn>
     </Columns>
@@ -31,88 +30,3 @@
         <MudDataGridPager T="CategoryDto" />
     </PagerContent>
 </MudDataGrid>
-
-@code {
-    MudDataGrid<CategoryDto> dataGrid = null!;
-
-    [Inject] ICategoryApiClient CategoryApiClient { get; set; } = null!;
-
-    private async Task<GridData<CategoryDto>> ServerReloadAsync(GridState<CategoryDto> state, CancellationToken ct)
-    {
-        var sortBy = "Name";
-        var sortDirection = "asc";
-        var currentPage = state.Page;
-        var pageSize = state.PageSize;
-
-        var sortDefinition = state.SortDefinitions.FirstOrDefault();
-        if (sortDefinition != null)
-        {
-            sortBy = sortDefinition.SortBy;
-            sortDirection = sortDefinition.Descending ? "desc" : "asc";
-        }
-
-        var pageNumber = currentPage + 1;
-
-        var pagedData = await CategoryApiClient.GetPagedCategoriesAsync(
-            pageNumber,
-           pageSize, sortBy, sortDirection, ct);
-
-        return new GridData<CategoryDto>
-        {
-            TotalItems = pagedData!.Total,
-            Items = pagedData.Items
-        };
-    }
-
-    private async Task OpenDialogAsync()
-    {
-        using var cts = new CancellationTokenSource();
-        var parameters = new DialogParameters { ["CancellationToken"] = cts.Token };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-        var dialog = await DialogService.ShowAsync<CreateCategoryDialog>("Add Category", parameters, options);
-        var result = await dialog.Result;
-
-        if (result!.Canceled != true)
-        {
-            var created = (CreateCategoryDto)result.Data!;
-            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
-            Snackbar.Add($"Category '{created.Name}' succesfully created", Severity.Success);
-
-            await dataGrid.ReloadServerData();
-        }
-    }
-
-    private async Task OpenEditDialogAsync(CategoryDto item)
-    {
-        using var cts = new CancellationTokenSource();
-        var parameters = new DialogParameters { ["CategoryParam"] = item, ["CancellationToken"] = cts.Token };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-
-        var dialog = await DialogService.ShowAsync<EditCategoryDialog>("Edit Category", parameters, options);
-        var result = await dialog.Result;
-
-        if (result!.Canceled != true)
-        {
-            var updated = (UpdateCategoryDto)result.Data!;
-            Snackbar.Add($"Category '{updated.Name}' succesfully updated", Severity.Info);
-            await dataGrid.ReloadServerData();
-        }
-    }
-
-    private async Task OpenDeleteDialogAsync(CategoryDto item)
-    {
-        using var cts = new CancellationTokenSource();
-        var parameters = new DialogParameters { ["CategoryParam"] = item, ["CancellationToken"] = cts.Token };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-
-        var dialog = await DialogService.ShowAsync<DeleteCategoryDialog>($"Delete Category", 
-            parameters, options);
-        var result = await dialog.Result;
-
-        if (result!.Canceled != true)
-        {
-            Snackbar.Add($"Category '{item.Name}' succesfully deleted!", Severity.Success);
-            await dataGrid.ReloadServerData();
-        }
-    }
-}

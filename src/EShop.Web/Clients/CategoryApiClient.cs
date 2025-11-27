@@ -16,12 +16,14 @@ public class CategoryApiClient(HttpClient httpClient, ILogger<CategoryApiClient>
         int pageSize = 20,
         string orderBy = "Name",
         string orderDirection = "asc",
+        string? filter = null,
         CancellationToken ct = default)
     {
         var orderByEscaped = Uri.EscapeDataString(orderBy ?? "Name");
         var orderDirEscaped = Uri.EscapeDataString(orderDirection ?? "asc");
+        var escapedFilter = Uri.EscapeDataString(filter ?? string.Empty);
 
-        var url = $"{BasePath}?page={page}&pageSize={pageSize}&orderBy={orderByEscaped}&orderDirection={orderDirEscaped}";
+        var url = $"{BasePath}?page={page}&pageSize={pageSize}&orderBy={orderByEscaped}&orderDirection={orderDirEscaped}&filter={escapedFilter}";
         return await SendAsync<PagedResult<CategoryDto>>(() => HttpClient.GetAsync(url, ct), ct);
     }
 

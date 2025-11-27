@@ -23,13 +23,21 @@ public class BrandService : IBrandService
         _mapper = mapper;
     }
 
-    public async Task<Shared.Representations.PagedResult<BrandDto>> GetPagedAsync(int page, int pageSize, 
-        string orderBy = "Name", string orderDirection = "asc", CancellationToken ct = default)
+    public async Task<Shared.Representations.PagedResult<BrandDto>> GetPagedAsync(
+        int page, int pageSize, 
+        string orderBy = "Name", string orderDirection = "asc", 
+        string? filter = null,
+        CancellationToken ct = default)
     {
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 200);
 
         IQueryable<Brand> query = _context.Brands.AsNoTracking();
+
+        if (!string.IsNullOrEmpty(filter))
+        {
+            query = query.Where("Name.ToLower().Contains(@0)", filter.ToLower());
+        }
 
         if (!string.IsNullOrEmpty(orderBy))
         {
