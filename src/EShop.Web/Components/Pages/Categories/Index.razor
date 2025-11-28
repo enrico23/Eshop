@@ -1,0 +1,32 @@
+﻿@page "/categories"
+@inherits CategoryIndexBase
+@using EShop.Shared.Representations.Category
+
+<MudDataGrid @ref="dataGrid" T="CategoryDto" ServerData="@(state => ServerReloadAsync(state, CancellationToken.None))" Filterable="false">
+    <ToolBarContent>
+        <MudItem xs="12" sm="6">
+            <MudTextField T="string" Placeholder="Search" 
+                ValueChanged="@(s => OnSearch(s))" @bind-Value="_searchString" @bind-Value:event="oninput" DebounceInterval="300"
+                Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </MudItem>
+         <MudItem xs="12" sm="6" Class="d-flex justify-end">
+            <MudButton @onclick="OpenDialogAsync" Color="Color.Success" Variant="Variant.Filled">
+                Add Category
+            </MudButton>
+        </MudItem>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.Id" MinWidth="80px" />
+        <PropertyColumn Property="x => x.Name" MinWidth="200px" />
+        <TemplateColumn>
+            <HeaderTemplate>Actions</HeaderTemplate>
+            <CellTemplate Context="context">
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@(async () => await OpenEditDialogAsync(context.Item))"></MudIconButton>
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" OnClick="@(async () => await OpenDeleteDialogAsync(context.Item))"></MudIconButton>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="CategoryDto" />
+    </PagerContent>
+</MudDataGrid>

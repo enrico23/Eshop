@@ -1,0 +1,90 @@
+﻿@using EShop.Shared.Representations.Category
+@using EShop.Web.Clients
+@using EShop.Web.Exceptions
+@using MudBlazor
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="mudForm">
+            <MudTextField @bind-Value="EditModel.Name"
+                            Label="Name"
+                            Required="true"
+                            For="@(() => EditModel.Name)" />
+        </MudForm>
+
+        @if (!string.IsNullOrEmpty(ServerError))
+        {
+            <MudSpacer />
+            <MudText Color="Color.Error" Class="mt-2">@ServerError</MudText>
+        }
+
+        @if (IsSubmitting)
+        {
+            <MudSpacer />
+            <MudProgressCircular Color="Color.Primary" Size="Size.Medium" Indeterminate="true" />
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="SubmitForm" Disabled="@IsSubmitting">Save</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] 
+    IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Inject] ICategoryApiClient CategoryApiClient { get; set; } = null!;
+
+    [Parameter] 
+    public CategoryDto? CategoryParam { get; set; }
+
+    [Parameter]
+    public CancellationToken CancellationToken { get; set; }
+
+    private MudForm mudForm = null!;
+
+    private bool IsSubmitting = false;
+
+    private UpdateCategoryDto EditModel { get; set; } = new() { Name = string.Empty };
+
+    private string ServerError = string.Empty;
+
+    private int categoryId;
+
+    protected override void OnInitialized()
+    {
+        if (CategoryParam != null)
+        {
+            categoryId = CategoryParam.Id;
+            EditModel.Name = CategoryParam.Name;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SubmitForm()
+    {
+        IsSubmitting = true;
+        ServerError = string.Empty;
+        await mudForm.Validate();
+
+        if (!mudForm.IsValid)
+            return;
+
+        try
+        {
+            await CategoryApiClient.UpdateAsync(categoryId, EditModel, CancellationToken);
+            
+            MudDialog.Close(DialogResult.Ok(EditModel));
+        }
+        catch (Exception ex)
+        {
+            ServerError = ex.Message;
+        }
+        finally
+        {
+            IsSubmitting = false;
+        }
+    }
+}
