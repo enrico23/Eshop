@@ -1,26 +1,123 @@
 📦 EShop — Full-Stack .NET E-Commerce Demo
 
-A clean, modern, full-stack e-commerce application showcasing backend, frontend, architecture, DevOps, and developer-experience skills.
+A clean, modern, full-stack e-commerce application designed to showcase backend engineering, frontend development, cloud-native architecture, DevOps practice, and developer-experience excellence.
 
 ✨ Overview
 
-EShop is a demo e-commerce application built to demonstrate professional-grade software engineering skills using .NET, SQL Server, EF Core, Blazor, and .NET Aspire 
-for improved local developer experience and service orchestration.
+EShop is a demonstration project built to highlight professional-grade software engineering using:
 
-The goal of this project is to provide:
+.NET for backend and orchestration
 
-A clean architectural foundation
+Blazor Server for modern, interactive UI
 
-A realistic backend API using ASP.NET Core
+SQL Server + EF Core for data access
 
-A modern frontend built with Blazor Server
+.NET Aspire for local service orchestration and developer experience
 
-Database access with EF Core
+This project is part of my professional portfolio on GitHub and LinkedIn, showcasing clean architecture, maintainability, reliability, and modern .NET practices.
 
-Automated migrations
+🎯 Goals
 
-Strong separation of concerns
+EShop aims to demonstrate:
 
-Developer-friendly local environment using .NET Aspire
+Clean Architectural Foundation
+Domain-driven structure with clear separation of concerns.
 
-This project is designed to be the one I showcase on GitHub and LinkedIn as part of my professional portfolio.
+Realistic Backend API
+ASP.NET Core following industry-standard patterns.
+
+Modern Frontend
+Blazor Server + component library (MudBlazor).
+
+Database Integration
+SQL Server, EF Core, and automated migrations.
+
+Developer Experience Excellence
+.NET Aspire orchestrating all services with a single command.
+
+Production-minded Practices
+Clear boundaries, testability, modularity, scalability.
+
+🚀 Features
+
+Product catalog with categories and brands
+
+Clean domain + application layering
+
+EF Core with migrations and SQL Server
+
+Blazor UI with component library
+
+Orchestrated services via .NET Aspire
+
+Future expansion for checkout, orders, and inventory
+
+🏁 Getting Started
+
+EShop uses .NET Aspire to run and orchestrate all services locally.
+With Aspire, the backend, frontend, and (soon) database/migrations) start together with a single command.
+
+✔ Prerequisites
+
+Before running the project, ensure the following are installed:
+
+1. .NET SDK 9.0+
+
+Backend services and Aspire target .NET 10
+
+Blazor Server targets .NET 9 due to MudBlazor compatibility
+
+Download:
+https://dotnet.microsoft.com/download
+
+2. .NET Aspire Workloads
+
+Install Aspire:
+
+dotnet workload update
+dotnet workload install aspire
+
+
+More info:
+https://aspire.dev/get-started/prerequisites/
+
+3. Container Runtime (required for SQL Server + Aspire resources)
+
+You can use either Docker Desktop or Rancher Desktop.
+
+🟦 Option 1 — Docker Desktop
+
+Recommended by Microsoft.
+
+✔ Easiest setup
+✔ Strong integration with .NET
+✔ Great tooling support
+
+⚠️ Licensing restrictions apply for commercial use.
+Use it only if it fits your license model.
+
+Download:
+https://www.docker.com/products/docker-desktop/
+
+🟩 Option 2 — Rancher Desktop (my personal choice)
+
+A fully open-source alternative with no license constraints.
+
+✔ Free & open-source
+✔ No usage restrictions
+✔ Works seamlessly with .NET Aspire
+✔ Supports both containerd and dockerd
+
+Download:
+https://rancherdesktop.io/
+
+Recommended settings (if using Rancher Desktop):
+
+Runtime: dockerd
+
+Kubernetes: off (not required)
+
+WSL2 enabled (on Windows)
+
+
+![Aspire Dashboard](docs/images/dashboard.jpg)

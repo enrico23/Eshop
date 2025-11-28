@@ -11,9 +11,13 @@ builder.Services.AddMudServices();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// CATALOG API HTTP CLIENT
+var catalogApiBaseFromConfig = builder.Configuration["services:api:http:0"];
+var catalogApiBaseFromEnv = Environment.GetEnvironmentVariable("services__api__http__0");
+var catalogApiBase = catalogApiBaseFromConfig ?? catalogApiBaseFromEnv ?? "https://localhost:5002/";
 builder.Services.AddHttpClient<ICategoryApiClient, CategoryApiClient>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["EShopApiBaseUrl"] ?? "http://localhost:5002/");
+    client.BaseAddress = new Uri(catalogApiBase);
 });
 
 var app = builder.Build();
