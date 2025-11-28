@@ -10,7 +10,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EShop.API\EShop.API.csproj" />
+    <ProjectReference Include="..\EShop.MigrationService\EShop.MigrationService.csproj" />
     <ProjectReference Include="..\EShop.Web\EShop.Web.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.0.1" />
   </ItemGroup>
 
 </Project>
