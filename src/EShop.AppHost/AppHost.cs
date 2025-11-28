@@ -1,8 +1,11 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var api = builder.AddProject<Projects.EShop_API>("api");
+var catalogApi = builder.AddProject<Projects.EShop_API>("api");
 
-var blazor = builder.AddProject<Projects.EShop_Web>("web");
+var blazor = builder.AddProject<Projects.EShop_Web>("web")
+    .WithExternalHttpEndpoints()
+    .WithReference(catalogApi)
+    .WaitFor(catalogApi);
 
 builder.Build().Run();
  
