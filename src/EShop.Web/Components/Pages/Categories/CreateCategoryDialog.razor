@@ -1,0 +1,78 @@
+﻿@using EShop.Shared.Representations.Category
+@using EShop.Web.Clients
+@using MudBlazor
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="form">
+            <MudTextField @bind-Value="NewCategory.Name" Label="Name" Required="true" For="@(() => NewCategory.Name)" />
+        </MudForm>
+
+        @if (!string.IsNullOrEmpty(ServerError))
+        {
+            <MudSpacer />
+            <MudText Color="Color.Error">@ServerError</MudText>
+        }
+
+        @if (IsSubmitting)
+        {
+            <MudSpacer />
+            <MudProgressCircular Color="Color.Primary" Size="Size.Medium" Indeterminate="true" />
+        }
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="SubmitForm" Disabled="@IsSubmitting">Save</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] 
+    IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] 
+    public CancellationToken CancellationToken { get; set; }
+
+    [Inject] ICategoryApiClient CategoryApiClient { get; set; } = null!;
+
+    private bool IsSubmitting = false;
+
+    private MudForm form = null!;
+
+    private CreateCategoryDto NewCategory { get; set; } = new (){ Name = string.Empty };
+
+    private string ServerError = "";
+
+    private async Task SubmitForm()
+    {
+        await form.Validate();
+
+        if (form.IsValid)
+            await Save();
+    }
+
+    private async Task Save()
+    {
+        IsSubmitting = true;
+
+        try
+        {
+            await CategoryApiClient.CreateAsync(NewCategory, CancellationToken);
+            MudDialog.Close(DialogResult.Ok(NewCategory));
+        }
+        catch (Exception ex)
+        {
+            ServerError = ex.Message;
+        }
+        finally
+        {
+            IsSubmitting = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}
