@@ -14,7 +14,7 @@ builder.Services.AddRazorComponents()
 // CATALOG API HTTP CLIENT
 var catalogApiBaseFromConfig = builder.Configuration["services:api:http:0"];
 var catalogApiBaseFromEnv = Environment.GetEnvironmentVariable("services__api__http__0");
-var catalogApiBase = catalogApiBaseFromConfig ?? catalogApiBaseFromEnv ?? "https://localhost:5002/";
+var catalogApiBase = catalogApiBaseFromConfig ?? catalogApiBaseFromEnv ?? "http://localhost:5002/";
 builder.Services.AddHttpClient<ICategoryApiClient, CategoryApiClient>(client =>
 {
     client.BaseAddress = new Uri(catalogApiBase);
