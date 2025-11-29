@@ -1,4 +1,7 @@
+using Microsoft.Extensions.Configuration;
+
 var builder = DistributedApplication.CreateBuilder(args);
+var disableFrontend = builder.Configuration.GetValue("DisableFrontend", false);
 
 // SQL SERVER & DB SETUP
 var databaseName = "CatalogDb";
@@ -18,10 +21,14 @@ var catalogApi = builder.AddProject<Projects.EShop_API>("api")
        .WaitFor(migrationWorkerService);
 
 // FRONTEND
-var blazorFrontEnd = builder.AddProject<Projects.EShop_Web>("web")
-    .WithExternalHttpEndpoints()
-    .WithReference(catalogApi)
-    .WaitFor(catalogApi);
+IResourceBuilder<ProjectResource>? frontend = null!;
+if (!disableFrontend)
+{
+    frontend = builder.AddProject<Projects.EShop_Web>("web").WithExternalHttpEndpoints();
+    frontend = frontend
+        .WithReference(catalogApi)
+        .WaitFor(catalogApi);
+}
 
 builder.Build().Run();
  

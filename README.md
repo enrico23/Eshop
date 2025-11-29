@@ -25,13 +25,4 @@ EShop highlights professional-grade software engineering using:
 
 EShop uses .NET Aspire to orchestrate backend, frontend, and database with a single command.
 
-### Prerequisites
-
-- [.NET SDK 9.0+](https://dotnet.microsoft.com/download)
-- [.NET Aspire](https://aspire.dev/get-started/prerequisites/)
-- Container runtime: [Docker Desktop](https://www.docker.com/products/docker-desktop/) **or** [Rancher Desktop](https://rancherdesktop.io/)
-
-### Starting the App
-
-```bash
-dotnet run --password "YourStrongPassword"
+➡️ See the full guide here: [Quick Start](docs/quickstart.md)
