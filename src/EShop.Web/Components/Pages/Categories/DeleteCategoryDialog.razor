@@ -1,6 +1,7 @@
 ﻿@using EShop.Shared.Representations.Category
 @using EShop.Web.Clients
 @using System.Threading.Tasks
+@using EShop.Web.Exceptions
 
 <MudDialog>
     <DialogContent>
@@ -35,7 +36,7 @@
     private int categoryId;
     private string categoryName = string.Empty;
 
-    [Inject] ICategoryApiClient CategoryApiClient { get; set; } = null!;
+    [Inject] ICatalogApiClient CategoryApiClient { get; set; } = null!;
 
     protected override void OnInitialized()
     {
@@ -55,9 +56,13 @@
             await CategoryApiClient.DeleteAsync(categoryId, CancellationToken.None);
             MudDialog.Close(DialogResult.Ok(true));
         }
-        catch (Exception ex)
+        catch (ApiException ex)
         {
-            ServerError = ex.Message;
+            ServerError = ex.FriendlyMessage!;
+        }
+        catch (Exception)
+        {
+            ServerError = "An unexpected error occurred. Please try again.";
         }
         finally
         {

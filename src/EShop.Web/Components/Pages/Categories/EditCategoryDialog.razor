@@ -33,7 +33,7 @@
 @code {
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
 
-    [Inject] ICategoryApiClient CategoryApiClient { get; set; } = null!;
+    [Inject] ICatalogApiClient CategoryApiClient { get; set; } = null!;
 
     [Parameter] public CategoryDto? CategoryParam { get; set; }
 
@@ -69,9 +69,13 @@
             await CategoryApiClient.UpdateAsync(categoryId, EditModel, CancellationToken.None);
             MudDialog.Close(DialogResult.Ok(EditModel));
         }
+        catch (ApiException ex)
+        {
+            ServerError = ex.FriendlyMessage!;
+        }
         catch (Exception ex)
         {
-            ServerError = ex.Message;
+            ServerError = "An unexpected error occurred. Please try again.";
         }
         finally
         {
