@@ -55,7 +55,6 @@
                                     Size="Size.Small"
                                     OnClick="@(() => OnDelete.InvokeAsync(item))" />
                 }
-                
             </CellTemplate>
         </TemplateColumn>
     </Columns>
@@ -69,25 +68,12 @@
     [Parameter]
     public Func<GridState<TItem>, string?, Task<GridData<TItem>>> ServerData { get; set; } = default!;
 
-    [Parameter]
-    public RenderFragment? Columns { get; set; }
-
-    [Parameter]
-    public int[] PageSizeOptions { get; set; } = new[] { 10, 25, 50 };
-
-    [Parameter]
-    public int DefaultPageSize { get; set; } = 5;
-
-    [Parameter]
-    public string SearchPlaceholder { get; set; } = "Search";
-
-    [Parameter]
-    public bool ShowAddButton { get; set; } = false;
-
-    [Parameter]
-    public string AddButtonText { get; set; } = "Add";
-
-    // Callbacks
+    [Parameter]public RenderFragment? Columns { get; set; }
+    [Parameter] public int[] PageSizeOptions { get; set; } = new[] { 10, 25, 50 };
+    [Parameter] public int DefaultPageSize { get; set; } = 5;
+    [Parameter]public string SearchPlaceholder { get; set; } = "Search";
+    [Parameter] public bool ShowAddButton { get; set; } = false;
+    [Parameter] public string AddButtonText { get; set; } = "Add";
     [Parameter] public EventCallback OnAdd { get; set; }
     [Parameter] public EventCallback<TItem> OnEdit { get; set; }
     [Parameter] public EventCallback<TItem> OnDelete { get; set; }
@@ -103,9 +89,7 @@
         _searchText = value;
 
         if (_grid is not null)
-        {
             await _grid.ReloadServerData();
-        }
     }
 
     private async Task OnAddClicked()

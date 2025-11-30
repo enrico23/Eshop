@@ -28,38 +28,35 @@
 </MudDialog>
 
 @code {
-    [CascadingParameter] 
-    IMudDialogInstance MudDialog { get; set; } = null!;
-
-    [Parameter] 
-    public CancellationToken CancellationToken { get; set; }
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
 
     [Inject] ICategoryApiClient CategoryApiClient { get; set; } = null!;
 
     private bool IsSubmitting = false;
-
     private MudForm form = null!;
-
     private CreateCategoryDto NewCategory { get; set; } = new (){ Name = string.Empty };
-
     private string ServerError = "";
 
     private async Task SubmitForm()
     {
-        await form.Validate();
+        ServerError = "";
 
+        await form.Validate();
         if (form.IsValid)
-            await Save();
+            await SaveAsync();
     }
 
-    private async Task Save()
+    private async Task SaveAsync()
     {
         IsSubmitting = true;
 
         try
         {
-            await CategoryApiClient.CreateAsync(NewCategory, CancellationToken);
+            await CategoryApiClient.CreateAsync(NewCategory, CancellationToken.None);
             MudDialog.Close(DialogResult.Ok(NewCategory));
+        }
+        catch (OperationCanceledException)
+        {
         }
         catch (Exception ex)
         {

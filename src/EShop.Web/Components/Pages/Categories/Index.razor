@@ -7,14 +7,14 @@
 <MudPaper Class="pa-4">
     <GenericGrid TItem="CategoryDto"
                  @ref="_grid"
-                 ServerData="LoadAsync"
+                 ServerData="LoadCategoryAsync"
                  DefaultPageSize="10"
                  PageSizeOptions="new[] {5, 10, 25, 50 }"
                  SearchPlaceholder="Search..."
                  AddButtonText="Add Category"
-                 OnAdd="AddCategory"
-                 OnEdit="EditCategory"
-                 OnDelete="DeleteCategory">
+                 OnAdd="OpenCreateDialogAsync"
+                 OnEdit="OpenEditDialogAsync"
+                 OnDelete="OpenDeleteDialogAsync">
         <Columns>
             <PropertyColumn 
                 T="CategoryDto"
@@ -30,7 +30,9 @@
     [Inject] protected IDialogService DialogService { get; set; } = null!;
     [Inject] protected ISnackbar Snackbar { get; set; } = null!;
 
-    private async Task<GridData<CategoryDto>> LoadAsync(GridState<CategoryDto> state, string? searchText)
+    private GenericGrid<CategoryDto>? _grid;
+
+    private async Task<GridData<CategoryDto>> LoadCategoryAsync(GridState<CategoryDto> state, string? searchText)
     {
         var sortBy = "Name";
         var sortDirection = "asc";
@@ -57,12 +59,9 @@
         };
     }
 
-    private GenericGrid<CategoryDto>? _grid;
-
-    private async Task AddCategory()
+    private async Task OpenCreateDialogAsync()
     {
-        using var cts = new CancellationTokenSource();
-        var parameters = new DialogParameters { ["CancellationToken"] = cts.Token };
+        var parameters = new DialogParameters { };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
         var dialog = await DialogService.ShowAsync<CreateCategoryDialog>("Add Category", parameters, options);
         var result = await dialog.Result;
@@ -74,18 +73,14 @@
             Snackbar.Add($"Category '{created.Name}' succesfully created", Severity.Success);
 
             if (_grid is not null)
-            {
                 await _grid.ReloadAsync();
-            }
         }
     }
 
-    private async Task EditCategory(CategoryDto item)
+    private async Task OpenEditDialogAsync(CategoryDto item)
     {
-        using var cts = new CancellationTokenSource();
-        var parameters = new DialogParameters { ["CategoryParam"] = item, ["CancellationToken"] = cts.Token };
+        var parameters = new DialogParameters { ["CategoryParam"] = item };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-
         var dialog = await DialogService.ShowAsync<EditCategoryDialog>("Edit Category", parameters, options);
         var result = await dialog.Result;
 
@@ -95,16 +90,13 @@
             Snackbar.Add($"Category '{updated.Name}' succesfully updated", Severity.Info);
 
             if (_grid is not null)
-            {
                 await _grid.ReloadAsync();
-            }
         }
     }
 
-    private async Task DeleteCategory(CategoryDto item)
+    private async Task OpenDeleteDialogAsync(CategoryDto item)
     {
-        using var cts = new CancellationTokenSource();
-        var parameters = new DialogParameters { ["CategoryParam"] = item, ["CancellationToken"] = cts.Token };
+        var parameters = new DialogParameters { ["CategoryParam"] = item };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
 
         var dialog = await DialogService.ShowAsync<DeleteCategoryDialog>($"Delete Category",
@@ -115,9 +107,7 @@
         {
             Snackbar.Add($"Category '{item.Name}' succesfully deleted!", Severity.Success);
             if (_grid is not null)
-            {
                 await _grid.ReloadAsync();
-            }
         }
     }
 }

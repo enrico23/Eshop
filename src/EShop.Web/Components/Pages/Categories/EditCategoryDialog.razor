@@ -31,25 +31,17 @@
 </MudDialog>
 
 @code {
-    [CascadingParameter] 
-    IMudDialogInstance MudDialog { get; set; } = null!;
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
 
     [Inject] ICategoryApiClient CategoryApiClient { get; set; } = null!;
 
-    [Parameter] 
-    public CategoryDto? CategoryParam { get; set; }
+    [Parameter] public CategoryDto? CategoryParam { get; set; }
 
-    [Parameter]
-    public CancellationToken CancellationToken { get; set; }
-
+  
     private MudForm mudForm = null!;
-
     private bool IsSubmitting = false;
-
     private UpdateCategoryDto EditModel { get; set; } = new() { Name = string.Empty };
-
     private string ServerError = string.Empty;
-
     private int categoryId;
 
     protected override void OnInitialized()
@@ -74,8 +66,7 @@
 
         try
         {
-            await CategoryApiClient.UpdateAsync(categoryId, EditModel, CancellationToken);
-            
+            await CategoryApiClient.UpdateAsync(categoryId, EditModel, CancellationToken.None);
             MudDialog.Close(DialogResult.Ok(EditModel));
         }
         catch (Exception ex)
