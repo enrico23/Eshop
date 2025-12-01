@@ -1,8 +1,10 @@
 ﻿@page "/categories"
+@using EShop.Shared.Representations
 @using EShop.Shared.Representations.Brand
 @using EShop.Shared.Representations.Category
 @using EShop.Web.Clients
 @using EShop.Web.Components.Pages.Categories
+@using EShop.Web.Exceptions
 
 <MudPaper Class="pa-4">
     <GenericGrid TItem="CategoryDto"
@@ -26,7 +28,7 @@
 </MudPaper>
 
 @code {
-    [Inject] protected ICategoryApiClient CategoryApiClient { get; set; } = null!;
+    [Inject] protected ICatalogApiClient CategoryApiClient { get; set; } = null!;
     [Inject] protected IDialogService DialogService { get; set; } = null!;
     [Inject] protected ISnackbar Snackbar { get; set; } = null!;
 
@@ -46,16 +48,31 @@
             sortDirection = sortDefinition.Descending ? "desc" : "asc";
         }
 
-        var pageNumber = currentPage + 1;
+        var page = currentPage + 1;
 
-        var pagedData = await CategoryApiClient.GetPagedCategoriesAsync(
-          pageNumber,
-          pageSize, sortBy, sortDirection, searchText, CancellationToken.None);
+        try
+        {
+            var pagedData = await CategoryApiClient.GetPagedCategoriesAsync(page, pageSize, sortBy, sortDirection, searchText, CancellationToken.None);
+
+            return new GridData<CategoryDto>
+            {
+                TotalItems = pagedData!.Total,
+                Items = pagedData.Items
+            };
+        }
+        catch (ApiException ex)
+        {
+            Snackbar.Add(ex.FriendlyMessage!, Severity.Error);
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Unexpected error.", Severity.Error);
+        }
 
         return new GridData<CategoryDto>
         {
-            TotalItems = pagedData!.Total,
-            Items = pagedData.Items
+            TotalItems = 0,
+            Items = new List<CategoryDto>()
         };
     }
 

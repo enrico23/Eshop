@@ -1,5 +1,6 @@
 ﻿@using EShop.Shared.Representations.Category
 @using EShop.Web.Clients
+@using EShop.Web.Exceptions
 @using MudBlazor
 
 <MudDialog>
@@ -30,7 +31,7 @@
 @code {
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
 
-    [Inject] ICategoryApiClient CategoryApiClient { get; set; } = null!;
+    [Inject] ICatalogApiClient CategoryApiClient { get; set; } = null!;
 
     private bool IsSubmitting = false;
     private MudForm form = null!;
@@ -55,12 +56,13 @@
             await CategoryApiClient.CreateAsync(NewCategory, CancellationToken.None);
             MudDialog.Close(DialogResult.Ok(NewCategory));
         }
-        catch (OperationCanceledException)
+        catch (ApiException ex)
         {
+            ServerError = ex.FriendlyMessage!;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            ServerError = ex.Message;
+            ServerError = "An unexpected error occurred. Please try again.";
         }
         finally
         {
