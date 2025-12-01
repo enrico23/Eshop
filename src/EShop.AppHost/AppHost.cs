@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 
 var builder = DistributedApplication.CreateBuilder(args);
 var disableFrontend = builder.Configuration.GetValue("DisableFrontend", false);
+var dependenciesOnly = builder.Configuration.GetValue("DependenciesOnly", false);
 
 // SQL SERVER & DB SETUP
 var databaseName = "CatalogDb";
@@ -15,19 +16,21 @@ var migrationWorkerService = builder.AddProject<Projects.EShop_MigrationService>
     .WithReference(db)
     .WaitFor(db);
 
-// API CONFIGURATION
-var catalogApi = builder.AddProject<Projects.EShop_API>("api")
-       .WithReference(db)
-       .WaitFor(migrationWorkerService);
-
-// FRONTEND
-IResourceBuilder<ProjectResource>? frontend = null!;
-if (!disableFrontend)
+if (!dependenciesOnly)
 {
-    frontend = builder.AddProject<Projects.EShop_Web>("web").WithExternalHttpEndpoints();
-    frontend = frontend
-        .WithReference(catalogApi)
-        .WaitFor(catalogApi);
+    // API CONFIGURATION
+    var catalogApi = builder.AddProject<Projects.EShop_API>("api")
+           .WithReference(db)
+           .WaitFor(migrationWorkerService);
+
+    // FRONTEND
+    if (!disableFrontend)
+    {
+        var frontend = builder.AddProject<Projects.EShop_Web>("web").WithExternalHttpEndpoints();
+        frontend = frontend
+            .WithReference(catalogApi)
+            .WaitFor(catalogApi);
+    }
 }
 
 builder.Build().Run();
