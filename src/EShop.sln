@@ -31,6 +31,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{695ED087-1
 		..\docs\quickstart.md = ..\docs\quickstart.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{1CFF8CA6-A149-4AA5-BFC2-2E2897B4EFAE}"
+	ProjectSection(SolutionItems) = preProject
+		..\docs\api\errorhandling.md = ..\docs\api\errorhandling.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +80,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{695ED087-1418-4824-BC9F-03012F8EB976} = {446DC99F-193C-4C32-AAFB-5213A81714AA}
+		{1CFF8CA6-A149-4AA5-BFC2-2E2897B4EFAE} = {695ED087-1418-4824-BC9F-03012F8EB976}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {15E4314C-18A9-4A0E-88F4-96EA2D79E06A}

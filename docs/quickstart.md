@@ -34,7 +34,7 @@ You can run only the dependecies in the AppHost using the `DependenciesOnly` fla
 ```
 cd src/EShop.AppHost
 
-dotnet run -- DisableFrontend=true
+dotnet run -- DependenciesOnly=true
 ```
 
 This will start:

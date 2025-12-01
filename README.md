@@ -26,3 +26,7 @@ EShop highlights professional-grade software engineering using:
 EShop uses .NET Aspire to orchestrate backend, frontend, and database with a single command.
 
 ➡️ See the full guide here: [Quick Start](docs/quickstart.md)
+
+## API
+
+➡️ [Error Handling](docs/api/errorhandling.md)
