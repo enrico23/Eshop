@@ -99,7 +99,7 @@ public class CategoryService : ICategoryService
         if (createCategoryDto is null)
             throw new ArgumentNullException(nameof(createCategoryDto));
 
-        var alreadyExists = await _context.Brands.AnyAsync(b => b.Name.ToLower() == createCategoryDto.Name.ToLower(), ct);
+        var alreadyExists = await _context.Categories.AnyAsync(b => b.Name.ToLower() == createCategoryDto.Name.ToLower(), ct);
         if (alreadyExists)
             throw new DomainException($"A brand with name '{createCategoryDto.Name}' already exists.");
 

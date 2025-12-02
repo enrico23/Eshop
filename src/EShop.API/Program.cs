@@ -34,7 +34,6 @@ builder.Services.AddDbContext<CatalogDbContext>(options =>
 builder.Services.AddMapster();
 TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
 
-builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 
