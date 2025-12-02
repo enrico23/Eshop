@@ -15,9 +15,4 @@
   <ItemGroup>
     <ProjectReference Include="..\EShop.Shared\EShop.Shared.csproj" />
   </ItemGroup>
-
-
-  <ItemGroup>
-    <Folder Include="Components\Pages\Brands\" />
-  </ItemGroup>
 </Project>

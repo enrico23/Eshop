@@ -1,0 +1,73 @@
+﻿@using EShop.Shared.Representations.Category
+@using EShop.Shared.Representations.Product
+@using MudBlazor
+@inherits ComponentBase
+
+<MudGrid GutterSize="2">
+
+    <MudItem xs="12">
+        <MudTextField @bind-Value="Product.Name"
+                      Label="Name"
+                      Required="true"
+                      For="@(() => Product.Name)" />
+    </MudItem>
+
+    <MudItem xs="12">
+        <MudTextField @bind-Value="Product.Price"
+                      Label="Price"
+                      Required="true"
+                      For="@(() => Product.Price)" />
+    </MudItem>
+
+    <MudItem xs="12">
+        <MudTextField @bind-Value="Product.Stock"
+                      Label="Stock"
+                      Required="true"
+                      For="@(() => Product.Stock)" />
+    </MudItem>
+
+    <MudItem xs="12">
+        @if (Categories is null || Categories.Count == 0)
+        {
+            <MudAlert Severity="Severity.Warning">
+                No categories are available. Please create a category first.
+            </MudAlert>
+        }
+        else
+        {
+            <MudSelect Label="Category"
+                       Placeholder="Select..."
+                       T="int?" Required="true"
+                       @bind-Value="Product.CategoryId"
+                       For="@(() => Product.CategoryId)"
+                       FullWidth="true"
+                       Margin="Margin.Dense">
+
+                @foreach (var category in Categories)
+                {
+                    <MudSelectItem T="int?" Value="category.Id">@category.Name</MudSelectItem>
+                }
+            </MudSelect>
+        }
+    </MudItem>
+
+    <MudItem xs="12">
+        <MudTextField T="string"
+                      @bind-Value="Product.Description"
+                      Label="Description"
+                      For="@(() => Product.Description)"
+                      Lines="4"
+                      MaxLength="255"
+                      Required="true"
+                      TextLengthExceededMessage="Description cannot exceed 255 characters." />
+    </MudItem>
+
+</MudGrid>
+
+@code {
+    [Parameter]
+    public ProductUpsertDto Product { get; set; } = null!;
+
+    [Parameter]
+    public List<CategoryDto> Categories { get; set; } = new();
+}

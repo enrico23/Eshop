@@ -1,0 +1,105 @@
+﻿@using EShop.Shared.Representations.Category
+@using EShop.Shared.Representations.Product
+@using EShop.Web.Clients
+@using EShop.Web.Exceptions
+@using MudBlazor
+
+<MudDialog>
+    <DialogContent>
+
+        <MudForm @ref="form">
+            <ProductForm Product="Product" Categories="Categories" />
+        </MudForm>
+
+        @if (!string.IsNullOrEmpty(ServerError))
+        {
+            <MudSpacer />
+            <MudText Color="Color.Error">@ServerError</MudText>
+        }
+
+        @if (IsSubmitting)
+        {
+            <MudSpacer />
+            <MudProgressCircular 
+                Color="Color.Primary"
+                Size="Size.Medium"
+                Indeterminate="true" />
+        }
+
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary"
+                   OnClick="SubmitForm"
+                   Disabled="@IsSubmitting">
+            Save
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Inject] ICatalogApiClient CategoryApiClient { get; set; } = null!;
+
+    [Parameter]
+    public ProductUpsertDto Product { get; set; } = null!;
+
+    [Parameter]
+    public Func<ProductUpsertDto, Task> OnSave { get; set; } = default!;
+
+    private MudForm form = null!;
+    private bool IsSubmitting = false;
+    private string ServerError = "";
+
+    private List<CategoryDto> Categories { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Categories = await CategoryApiClient.GetAllCategoriesAsync();
+    }
+
+    private async Task SubmitForm()
+    {
+        ServerError = "";
+
+        await form.Validate();
+        if (!form.IsValid)
+            return;
+
+        await SaveAsync();
+    }
+
+    private async Task SaveAsync()
+    {
+        IsSubmitting = true;
+
+        try
+        {
+            if (OnSave is not null)
+            {
+                await OnSave(Product);
+            }
+
+            MudDialog.Close(DialogResult.Ok(Product));
+        }
+        catch (ApiException ex)
+        {
+            ServerError = ex.FriendlyMessage ?? "An API error occurred.";
+        }
+        catch
+        {
+            ServerError = "An unexpected error occurred. Please try again.";
+        }
+        finally
+        {
+            IsSubmitting = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}

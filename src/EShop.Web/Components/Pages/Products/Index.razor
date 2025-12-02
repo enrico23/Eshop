@@ -1,0 +1,158 @@
+﻿@page "/products"
+@using EShop.Web.Components.Pages.Categories
+@using EShop.Web.Exceptions
+
+<MudPaper Class="pa-4">
+    <GenericGrid TItem="ProductDto"
+                 @ref="_grid"
+                 ServerData="LoadProductAsync"
+                 DefaultPageSize="10"
+                 PageSizeOptions="new[] {5, 10, 25, 50 }"
+                 SearchPlaceholder="Search..."
+                 AddButtonText="Add Product"
+                 OnAdd="OpenCreateDialogAsync"
+                 OnEdit="OpenEditDialogAsync"
+                 OnDelete="OpenDeleteDialogAsync">
+        <Columns>
+            <PropertyColumn 
+                T="ProductDto"
+                TProperty="string"
+                Property="x => x.Name" 
+                Sortable="true" />
+        </Columns>
+    </GenericGrid>
+</MudPaper>
+
+@code {
+    [Inject] protected ICatalogApiClient CategoryApiClient { get; set; } = null!;
+    [Inject] protected IDialogService DialogService { get; set; } = null!;
+    [Inject] protected ISnackbar Snackbar { get; set; } = null!;
+
+    private GenericGrid<ProductDto>? _grid;
+
+    private async Task<GridData<ProductDto>> LoadProductAsync(GridState<ProductDto> state, string? searchText)
+    {
+        var sortBy = "Name";
+        var sortDirection = "asc";
+        var currentPage = state.Page;
+        var pageSize = state.PageSize;
+
+        var sortDefinition = state.SortDefinitions.FirstOrDefault();
+        if (sortDefinition != null)
+        {
+            sortBy = sortDefinition.SortBy;
+            sortDirection = sortDefinition.Descending ? "desc" : "asc";
+        }
+
+        var page = currentPage + 1;
+
+        try
+        {
+            var pagedData = await CategoryApiClient.GetPagedProductsAsync(page, pageSize, sortBy, sortDirection, searchText, CancellationToken.None);
+
+            return new GridData<ProductDto>
+            {
+                TotalItems = pagedData!.Total,
+                Items = pagedData.Items
+            };
+        }
+        catch (ApiException ex)
+        {
+            Snackbar.Add(ex.FriendlyMessage!, Severity.Error);
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Unexpected error.", Severity.Error);
+        }
+
+        return new GridData<ProductDto>
+        {
+            TotalItems = 0,
+            Items = new List<ProductDto>()
+        };
+    }
+
+    private DialogOptions _options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+
+    private async Task OpenCreateDialogAsync()
+    {
+        var createProductDto = new CreateProductDto
+        {
+            Name = string.Empty,
+            Description = string.Empty,
+            Price = 0.01m,
+            Stock = 1,
+            CategoryId = null
+        };
+
+        var parameters = new DialogParameters
+        {
+            ["Product"] = createProductDto,
+            ["OnSave"] = new Func<ProductUpsertDto, Task>(async dto =>
+            {
+                var createDto = (CreateProductDto)dto;
+                await CategoryApiClient.CreateProductAsync(createDto, CancellationToken.None);
+            })
+        };
+
+        var dialog = await DialogService.ShowAsync<ProductUpsertDialog>("Create product", parameters, _options);
+        var result = await dialog.Result;
+
+        if (result!.Canceled != true)
+        {
+            var created = (CreateProductDto)result.Data!;
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+            Snackbar.Add($"Product '{created.Name}' succesfully created", Severity.Success);
+
+            if (_grid is not null)
+                await _grid.ReloadAsync();
+        }
+    }
+
+    private async Task OpenEditDialogAsync(ProductDto existing)
+    {
+        var updateProductDto = new UpdateProductDto
+        {
+            Name = existing.Name,
+            Description = existing.Description!,
+            Price = existing.Price,
+            Stock = existing.Stock,
+            CategoryId = existing.CategoryId
+        };
+
+        var parameters = new DialogParameters
+            {
+                ["Product"] = updateProductDto,
+                ["OnSave"] = new Func<ProductUpsertDto, Task>(async dto =>
+                {
+                    var updateDto = (UpdateProductDto)dto;
+                    await CategoryApiClient.UpdateProductAsync(existing.Id, updateDto, CancellationToken.None);
+                })
+            };
+        var dialog = await DialogService.ShowAsync<ProductUpsertDialog>("Edit product", parameters, _options);
+        var result = await dialog.Result;
+
+        if (result!.Canceled != true)
+        {
+            var updated = (UpdateProductDto)result.Data!;
+            Snackbar.Add($"Product '{updated.Name}' succesfully updated", Severity.Info);
+
+            if (_grid is not null)
+                await _grid.ReloadAsync();
+        }
+    }
+
+    private async Task OpenDeleteDialogAsync(ProductDto item)
+    {
+        var parameters = new DialogParameters { ["ProductParam"] = item };
+        var dialog = await DialogService.ShowAsync<DeleteProductDialog>($"Delete Product", parameters, _options);
+        var result = await dialog.Result;
+
+        if (result!.Canceled != true)
+        {
+            Snackbar.Add($"Product '{item.Name}' succesfully deleted!", Severity.Success);
+            if (_grid is not null)
+                await _grid.ReloadAsync();
+        }
+    }
+}
