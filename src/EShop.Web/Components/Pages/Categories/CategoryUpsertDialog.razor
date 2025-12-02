@@ -1,12 +1,14 @@
 ﻿@using EShop.Shared.Representations.Category
+@using EShop.Shared.Representations.Product
 @using EShop.Web.Clients
 @using EShop.Web.Exceptions
 @using MudBlazor
 
 <MudDialog>
     <DialogContent>
+
         <MudForm @ref="form">
-            <MudTextField @bind-Value="NewCategory.Name" Label="Name" Required="true" For="@(() => NewCategory.Name)" />
+            <CategoryForm Category="Category" />
         </MudForm>
 
         @if (!string.IsNullOrEmpty(ServerError))
@@ -18,13 +20,21 @@
         @if (IsSubmitting)
         {
             <MudSpacer />
-            <MudProgressCircular Color="Color.Primary" Size="Size.Medium" Indeterminate="true" />
+            <MudProgressCircular 
+                Color="Color.Primary"
+                Size="Size.Medium"
+                Indeterminate="true" />
         }
 
     </DialogContent>
+
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="SubmitForm" Disabled="@IsSubmitting">Save</MudButton>
+        <MudButton Color="Color.Primary"
+                   OnClick="SubmitForm"
+                   Disabled="@IsSubmitting">
+            Save
+        </MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -33,9 +43,13 @@
 
     [Inject] ICatalogApiClient CategoryApiClient { get; set; } = null!;
 
-    private bool IsSubmitting = false;
+    [Parameter] public CategoryUpsertDto Category { get; set; } = null!;
+
+    [Parameter]
+    public Func<CategoryUpsertDto, Task> OnSave { get; set; } = default!;
+
     private MudForm form = null!;
-    private CreateCategoryDto NewCategory { get; set; } = new (){ Name = string.Empty };
+    private bool IsSubmitting = false;
     private string ServerError = "";
 
     private async Task SubmitForm()
@@ -43,8 +57,10 @@
         ServerError = "";
 
         await form.Validate();
-        if (form.IsValid)
-            await SaveAsync();
+        if (!form.IsValid)
+            return;
+
+        await SaveAsync();
     }
 
     private async Task SaveAsync()
@@ -53,14 +69,18 @@
 
         try
         {
-            await CategoryApiClient.CreateCategoryAsync(NewCategory, CancellationToken.None);
-            MudDialog.Close(DialogResult.Ok(NewCategory));
+            if (OnSave is not null)
+            {
+                await OnSave(Category);
+            }
+
+            MudDialog.Close(DialogResult.Ok(Category));
         }
         catch (ApiException ex)
         {
-            ServerError = ex.FriendlyMessage!;
+            ServerError = ex.FriendlyMessage ?? "An API error occurred.";
         }
-        catch (Exception)
+        catch
         {
             ServerError = "An unexpected error occurred. Please try again.";
         }

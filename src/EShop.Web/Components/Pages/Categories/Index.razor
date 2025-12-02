@@ -1,7 +1,4 @@
 ﻿@page "/categories"
-@using EShop.Shared.Representations
-@using EShop.Shared.Representations.Category
-@using EShop.Web.Clients
 @using EShop.Web.Components.Pages.Categories
 @using EShop.Web.Exceptions
 
@@ -75,11 +72,23 @@
         };
     }
 
+    private DialogOptions _options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+
     private async Task OpenCreateDialogAsync()
     {
-        var parameters = new DialogParameters { };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-        var dialog = await DialogService.ShowAsync<CreateCategoryDialog>("Add Category", parameters, options);
+        var createCategoryDto = new CreateCategoryDto { Name = string.Empty };
+
+        var parameters = new DialogParameters
+        {
+            ["Category"] = createCategoryDto,
+            ["OnSave"] = new Func<CategoryUpsertDto, Task>(async dto =>
+            {
+                var createDto = (CreateCategoryDto)dto;
+                await CategoryApiClient.CreateCategoryAsync(createDto, CancellationToken.None);
+            })
+        };
+
+        var dialog = await DialogService.ShowAsync<CategoryUpsertDialog>("Add Category", parameters, _options);
         var result = await dialog.Result;
 
         if (result!.Canceled != true)
@@ -93,11 +102,20 @@
         }
     }
 
-    private async Task OpenEditDialogAsync(CategoryDto item)
+    private async Task OpenEditDialogAsync(CategoryDto existing)
     {
-        var parameters = new DialogParameters { ["CategoryParam"] = item };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-        var dialog = await DialogService.ShowAsync<EditCategoryDialog>("Edit Category", parameters, options);
+        var updateCategoryDto = new UpdateCategoryDto { Name = existing.Name };
+
+        var parameters = new DialogParameters
+        {
+            ["Category"] = updateCategoryDto,
+            ["OnSave"] = new Func<CategoryUpsertDto, Task>(async dto =>
+            {
+                var updateDto = (UpdateCategoryDto)dto;
+                await CategoryApiClient.UpdateCategoryAsync(existing.Id, updateDto, CancellationToken.None);
+            })
+        };
+        var dialog = await DialogService.ShowAsync<CategoryUpsertDialog>("Edit category", parameters, _options);
         var result = await dialog.Result;
 
         if (result!.Canceled != true)
@@ -113,10 +131,7 @@
     private async Task OpenDeleteDialogAsync(CategoryDto item)
     {
         var parameters = new DialogParameters { ["CategoryParam"] = item };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-
-        var dialog = await DialogService.ShowAsync<DeleteCategoryDialog>($"Delete Category",
-            parameters, options);
+        var dialog = await DialogService.ShowAsync<DeleteCategoryDialog>($"Delete Category", parameters, _options);
         var result = await dialog.Result;
 
         if (result!.Canceled != true)
@@ -126,4 +141,5 @@
                 await _grid.ReloadAsync();
         }
     }
+
 }

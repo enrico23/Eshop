@@ -1,9 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace EShop.Shared.Representations.Category;
 
-namespace EShop.Shared.Representations.Category;
-
-public class UpdateCategoryDto
+public sealed class UpdateCategoryDto : CategoryUpsertDto
 {
-    [Required]
-    public required string Name { get; set; }
 }

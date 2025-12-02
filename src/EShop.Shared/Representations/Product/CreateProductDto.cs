@@ -1,5 +1,5 @@
 ﻿namespace EShop.Shared.Representations.Product;
 
-public class CreateProductDto : ProductUpsertDto
+public sealed class CreateProductDto : ProductUpsertDto
 {
 }
