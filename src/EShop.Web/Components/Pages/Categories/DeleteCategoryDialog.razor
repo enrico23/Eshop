@@ -53,7 +53,7 @@
 
         try
         {
-            await CategoryApiClient.DeleteAsync(categoryId, CancellationToken.None);
+            await CategoryApiClient.DeleteCategoryAsync(categoryId, CancellationToken.None);
             MudDialog.Close(DialogResult.Ok(true));
         }
         catch (ApiException ex)

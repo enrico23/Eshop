@@ -66,7 +66,7 @@
 
         try
         {
-            await CategoryApiClient.UpdateAsync(categoryId, EditModel, CancellationToken.None);
+            await CategoryApiClient.UpdateCategoryAsync(categoryId, EditModel, CancellationToken.None);
             MudDialog.Close(DialogResult.Ok(EditModel));
         }
         catch (ApiException ex)
