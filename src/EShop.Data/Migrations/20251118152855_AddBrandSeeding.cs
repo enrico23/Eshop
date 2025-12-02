@@ -12,34 +12,13 @@ namespace EShop.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.InsertData(
-                table: "Brands",
-                columns: new[] { "Id", "Name" },
-                values: new object[,]
-                {
-                    { 1, "Microsoft" },
-                    { 2, "Apple" },
-                    { 3, "Samsung" }
-                });
+            // Removed Brand seeding — no operation required.
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DeleteData(
-                table: "Brands",
-                keyColumn: "Id",
-                keyValue: 1);
-
-            migrationBuilder.DeleteData(
-                table: "Brands",
-                keyColumn: "Id",
-                keyValue: 2);
-
-            migrationBuilder.DeleteData(
-                table: "Brands",
-                keyColumn: "Id",
-                keyValue: 3);
+            // No rollback needed.
         }
     }
 }

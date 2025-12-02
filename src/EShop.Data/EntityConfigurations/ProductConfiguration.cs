@@ -21,7 +21,5 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.Stock).HasDefaultValue(0);
 
         builder.HasOne(p => p.Category).WithMany(c => c.Products).HasForeignKey(p => p.CategoryId);
-
-        builder.HasOne(p => p.Brand).WithMany(c => c.Products).HasForeignKey(p => p.BrandId);
     }
 }

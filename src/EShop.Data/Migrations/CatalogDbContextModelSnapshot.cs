@@ -21,41 +21,6 @@ namespace EShop.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("EShop.Domain.Brand", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Brands", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Microsoft"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Apple"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Samsung"
-                        });
-                });
-
             modelBuilder.Entity("EShop.Domain.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -99,9 +64,6 @@ namespace EShop.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BrandId")
-                        .HasColumnType("int");
-
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
@@ -125,8 +87,6 @@ namespace EShop.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BrandId");
-
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Products", (string)null);
@@ -134,26 +94,13 @@ namespace EShop.Data.Migrations
 
             modelBuilder.Entity("EShop.Domain.Product", b =>
                 {
-                    b.HasOne("EShop.Domain.Brand", "Brand")
-                        .WithMany("Products")
-                        .HasForeignKey("BrandId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("EShop.Domain.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Brand");
-
                     b.Navigation("Category");
-                });
-
-            modelBuilder.Entity("EShop.Domain.Brand", b =>
-                {
-                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("EShop.Domain.Category", b =>
