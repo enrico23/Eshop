@@ -1,6 +1,8 @@
 ﻿@page "/products"
 @using EShop.Web.Components.Pages.Categories
 @using EShop.Web.Exceptions
+@using EShop.Web.Components.Pages.Shared
+@inherits BaseCrudPage
 
 <MudPaper Class="pa-4">
     <GenericGrid TItem="ProductDto"
@@ -24,10 +26,6 @@
 </MudPaper>
 
 @code {
-    [Inject] protected ICatalogApiClient CategoryApiClient { get; set; } = null!;
-    [Inject] protected IDialogService DialogService { get; set; } = null!;
-    [Inject] protected ISnackbar Snackbar { get; set; } = null!;
-
     private GenericGrid<ProductDto>? _grid;
 
     private async Task<GridData<ProductDto>> LoadProductAsync(GridState<ProductDto> state, string? searchText)
@@ -72,8 +70,6 @@
         };
     }
 
-    private DialogOptions _options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-
     private async Task OpenCreateDialogAsync()
     {
         var createProductDto = new CreateProductDto
@@ -85,28 +81,22 @@
             CategoryId = null
         };
 
+        var categories = await CategoryApiClient.GetAllCategoriesAsync();
+
         var parameters = new DialogParameters
         {
             ["Product"] = createProductDto,
-            ["OnSave"] = new Func<ProductUpsertDto, Task>(async dto =>
-            {
-                var createDto = (CreateProductDto)dto;
-                await CategoryApiClient.CreateProductAsync(createDto, CancellationToken.None);
-            })
+            ["Categories"] = categories
         };
 
-        var dialog = await DialogService.ShowAsync<ProductUpsertDialog>("Create product", parameters, _options);
-        var result = await dialog.Result;
+        var saved = await ConfirmUpsertAsync<ProductUpsertDialog, CreateProductDto>(
+            title: "Create product",
+            parameters: parameters,
+            saveAction: model => CategoryApiClient.CreateProductAsync(model, CancellationToken.None),
+            successMessage: $"Product '{createProductDto.Name}' successfully created");
 
-        if (result!.Canceled != true)
-        {
-            var created = (CreateProductDto)result.Data!;
-            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
-            Snackbar.Add($"Product '{created.Name}' succesfully created", Severity.Success);
-
-            if (_grid is not null)
-                await _grid.ReloadAsync();
-        }
+        if (saved && _grid is not null)
+            await _grid.ReloadAsync();
     }
 
     private async Task OpenEditDialogAsync(ProductDto existing)
@@ -120,39 +110,34 @@
             CategoryId = existing.CategoryId
         };
 
+        var categories = await CategoryApiClient.GetAllCategoriesAsync();
+
         var parameters = new DialogParameters
             {
                 ["Product"] = updateProductDto,
-                ["OnSave"] = new Func<ProductUpsertDto, Task>(async dto =>
-                {
-                    var updateDto = (UpdateProductDto)dto;
-                    await CategoryApiClient.UpdateProductAsync(existing.Id, updateDto, CancellationToken.None);
-                })
+                ["Categories"] = categories
             };
-        var dialog = await DialogService.ShowAsync<ProductUpsertDialog>("Edit product", parameters, _options);
-        var result = await dialog.Result;
 
-        if (result!.Canceled != true)
-        {
-            var updated = (UpdateProductDto)result.Data!;
-            Snackbar.Add($"Product '{updated.Name}' succesfully updated", Severity.Info);
+        var saved = await ConfirmUpsertAsync<ProductUpsertDialog, UpdateProductDto>(
+           title: "Edit product",
+           parameters: parameters,
+           saveAction: model => CategoryApiClient.UpdateProductAsync(existing.Id, model, CancellationToken.None),
+           successMessage: $"Product '{updateProductDto.Name}' successfully updated");
 
-            if (_grid is not null)
-                await _grid.ReloadAsync();
-        }
+        if (saved && _grid is not null)
+            await _grid!.ReloadAsync();
     }
 
     private async Task OpenDeleteDialogAsync(ProductDto item)
     {
-        var parameters = new DialogParameters { ["ProductParam"] = item };
-        var dialog = await DialogService.ShowAsync<DeleteProductDialog>($"Delete Product", parameters, _options);
-        var result = await dialog.Result;
+        var deleted = await ConfirmDeleteAsync<ProductDto>(
+            item,
+            title: "Delete Product",
+            message: $"Are you sure you want to delete product '{item.Name}'?",
+            deleteAction: action => CategoryApiClient.DeleteProductAsync(item.Id)
+        );
 
-        if (result!.Canceled != true)
-        {
-            Snackbar.Add($"Product '{item.Name}' succesfully deleted!", Severity.Success);
-            if (_grid is not null)
-                await _grid.ReloadAsync();
-        }
+        if (deleted && _grid is not null)
+            await _grid.ReloadAsync();
     }
 }

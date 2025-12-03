@@ -1,6 +1,4 @@
-﻿@using EShop.Shared.Representations.Category
-@using EShop.Shared.Representations.Product
-@using EShop.Web.Clients
+﻿@using EShop.Web.Clients
 @using EShop.Web.Exceptions
 @using MudBlazor
 
@@ -41,65 +39,29 @@
 @code {
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
 
-    [Inject] ICatalogApiClient CategoryApiClient { get; set; } = null!;
+    [Parameter] public ProductUpsertDto Product { get; set; } = null!;
 
-    [Parameter]
-    public ProductUpsertDto Product { get; set; } = null!;
-
-    [Parameter]
-    public Func<ProductUpsertDto, Task> OnSave { get; set; } = default!;
+    [Parameter] public List<CategoryDto> Categories { get; set; } = new();
 
     private MudForm form = null!;
     private bool IsSubmitting = false;
     private string ServerError = "";
 
-    private List<CategoryDto> Categories { get; set; } = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        Categories = await CategoryApiClient.GetAllCategoriesAsync();
-    }
-
     private async Task SubmitForm()
     {
         ServerError = "";
+        IsSubmitting = true;
 
         await form.Validate();
         if (!form.IsValid)
-            return;
-
-        await SaveAsync();
-    }
-
-    private async Task SaveAsync()
-    {
-        IsSubmitting = true;
-
-        try
-        {
-            if (OnSave is not null)
-            {
-                await OnSave(Product);
-            }
-
-            MudDialog.Close(DialogResult.Ok(Product));
-        }
-        catch (ApiException ex)
-        {
-            ServerError = ex.FriendlyMessage ?? "An API error occurred.";
-        }
-        catch
-        {
-            ServerError = "An unexpected error occurred. Please try again.";
-        }
-        finally
         {
             IsSubmitting = false;
+            return;
         }
+
+        MudDialog.Close(DialogResult.Ok(Product));
+        IsSubmitting = false;
     }
 
-    private void Cancel()
-    {
-        MudDialog.Cancel();
-    }
+    private void Cancel() => MudDialog.Cancel();
 }
