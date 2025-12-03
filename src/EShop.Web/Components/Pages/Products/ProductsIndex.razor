@@ -16,11 +16,26 @@
                  OnEdit="OpenEditDialogAsync"
                  OnDelete="OpenDeleteDialogAsync">
         <Columns>
-            <PropertyColumn 
-                T="ProductDto"
+            <PropertyColumn T="ProductDto"
                 TProperty="string"
                 Property="x => x.Name" 
                 Sortable="true" />
+
+            <PropertyColumn T="ProductDto"
+                            TProperty="decimal"
+                            Property="x => x.Price"
+                            Sortable="true" />
+
+            <PropertyColumn T="ProductDto"
+                            TProperty="int"
+                            Property="x => x.Stock"
+                            Sortable="true" />
+
+            <PropertyColumn T="ProductDto"
+                            TProperty="string"
+                            Property="x => x.CategoryName"
+                            Title="Category"
+                            Sortable="true" />
         </Columns>
     </GenericGrid>
 </MudPaper>

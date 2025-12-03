@@ -2,6 +2,7 @@
 using EShop.Web.Exceptions;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using System.Net;
 
 namespace EShop.Web.Components.Pages.Shared;
 
@@ -41,6 +42,10 @@ public abstract class BaseCrudPage : ComponentBase
 
                 return true;
             }
+            catch (ApiException ex) when (ex.StatusCode is HttpStatusCode.Conflict)
+            {
+                Snackbar.Add(ex.Message!, Severity.Error);
+            }
             catch (ApiException ex)
             {
                 Snackbar.Add(ex.FriendlyMessage!, Severity.Error);
@@ -72,6 +77,10 @@ public abstract class BaseCrudPage : ComponentBase
                 await saveAction(model);
                 Snackbar.Add(successMessage, Severity.Success);
                 return true;
+            }
+            catch (ApiException ex) when (ex.StatusCode is HttpStatusCode.Conflict)
+            {
+                Snackbar.Add(ex.Message!, Severity.Error);
             }
             catch (ApiException ex)
             {

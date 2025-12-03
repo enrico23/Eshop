@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-// Adds services for using Problem Details format
+builder.Services.AddExceptionHandler<DomainExceptionHandler>();
 builder.Services.AddProblemDetails(options =>
 {
     options.CustomizeProblemDetails = context =>
@@ -43,16 +43,7 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 // Converts unhandled exceptions into Problem Details responses
-app.UseExceptionHandler(
-    new ExceptionHandlerOptions
-{
-    StatusCodeSelector = ex => ex switch
-    {
-        ArgumentException => StatusCodes.Status400BadRequest,
-        DomainException => StatusCodes.Status409Conflict,
-        _ => StatusCodes.Status500InternalServerError
-    }
-});
+app.UseExceptionHandler();
 // Returns the Problem Details response for (empty) non-successful responses
 app.UseStatusCodePages();
 
