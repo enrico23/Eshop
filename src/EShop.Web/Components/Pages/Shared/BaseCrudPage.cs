@@ -1,4 +1,5 @@
 ﻿using EShop.Web.Clients;
+using EShop.Web.Exceptions;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 
@@ -32,11 +33,22 @@ public abstract class BaseCrudPage : ComponentBase
 
         if (result is { Canceled: false })
         {
-            await deleteAction(entity);
+            try
+            {
+                await deleteAction(entity);
 
-            Snackbar.Add($"{title.Replace("Delete", "").Trim()} deleted successfully!", Severity.Success);
+                Snackbar.Add($"{title.Replace("Delete", "").Trim()} deleted successfully!", Severity.Success);
 
-            return true;
+                return true;
+            }
+            catch (ApiException ex)
+            {
+                Snackbar.Add(ex.FriendlyMessage!, Severity.Error);
+            }
+            catch (Exception)
+            {
+                Snackbar.Add("Unexpected error.", Severity.Error);
+            }
         }
 
         return false;
@@ -55,11 +67,23 @@ public abstract class BaseCrudPage : ComponentBase
 
         if (result is { Canceled: false, Data: TModel model })
         {
-            await saveAction(model);
-            Snackbar.Add(successMessage, Severity.Success);
-            return true;
+            try
+            {
+                await saveAction(model);
+                Snackbar.Add(successMessage, Severity.Success);
+                return true;
+            }
+            catch (ApiException ex)
+            {
+                Snackbar.Add(ex.FriendlyMessage!, Severity.Error);
+            }
+            catch (Exception)
+            {
+                Snackbar.Add("Unexpected error.", Severity.Error);
+            }
         }
 
         return false;
     }
 }
+
