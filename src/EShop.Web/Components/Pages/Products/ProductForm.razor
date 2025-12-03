@@ -37,7 +37,7 @@
         {
             <MudSelect Label="Category"
                        Placeholder="Select..."
-                       T="int?" Required="true"
+                       T="Guid?" Required="true"
                        @bind-Value="Product.CategoryId"
                        For="@(() => Product.CategoryId)"
                        FullWidth="true"
@@ -45,7 +45,7 @@
 
                 @foreach (var category in Categories)
                 {
-                    <MudSelectItem T="int?" Value="category.Id">@category.Name</MudSelectItem>
+                    <MudSelectItem T="Guid?" Value="category.Id">@category.Name</MudSelectItem>
                 }
             </MudSelect>
         }

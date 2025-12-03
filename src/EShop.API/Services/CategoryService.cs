@@ -62,7 +62,7 @@ public class CategoryService : ICategoryService
             .ToListAsync(ct);
     }
 
-    public async Task<bool> ExistsAsync(int id, CancellationToken ct = default)
+    public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default)
     {
         return await _context.Categories
             .AsNoTracking()
@@ -70,7 +70,7 @@ public class CategoryService : ICategoryService
     }
 
 
-    public async Task<CategoryDto?> GetByIdAsync(int id, CancellationToken ct = default)
+    public async Task<CategoryDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await _context.Categories
              .AsNoTracking()
@@ -79,7 +79,7 @@ public class CategoryService : ICategoryService
              .FirstOrDefaultAsync(ct);
     }
 
-    public async Task<bool> UpdateAsync(int id, UpdateCategoryDto updateCategoryDto, CancellationToken ct)
+    public async Task<bool> UpdateAsync(Guid id, UpdateCategoryDto updateCategoryDto, CancellationToken ct)
     {
         if (updateCategoryDto is null)
             throw new ArgumentNullException(nameof(updateCategoryDto));
@@ -112,7 +112,7 @@ public class CategoryService : ICategoryService
         return category.Adapt<CategoryDto>();
     }
 
-    public async Task<bool> DeleteAsync(int id, CancellationToken ct)
+    public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)
     {
         var entity = await _context.Categories.FirstOrDefaultAsync(b => b.Id == id, ct);
 

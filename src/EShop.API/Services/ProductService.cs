@@ -54,14 +54,14 @@ public class ProductService : IProductService
         return new Shared.Representations.PagedResult<ProductDto>(items, page, pageSize, total);
     }
 
-    public async Task<bool> ExistsAsync(int id, CancellationToken ct = default)
+    public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default)
     {
         return await _context.Products
             .AsNoTracking()
             .AnyAsync(b => b.Id == id, ct);
     }
 
-    public async Task<ProductDto?> GetByIdAsync(int id, CancellationToken ct)
+    public async Task<ProductDto?> GetByIdAsync(Guid id, CancellationToken ct)
     {
         return await _context.Products
             .AsNoTracking()
@@ -88,7 +88,7 @@ public class ProductService : IProductService
         return product.Adapt<ProductDto>();
     }
 
-    public async Task<bool> UpdateAsync(int id, UpdateProductDto updateProductDto, CancellationToken ct)
+    public async Task<bool> UpdateAsync(Guid id, UpdateProductDto updateProductDto, CancellationToken ct)
     {
         if (updateProductDto is null)
             throw new ArgumentNullException(nameof(updateProductDto));
@@ -103,7 +103,7 @@ public class ProductService : IProductService
         return true;
     }
 
-    public async Task<bool> DeleteAsync(int id, CancellationToken ct)
+    public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)
     {
         var entity = await _context.Products.FirstOrDefaultAsync(b => b.Id == id, ct);
 

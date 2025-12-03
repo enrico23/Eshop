@@ -50,10 +50,10 @@ public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> l
     public Task CreateCategoryAsync(CreateCategoryDto model, CancellationToken ct = default) =>
         SendAsync(() => httpClient.PostAsJsonAsync(CategoriesEndpointsBasePath, model, ct), ct);
 
-    public Task UpdateCategoryAsync(int id, UpdateCategoryDto model, CancellationToken ct = default) =>
+    public Task UpdateCategoryAsync(Guid id, UpdateCategoryDto model, CancellationToken ct = default) =>
         SendAsync(() => httpClient.PutAsJsonAsync($"{CategoriesEndpointsBasePath}/{id}", model, ct), ct);
 
-    public Task DeleteCategoryAsync(int id, CancellationToken ct = default) =>
+    public Task DeleteCategoryAsync(Guid id, CancellationToken ct = default) =>
         SendAsync(() => httpClient.DeleteAsync($"{CategoriesEndpointsBasePath}/{id}", ct), ct);
 
     #endregion
@@ -101,10 +101,10 @@ public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> l
     public Task CreateProductAsync(CreateProductDto model, CancellationToken ct = default) =>
         SendAsync(() => httpClient.PostAsJsonAsync(ProductsEndpointsBasePath, model, ct), ct);
 
-    public Task UpdateProductAsync(int id, UpdateProductDto model, CancellationToken ct = default) =>
+    public Task UpdateProductAsync(Guid id, UpdateProductDto model, CancellationToken ct = default) =>
         SendAsync(() => httpClient.PutAsJsonAsync($"{ProductsEndpointsBasePath}/{id}", model, ct), ct);
 
-    public Task DeleteProductAsync(int id, CancellationToken ct = default) =>
+    public Task DeleteProductAsync(Guid id, CancellationToken ct = default) =>
         SendAsync(() => httpClient.DeleteAsync($"{ProductsEndpointsBasePath}/{id}", ct), ct);
 
     #endregion
