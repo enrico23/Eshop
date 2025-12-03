@@ -21,6 +21,19 @@ EShop highlights professional-grade software engineering using:
 - Orchestrated services via .NET Aspire
 - Future expansion: checkout, orders, inventory
 
+## 🧭 Project Structure
+
+- `docs/` — Developer guides and API references (see `docs/quickstart.md` for local setup).
+- `src/EShop.AppHost/` — Aspire orchestration for API, frontend, database, and supporting services.
+- `src/EShop.API/` — ASP.NET Core catalog API with controllers, services, and mapping profiles.
+- `src/EShop.Web/` — Blazor Server frontend components, assets, and HTTP clients.
+- `src/EShop.Data/` — EF Core DbContext, entity configurations, and migrations.
+- `src/EShop.Domain/` — Domain entities and business logic abstractions.
+- `src/EShop.Shared/` — Shared representations and helpers consumed across projects.
+- `src/EShop.ServiceDefaults/` — Cross-cutting host defaults (observability, health checks, etc.).
+- `src/EShop.MigrationService/` — Service to apply database migrations during orchestration.
+- `src/EShop.sln` — .NET solution tying together all projects.
+
 ## 🏁 Quick Start
 
 EShop uses .NET Aspire to orchestrate backend, frontend, and database with a single command.
