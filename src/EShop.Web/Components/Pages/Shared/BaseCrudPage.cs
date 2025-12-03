@@ -10,7 +10,7 @@ public abstract class BaseCrudPage : ComponentBase
     [Inject] protected IDialogService DialogService { get; set; } = null!;
     [Inject] protected ISnackbar Snackbar { get; set; } = null!;
 
-    protected DialogOptions DialogOptions = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+    private DialogOptions _options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
 
     protected async Task<bool> ConfirmDeleteAsync<TEntity>(
        TEntity entity,
@@ -26,7 +26,7 @@ public abstract class BaseCrudPage : ComponentBase
         };
 
         var dialog = await DialogService.ShowAsync<DeleteConfirmationDialog>(
-            title, parameters, DialogOptions);
+            title, parameters, _options);
 
         var result = await dialog.Result;
 
@@ -50,7 +50,7 @@ public abstract class BaseCrudPage : ComponentBase
         where TDialog : ComponentBase
         where TModel : class
     {
-        var dialog = await DialogService.ShowAsync<TDialog>(title, parameters, DialogOptions);
+        var dialog = await DialogService.ShowAsync<TDialog>(title, parameters, _options);
         var result = await dialog.Result;
 
         if (result is { Canceled: false, Data: TModel model })
