@@ -1,0 +1,77 @@
+﻿@using EShop.Shared.Representations.Category
+@using EShop.Shared.Representations.Product
+@using EShop.Web.Clients
+@using EShop.Web.Exceptions
+@using MudBlazor
+
+<MudDialog>
+    <DialogContent>
+
+        <MudForm @ref="form">
+            <MudGrid GutterSize="2">
+
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="Category.Name"
+                                  Label="Name"
+                                  Required="true"
+                                  For="@(() => Category.Name)" />
+                </MudItem>
+
+            </MudGrid>
+        </MudForm>
+
+        @if (!string.IsNullOrEmpty(ServerError))
+        {
+            <MudSpacer />
+            <MudText Color="Color.Error">@ServerError</MudText>
+        }
+
+        @if (IsSubmitting)
+        {
+            <MudSpacer />
+            <MudProgressCircular 
+                Color="Color.Primary"
+                Size="Size.Medium"
+                Indeterminate="true" />
+        }
+
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary"
+                   OnClick="SubmitForm"
+                   Disabled="@IsSubmitting">
+            Save
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] public CategoryUpsertDto Category { get; set; } = null!;
+
+    private MudForm form = null!;
+    private bool IsSubmitting = false;
+    private string ServerError = "";
+
+    private async Task SubmitForm()
+    {
+        ServerError = "";
+        IsSubmitting = true;
+
+        await form.Validate();
+        if (!form.IsValid)
+        {
+            IsSubmitting = false;
+            return;
+        }
+        
+        MudDialog.Close(DialogResult.Ok(Category));
+        IsSubmitting = false;
+       
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

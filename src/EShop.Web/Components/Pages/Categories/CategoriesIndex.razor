@@ -1,9 +1,8 @@
 ﻿@page "/categories"
-@using EShop.Shared.Representations
-@using EShop.Shared.Representations.Category
-@using EShop.Web.Clients
 @using EShop.Web.Components.Pages.Categories
+@using EShop.Web.Components.Pages.Shared
 @using EShop.Web.Exceptions
+@inherits BaseCrudPage
 
 <MudPaper Class="pa-4">
     <GenericGrid TItem="CategoryDto"
@@ -27,10 +26,6 @@
 </MudPaper>
 
 @code {
-    [Inject] protected ICatalogApiClient CategoryApiClient { get; set; } = null!;
-    [Inject] protected IDialogService DialogService { get; set; } = null!;
-    [Inject] protected ISnackbar Snackbar { get; set; } = null!;
-
     private GenericGrid<CategoryDto>? _grid;
 
     private async Task<GridData<CategoryDto>> LoadCategoryAsync(GridState<CategoryDto> state, string? searchText)
@@ -77,53 +72,53 @@
 
     private async Task OpenCreateDialogAsync()
     {
-        var parameters = new DialogParameters { };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-        var dialog = await DialogService.ShowAsync<CreateCategoryDialog>("Add Category", parameters, options);
-        var result = await dialog.Result;
+        var createCategoryDto = new CreateCategoryDto { Name = string.Empty };
 
-        if (result!.Canceled != true)
+        var parameters = new DialogParameters
         {
-            var created = (CreateCategoryDto)result.Data!;
-            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
-            Snackbar.Add($"Category '{created.Name}' succesfully created", Severity.Success);
+            ["Category"] = createCategoryDto
+        };
 
-            if (_grid is not null)
-                await _grid.ReloadAsync();
-        }
+        var saved = await ConfirmUpsertAsync<CategoryUpsertDialog, CreateCategoryDto>(
+           title: "Create Category",
+           parameters: parameters,
+           saveAction: model => CategoryApiClient.CreateCategoryAsync(model, CancellationToken.None),
+           successMessage: $"Category '{createCategoryDto.Name}' successfully created");
+
+
+        if (saved && _grid is not null)
+            await _grid.ReloadAsync();
     }
 
-    private async Task OpenEditDialogAsync(CategoryDto item)
+    private async Task OpenEditDialogAsync(CategoryDto existing)
     {
-        var parameters = new DialogParameters { ["CategoryParam"] = item };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-        var dialog = await DialogService.ShowAsync<EditCategoryDialog>("Edit Category", parameters, options);
-        var result = await dialog.Result;
+        var updateCategoryDto = new UpdateCategoryDto { Name = existing.Name };
 
-        if (result!.Canceled != true)
+        var parameters = new DialogParameters
         {
-            var updated = (UpdateCategoryDto)result.Data!;
-            Snackbar.Add($"Category '{updated.Name}' succesfully updated", Severity.Info);
+            ["Category"] = updateCategoryDto
+        };
+        var saved = await ConfirmUpsertAsync<CategoryUpsertDialog, UpdateCategoryDto>(
+           title: "Update Category",
+           parameters: parameters,
+           saveAction: model => CategoryApiClient.UpdateCategoryAsync(existing.Id, model, CancellationToken.None),
+           successMessage: $"Category '{updateCategoryDto.Name}' successfully created");
 
-            if (_grid is not null)
-                await _grid.ReloadAsync();
-        }
+        if (saved && _grid is not null)
+            await _grid.ReloadAsync();
+
     }
 
     private async Task OpenDeleteDialogAsync(CategoryDto item)
     {
-        var parameters = new DialogParameters { ["CategoryParam"] = item };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var deleted = await ConfirmDeleteAsync<CategoryDto>(
+            item,
+            title: "Delete category",
+            message: $"Are you sure you want to delete category '{item.Name}'?",
+            deleteAction: action => CategoryApiClient.DeleteCategoryAsync(item.Id)
+        );
 
-        var dialog = await DialogService.ShowAsync<DeleteCategoryDialog>($"Delete Category",
-            parameters, options);
-        var result = await dialog.Result;
-
-        if (result!.Canceled != true)
-        {
-            Snackbar.Add($"Category '{item.Name}' succesfully deleted!", Severity.Success);
-            if (_grid is not null)
-                await _grid.ReloadAsync();
-        }
+        if (deleted && _grid is not null)
+                 await _grid.ReloadAsync();
     }
 }
