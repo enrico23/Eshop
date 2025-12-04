@@ -75,12 +75,19 @@ public class ProductService : IProductService
         if (createProductDto is null)
             throw new ArgumentNullException(nameof(createProductDto));
 
-        var alreadyExists = await _context.Products.AnyAsync(b => b.Name.ToLower() == createProductDto.Name.ToLower(), ct);
-        if (alreadyExists)
-            throw new DomainException($"A brand with name '{createProductDto.Name}' already exists.");
+        var name = createProductDto.Name.Trim();
+        var sku = createProductDto.Sku.Trim();
 
-        var name = createProductDto.Name?.Trim();
+        if (await _context.Products.AnyAsync(b => b.Name.ToLower() == name.ToLower(), ct))
+            throw new DomainException($"A product with name '{name}' already exists.");
+
+        if (await _context.Products.AnyAsync(b => b.Sku.ToLower() == sku.ToLower(), ct))
+            throw new DomainException($"A product with SKU '{sku}' already exists.");
+
         var product = _mapper.From(createProductDto).AdaptToType<Product>();
+        product.Name = name;
+        product.Sku = sku;
+        product.Description = createProductDto.Description?.Trim();
 
         await _context.Products.AddAsync(product, ct);
         await _context.SaveChangesAsync(ct);
@@ -97,7 +104,19 @@ public class ProductService : IProductService
         if (entity is null)
             return false;
 
+        var name = updateProductDto.Name.Trim();
+        var sku = updateProductDto.Sku.Trim();
+
+        if (await _context.Products.AnyAsync(b => b.Name.ToLower() == name.ToLower() && b.Id != id, ct))
+            throw new DomainException($"A product with name '{name}' already exists.");
+
+        if (await _context.Products.AnyAsync(b => b.Sku.ToLower() == sku.ToLower() && b.Id != id, ct))
+            throw new DomainException($"A product with SKU '{sku}' already exists.");
+
         updateProductDto.Adapt(entity);
+        entity.Name = name;
+        entity.Sku = sku;
+        entity.Description = updateProductDto.Description?.Trim();
 
         await _context.SaveChangesAsync(ct);
         return true;

@@ -13,11 +13,16 @@ public abstract class ProductUpsertDto
     public string Description { get; set; } = null!;
 
     [Required]
+    [StringLength(50)]
+    [RegularExpression(@"^[A-Za-z0-9_-]+$", ErrorMessage = "SKU can only contain letters, numbers, hyphens, and underscores.")]
+    public string Sku { get; set; } = null!;
+
+    [Required]
     [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0.")]
     public decimal Price { get; set; }
 
     [Required]
-    [Range(1, int.MaxValue, ErrorMessage = "Stock must be greater than 0.")]
+    [Range(0, int.MaxValue, ErrorMessage = "Stock cannot be negative.")]
     public int Stock { get; set; }
 
     [Required(ErrorMessage = "Please select a category.")]
