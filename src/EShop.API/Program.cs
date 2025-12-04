@@ -43,7 +43,15 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 // Converts unhandled exceptions into Problem Details responses
-app.UseExceptionHandler();
+app.UseExceptionHandler(
+    new ExceptionHandlerOptions
+    {
+        StatusCodeSelector = ex => ex switch
+        {
+            ArgumentException => StatusCodes.Status400BadRequest,
+            _ => StatusCodes.Status500InternalServerError
+        }
+    });
 // Returns the Problem Details response for (empty) non-successful responses
 app.UseStatusCodePages();
 
