@@ -27,6 +27,7 @@ public class ApiException : Exception
             HttpStatusCode.BadRequest => "Invalid request",
             HttpStatusCode.Unauthorized => "Unauthorized",
             HttpStatusCode.Forbidden => "Forbidden",
+            HttpStatusCode.Conflict => "Conflict",
             _ => "An unexpected error occurred.Please try again."
         };
     }

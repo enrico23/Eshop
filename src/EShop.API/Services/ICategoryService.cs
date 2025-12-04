@@ -10,13 +10,13 @@ public interface ICategoryService
 
     Task<ICollection<CategoryDto>> GetAllAsync(CancellationToken ct);
 
-    Task<bool> ExistsAsync(int id, CancellationToken ct = default);
+    Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
 
-    Task<CategoryDto?> GetByIdAsync(int id, CancellationToken ct = default);
+    Task<CategoryDto?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
-    Task<bool> UpdateAsync(int id, UpdateCategoryDto updateCategoryDto, CancellationToken ct);
+    Task<bool> UpdateAsync(Guid id, UpdateCategoryDto updateCategoryDto, CancellationToken ct);
 
     Task<CategoryDto> AddAsync(CreateCategoryDto createCategoryDto, CancellationToken ct);
 
-    Task<bool> DeleteAsync(int id, CancellationToken ct);
+    Task<bool> DeleteAsync(Guid id, CancellationToken ct);
 }

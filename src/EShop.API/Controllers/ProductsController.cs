@@ -30,12 +30,12 @@ public class ProductsController : ControllerBase
         return Ok(results);
     }
 
-    // GET: api/products/5
+    // GET: api/products/{id:guid}
     // <snippet_GetByID>
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProductDto), StatusCodes.Status200OK)]
-    public async Task<ActionResult<ProductDto>> GetByIdAsync(int id, CancellationToken ct = default)
+    public async Task<ActionResult<ProductDto>> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         var product = await _productService.GetByIdAsync(id, ct);
         if (product is null)
@@ -61,13 +61,13 @@ public class ProductsController : ControllerBase
     }
     // </snippet_Create>
 
-    // PUT: api/products/5
+    // PUT: api/products/{id:guid}
     // <snippet_Update>
-    [HttpPut("{id:int}")]
+    [HttpPut("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> PutAsync(int id, UpdateProductDto updateProductDto, CancellationToken ct = default)
+    public async Task<IActionResult> PutAsync(Guid id, UpdateProductDto updateProductDto, CancellationToken ct = default)
     {
         if (updateProductDto is null)
             return BadRequest();
@@ -81,11 +81,11 @@ public class ProductsController : ControllerBase
     }
     // </snippet_Update>
 
-    // DELETE: api/products/5
-    [HttpDelete("{id:int}")]
+    // DELETE: api/products/{id:guid}
+    [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> DeleteAsync(int id, CancellationToken ct = default)
+    public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken ct = default)
     {
         var deleted = await _productService.DeleteAsync(id, ct);
         if (!deleted)

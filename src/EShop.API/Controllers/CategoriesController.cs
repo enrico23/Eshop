@@ -41,12 +41,12 @@ namespace EShop.API.Controllers
         }
         // </snippet_GetAll>
 
-        // GET: api/categories/5
+        // GET: api/categories/{id:guid}
         // <snippet_GetByID>
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK)]
-        public async Task<ActionResult<CategoryDto>> GetByIdAsync(int id, CancellationToken ct = default)
+        public async Task<ActionResult<CategoryDto>> GetByIdAsync(Guid id, CancellationToken ct = default)
         {
             var category = await _categoryService.GetByIdAsync(id, ct);
             if (category is null)
@@ -56,13 +56,13 @@ namespace EShop.API.Controllers
         }
         // </snippet_GetByID>
 
-        // PUT: api/categories/5
+        // PUT: api/categories/{id:guid}
         // <snippet_Update>
-        [HttpPut("{id:int}")]
+        [HttpPut("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PutAsync(int id, UpdateCategoryDto updateCategoryDto, CancellationToken ct = default)
+        public async Task<IActionResult> PutAsync(Guid id, UpdateCategoryDto updateCategoryDto, CancellationToken ct = default)
         {
             if (updateCategoryDto is null)
                 return BadRequest();
@@ -92,11 +92,11 @@ namespace EShop.API.Controllers
         }
         // </snippet_Create>
 
-        // DELETE: api/categories/5
-        [HttpDelete("{id:int}")]
+        // DELETE: api/categories/{id:guid}
+        [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public async Task<IActionResult> DeleteAsync(int id, CancellationToken ct = default)
+        public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken ct = default)
         {
             var deleted = await _categoryService.DeleteAsync(id, ct);
             if (!deleted)

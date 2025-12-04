@@ -1,7 +1,5 @@
 ﻿using EShop.API.Exceptions;
 using EShop.Data;
-using EShop.Domain;
-using EShop.Shared.Representations;
 using EShop.Shared.Representations.Product;
 using Mapster;
 using MapsterMapper;
@@ -54,14 +52,14 @@ public class ProductService : IProductService
         return new Shared.Representations.PagedResult<ProductDto>(items, page, pageSize, total);
     }
 
-    public async Task<bool> ExistsAsync(int id, CancellationToken ct = default)
+    public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default)
     {
         return await _context.Products
             .AsNoTracking()
             .AnyAsync(b => b.Id == id, ct);
     }
 
-    public async Task<ProductDto?> GetByIdAsync(int id, CancellationToken ct)
+    public async Task<ProductDto?> GetByIdAsync(Guid id, CancellationToken ct)
     {
         return await _context.Products
             .AsNoTracking()
@@ -75,12 +73,20 @@ public class ProductService : IProductService
         if (createProductDto is null)
             throw new ArgumentNullException(nameof(createProductDto));
 
-        var alreadyExists = await _context.Products.AnyAsync(b => b.Name.ToLower() == createProductDto.Name.ToLower(), ct);
-        if (alreadyExists)
-            throw new DomainException($"A brand with name '{createProductDto.Name}' already exists.");
+        var productName = createProductDto.Name?.Trim();
+        if (string.IsNullOrWhiteSpace(productName))
+            throw new DomainException("Product name is required.");
 
-        var name = createProductDto.Name?.Trim();
-        var product = _mapper.From(createProductDto).AdaptToType<Product>();
+        var alreadyExists = await _context.Products.AnyAsync(b => b.Name.ToLower() == productName.ToLower(), ct);
+        if (alreadyExists)
+            throw new DomainException($"A product with name '{productName}' already exists.");
+
+        var product = Product.Create(
+            productName,
+            createProductDto.Description,
+            createProductDto.Price,
+            createProductDto.Stock,
+            createProductDto.CategoryId.GetValueOrDefault());
 
         await _context.Products.AddAsync(product, ct);
         await _context.SaveChangesAsync(ct);
@@ -88,7 +94,7 @@ public class ProductService : IProductService
         return product.Adapt<ProductDto>();
     }
 
-    public async Task<bool> UpdateAsync(int id, UpdateProductDto updateProductDto, CancellationToken ct)
+    public async Task<bool> UpdateAsync(Guid id, UpdateProductDto updateProductDto, CancellationToken ct)
     {
         if (updateProductDto is null)
             throw new ArgumentNullException(nameof(updateProductDto));
@@ -97,13 +103,24 @@ public class ProductService : IProductService
         if (entity is null)
             return false;
 
-        updateProductDto.Adapt(entity);
+        var productName = updateProductDto.Name?.Trim();
+        if (string.IsNullOrWhiteSpace(productName))
+            throw new DomainException("Product Name name is required.");
+
+        if (!updateProductDto.CategoryId.HasValue)
+            throw new DomainException("Category is required.");
+
+        entity.ChangeName(productName); 
+        entity.ChangePrice(updateProductDto.Price);
+        entity.ChangeDescription(updateProductDto.Description);
+        entity.ChangeCategory((Guid)updateProductDto.CategoryId);
+        entity.ChangeStock(updateProductDto.Stock);
 
         await _context.SaveChangesAsync(ct);
         return true;
     }
 
-    public async Task<bool> DeleteAsync(int id, CancellationToken ct)
+    public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)
     {
         var entity = await _context.Products.FirstOrDefaultAsync(b => b.Id == id, ct);
 

@@ -21,5 +21,5 @@ public abstract class ProductUpsertDto
     public int Stock { get; set; }
 
     [Required(ErrorMessage = "Please select a category.")]
-    public int? CategoryId { get; set; }
+    public Guid? CategoryId { get; set; }
 }

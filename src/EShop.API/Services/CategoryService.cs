@@ -9,17 +9,11 @@ using System.Linq.Dynamic.Core;
 
 namespace EShop.API.Services;
 
-public class CategoryService : ICategoryService
+public class CategoryService(CatalogDbContext context, IMapper mapper) : ICategoryService
 {
-    private readonly CatalogDbContext _context;
+    private readonly CatalogDbContext _context = context;
 
-    private readonly IMapper _mapper;
-
-    public CategoryService(CatalogDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Shared.Representations.PagedResult<CategoryDto>> GetPagedAsync(
         int page, int pageSize,
@@ -62,7 +56,7 @@ public class CategoryService : ICategoryService
             .ToListAsync(ct);
     }
 
-    public async Task<bool> ExistsAsync(int id, CancellationToken ct = default)
+    public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default)
     {
         return await _context.Categories
             .AsNoTracking()
@@ -70,7 +64,7 @@ public class CategoryService : ICategoryService
     }
 
 
-    public async Task<CategoryDto?> GetByIdAsync(int id, CancellationToken ct = default)
+    public async Task<CategoryDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await _context.Categories
              .AsNoTracking()
@@ -79,7 +73,7 @@ public class CategoryService : ICategoryService
              .FirstOrDefaultAsync(ct);
     }
 
-    public async Task<bool> UpdateAsync(int id, UpdateCategoryDto updateCategoryDto, CancellationToken ct)
+    public async Task<bool> UpdateAsync(Guid id, UpdateCategoryDto updateCategoryDto, CancellationToken ct)
     {
         if (updateCategoryDto is null)
             throw new ArgumentNullException(nameof(updateCategoryDto));
@@ -88,7 +82,11 @@ public class CategoryService : ICategoryService
         if (entity is null)
             return false;
 
-        updateCategoryDto.Adapt(entity);
+        var categoryName = updateCategoryDto.Name?.Trim();
+        if (string.IsNullOrWhiteSpace(categoryName))
+            throw new DomainException("Category name is required.");
+
+        entity.ChangeName(updateCategoryDto.Name!);
 
         await _context.SaveChangesAsync(ct);
         return true;
@@ -99,12 +97,15 @@ public class CategoryService : ICategoryService
         if (createCategoryDto is null)
             throw new ArgumentNullException(nameof(createCategoryDto));
 
-        var alreadyExists = await _context.Categories.AnyAsync(b => b.Name.ToLower() == createCategoryDto.Name.ToLower(), ct);
-        if (alreadyExists)
-            throw new DomainException($"A brand with name '{createCategoryDto.Name}' already exists.");
+        var categoryName = createCategoryDto.Name?.Trim();
+        if (string.IsNullOrWhiteSpace(categoryName))
+            throw new DomainException("Category name is required.");
 
-        var name = createCategoryDto.Name?.Trim();
-        var category = _mapper.From(createCategoryDto).AdaptToType<Category>();
+        var alreadyExists = await _context.Categories.AnyAsync(c => c.Name.ToLower() == categoryName.ToLower(), ct);
+        if (alreadyExists)
+            throw new DomainException($"A category with name '{categoryName}' already exists.");
+
+        var category = new Category(categoryName);
 
         await _context.Categories.AddAsync(category, ct);
         await _context.SaveChangesAsync(ct);
@@ -112,12 +113,15 @@ public class CategoryService : ICategoryService
         return category.Adapt<CategoryDto>();
     }
 
-    public async Task<bool> DeleteAsync(int id, CancellationToken ct)
+    public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)
     {
         var entity = await _context.Categories.FirstOrDefaultAsync(b => b.Id == id, ct);
 
-        if (entity is null)
-            return false;
+        if (entity is null) return false;
+
+        var hasProducts = await _context.Products.AnyAsync(p => p.CategoryId == id, ct);
+        if (hasProducts)
+            throw new DomainException("Category cannot be deleted because it contains products.");
 
         _context.Categories.Remove(entity);
         await _context.SaveChangesAsync(ct);
