@@ -14,6 +14,7 @@ public class ProductMapping : IRegister
             .Map(dest => dest.Price, src => src.Price.Amount)
             .Map(dest => dest.Stock, src => src.Stock.Value)
             .Map(dest => dest.CategoryId, src => src.CategoryId)
-            .Map(dest => dest.CategoryName, src => src.Category!.Name);
+            .Map(dest => dest.CategoryName, src => src.Category!.Name)
+            .Map(dest => dest.Sku, src => src.Sku.Value); 
     }
 }

@@ -27,4 +27,8 @@ public abstract class ProductUpsertDto
 
     [Required(ErrorMessage = "Please select a product status.")]
     public ProductStatus Status{ get; set; }
+
+    [Required(ErrorMessage = "SKU is required.")]
+    [StringLength(50)]
+    public string Sku { get; set; } = null!;
 }

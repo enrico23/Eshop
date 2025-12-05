@@ -19,6 +19,8 @@ public sealed class Product
 
     public ProductStatus Status { get; private set; }
 
+    public Sku Sku { get; private set; }
+
     public Guid CategoryId { get; private set; }
 
     public Category? Category { get; private set; }
@@ -27,7 +29,7 @@ public sealed class Product
     {
     }
 
-    public static Product Create(string name, ProductDescription description, Money price, StockQuantity stock, Guid categoryId)
+    public static Product Create(string name, ProductDescription description, Money price, StockQuantity stock, Guid categoryId, Sku sku)
     {
         return new Product
         {
@@ -37,7 +39,8 @@ public sealed class Product
             Price = price ?? throw new ArgumentNullException(nameof(price)),
             Stock = stock ?? throw new ArgumentNullException(nameof(stock)),
             CategoryId = ValidateCategoryId(categoryId),
-            Status = ProductStatus.Draft
+            Status = ProductStatus.Draft,
+            Sku = sku ?? throw new ArgumentNullException(nameof(sku))
         };
     }
 
@@ -114,6 +117,16 @@ public sealed class Product
         Status = ProductStatus.Draft;
     }
     #endregion
+
+    #region Product Sku
+
+    public void ChangeSku(Sku newSku)
+    {
+        Sku = newSku ?? throw new ArgumentNullException(nameof(newSku));
+    }
+
+    #endregion 
+
 
     public void ChangeCategory(Guid categoryId)
     {

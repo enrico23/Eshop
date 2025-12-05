@@ -20,29 +20,34 @@
             <PropertyColumn T="ProductDto"
                 TProperty="string"
                 Property="x => x.Name" 
-                Sortable="true" />
+                Sortable="true" Filterable="false"
+                />
 
             <PropertyColumn T="ProductDto"
                             TProperty="decimal"
                             Property="x => x.Price"
-                            Sortable="true" />
+                            Sortable="true" 
+                            Filterable="false"  />
 
             <PropertyColumn T="ProductDto"
                             TProperty="int"
                             Property="x => x.Stock"
-                            Sortable="true" />
+                            Sortable="true" 
+                            Filterable="false" />
 
             <PropertyColumn T="ProductDto"
                             TProperty="string"
                             Property="x => x.CategoryName"
                             Title="Category"
-                            Sortable="true" />
+                            Sortable="true"
+                            Filterable="false" />
 
             <PropertyColumn T="ProductDto"
                             TProperty="string"
                             Property="x => x.Status.ToString()"
                             Title="Status"
-                            Sortable="true" />
+                            Sortable="true"
+                            Filterable="false" />
         </Columns>
     </GenericGrid>
 </MudPaper>
@@ -131,7 +136,8 @@
             Price = existing.Price,
             Stock = existing.Stock,
             CategoryId = existing.CategoryId,
-            Status = existing.Status
+            Status = existing.Status,
+            Sku = existing.Sku
         };
 
         var categories = await CategoryApiClient.GetAllCategoriesAsync();
