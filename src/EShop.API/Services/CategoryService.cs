@@ -1,6 +1,6 @@
-﻿using EShop.API.Exceptions;
-using EShop.Data;
+﻿using EShop.Data;
 using EShop.Domain;
+using EShop.Domain.Exceptions;
 using EShop.Shared.Representations.Category;
 using Mapster;
 using MapsterMapper;

@@ -1,4 +1,5 @@
 ﻿using EShop.Domain;
+using EShop.Domain.Exceptions;
 using EShop.Domain.Products;
 
 public sealed class Product
@@ -81,26 +82,26 @@ public sealed class Product
         Stock = productQuantity;
     }
 
-    //public void Publish()
-    //{
-    //    if (Status == ProductStatus.Archived)
-    //        throw new DomainException("Cannot publish an archived product.");
+    public void Publish()
+    {
+        if (Status == ProductStatus.Archived)
+            throw new DomainException("Cannot publish an archived product.");
 
-    //    Status = ProductStatus.Active;
-    //}
+        Status = ProductStatus.Active;
+    }
 
-    //public void Archive()
-    //{
-    //    Status = ProductStatus.Archived;
-    //}
+    public void Archive()
+    {
+        Status = ProductStatus.Archived;
+    }
 
-    //public void Deactivate()
-    //{
-    //    if (Status == ProductStatus.Archived)
-    //        throw new DomainException("Cannot deactivate an archived product.");
+    public void Deactivate()
+    {
+        if (Status == ProductStatus.Archived)
+            throw new DomainException("Cannot deactivate an archived product.");
 
-    //    Status = ProductStatus.Inactive;
-    //}
+        Status = ProductStatus.Inactive;
+    }
 
     public void ChangeCategory(Guid categoryId)
     {
