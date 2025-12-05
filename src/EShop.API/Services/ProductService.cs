@@ -34,7 +34,7 @@ public class ProductService : IProductService
         IQueryable<Product> query = _context.Products.AsNoTracking();
 
         if(!string.IsNullOrEmpty(filter))
-            query = query.Where("Name.ToLower().Contains(@0) OR Description.ToLower().Contains(@0)", filter.ToLower());
+            query = query.Where("Name.ToLower().Contains(@0) OR Description.Value.ToLower().Contains(@0)", filter.ToLower());
         
 
         if (!string.IsNullOrEmpty(orderBy))
