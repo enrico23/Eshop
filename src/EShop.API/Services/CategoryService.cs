@@ -75,8 +75,7 @@ public class CategoryService(CatalogDbContext context, IMapper mapper) : ICatego
 
     public async Task<bool> UpdateAsync(Guid id, UpdateCategoryDto updateCategoryDto, CancellationToken ct)
     {
-        if (updateCategoryDto is null)
-            throw new ArgumentNullException(nameof(updateCategoryDto));
+        ArgumentNullException.ThrowIfNull(updateCategoryDto, nameof(updateCategoryDto));
 
         var entity = await _context.Categories.FirstOrDefaultAsync(b => b.Id == id, ct);
         if (entity is null)
@@ -94,8 +93,7 @@ public class CategoryService(CatalogDbContext context, IMapper mapper) : ICatego
 
     public async Task<CategoryDto> AddAsync(CreateCategoryDto createCategoryDto, CancellationToken ct)
     {
-        if (createCategoryDto is null)
-            throw new ArgumentNullException(nameof(createCategoryDto));
+        ArgumentNullException.ThrowIfNull(createCategoryDto, nameof(createCategoryDto));
 
         var categoryName = createCategoryDto.Name?.Trim();
         if (string.IsNullOrWhiteSpace(categoryName))

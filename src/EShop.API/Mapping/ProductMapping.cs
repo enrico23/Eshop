@@ -1,5 +1,4 @@
-﻿using EShop.Domain;
-using EShop.Shared.Representations.Product;
+﻿using EShop.Shared.Representations.Product;
 using Mapster;
 
 namespace EShop.API.Mapping;
@@ -8,10 +7,13 @@ public class ProductMapping : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<Product, ProductDto>();
-        config.NewConfig<CreateProductDto, Product>()
-             .Ignore(dest => dest.Id);
-        config.NewConfig<UpdateProductDto, Product>()
-             .Ignore(dest => dest.Id);
+        config.NewConfig<Product, ProductDto>()
+            .Map(dest => dest.Id, src => src.Id)
+            .Map(dest=> dest.Name, src=> src.Name)
+            .Map(dest => dest.Description, src => src.Description.Value)
+            .Map(dest => dest.Price, src => src.Price.Amount)
+            .Map(dest => dest.Stock, src => src.Stock.Value)
+            .Map(dest => dest.CategoryId, src => src.CategoryId)
+            .Map(dest => dest.CategoryName, src => src.Category!.Name);
     }
 }

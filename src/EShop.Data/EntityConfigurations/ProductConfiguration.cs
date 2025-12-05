@@ -14,14 +14,35 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.Id)
          .ValueGeneratedOnAdd();
 
-        builder.Property(p => p.Name).IsRequired().HasMaxLength(200);
+        builder.Property(p => p.Name)
+            .IsRequired()
+            .HasMaxLength(200);
 
-        builder.Property(p => p.Description).HasMaxLength(255);
+        builder.Property(p => p.Description)
+            .HasConversion(
+                v => v.Value, 
+                v => new Domain.Products.ProductDescription(v))
+            .HasMaxLength(2000);
 
-        builder.Property(p => p.Price).HasPrecision(18, 2);
+        builder.Property(p => p.Price)
+            .HasPrecision(18, 2)
+            .IsRequired()
+            .HasConversion(
+                v => v.Amount, 
+                v => new Domain.Money(v)
+             );
 
-        builder.Property(p => p.Stock).HasDefaultValue(0);
+        builder.Property(p => p.Stock)
+            .HasConversion(
+                v => v.Value,
+                v => new StockQuantity(v)
+            );
 
-        builder.HasOne(p => p.Category).WithMany(c => c.Products).HasForeignKey(p => p.CategoryId);
+        builder.Property(p => p.Status).IsRequired();
+
+        builder
+            .HasOne(p => p.Category)
+            .WithMany(c => c.Products)
+            .HasForeignKey(p => p.CategoryId);
     }
 }

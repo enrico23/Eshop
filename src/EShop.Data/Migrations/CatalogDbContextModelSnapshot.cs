@@ -80,7 +80,7 @@ namespace EShop.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("EShop.Domain.Product", b =>
+            modelBuilder.Entity("Product", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -90,8 +90,9 @@ namespace EShop.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -102,10 +103,11 @@ namespace EShop.Data.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<int>("Stock")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -114,7 +116,7 @@ namespace EShop.Data.Migrations
                     b.ToTable("Products", (string)null);
                 });
 
-            modelBuilder.Entity("EShop.Domain.Product", b =>
+            modelBuilder.Entity("Product", b =>
                 {
                     b.HasOne("EShop.Domain.Category", "Category")
                         .WithMany("Products")
