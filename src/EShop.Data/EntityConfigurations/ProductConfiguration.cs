@@ -1,4 +1,5 @@
 ﻿using EShop.Domain;
+using EShop.Domain.Catalog;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -39,6 +40,14 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             );
 
         builder.Property(p => p.Status).IsRequired();
+
+        builder.Property(p => p.Sku)
+           .IsRequired()
+           .HasMaxLength(50)
+           .HasConversion(
+               v => v.Value,
+               v => new Sku(v)
+           );
 
         builder
             .HasOne(p => p.Category)

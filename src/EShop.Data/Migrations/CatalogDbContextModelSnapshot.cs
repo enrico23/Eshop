@@ -22,7 +22,7 @@ namespace EShop.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("EShop.Domain.Category", b =>
+            modelBuilder.Entity("EShop.Domain.Catalog.Category", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -103,6 +103,11 @@ namespace EShop.Data.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("Sku")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -118,7 +123,7 @@ namespace EShop.Data.Migrations
 
             modelBuilder.Entity("Product", b =>
                 {
-                    b.HasOne("EShop.Domain.Category", "Category")
+                    b.HasOne("EShop.Domain.Catalog.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -127,7 +132,7 @@ namespace EShop.Data.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("EShop.Domain.Category", b =>
+            modelBuilder.Entity("EShop.Domain.Catalog.Category", b =>
                 {
                     b.Navigation("Products");
                 });

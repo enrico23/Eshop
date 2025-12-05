@@ -1,5 +1,6 @@
 ﻿using EShop.Data;
 using EShop.Domain;
+using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;
 using EShop.Domain.Products;
 using EShop.Shared.Domain;
@@ -84,15 +85,18 @@ public class ProductService : IProductService
         var productDescription = new ProductDescription(createProductDto.Description);
         var productPrice = new Money(createProductDto.Price);
         var productQuantity = new StockQuantity(createProductDto.Stock);
+        var sku = new Sku(createProductDto.Sku);
 
         var product = Product.Create(
             productName,
             productDescription,
             productPrice,
             productQuantity,
-            createProductDto.CategoryId.GetValueOrDefault());
+            createProductDto.CategoryId.GetValueOrDefault(),
+            sku);
 
         await _context.Products.AddAsync(product, ct);
+
         await _context.SaveChangesAsync(ct);
 
         return product.Adapt<ProductDto>();
@@ -102,41 +106,57 @@ public class ProductService : IProductService
     {
         ArgumentNullException.ThrowIfNull(updateProductDto, nameof(updateProductDto));
 
-        var entity = await _context.Products.FirstOrDefaultAsync(b => b.Id == id, ct);
-        if (entity is null)
+        var product = await _context.Products.FirstOrDefaultAsync(b => b.Id == id, ct);
+        if (product is null)
             return false;
 
         var productName = Product.ValidateName(updateProductDto.Name);
+        product.ChangeName(productName);
+
         var productDescription = new ProductDescription(updateProductDto.Description);
+        product.ChangeDescription(productDescription);
+
         var productPrice = new Money(updateProductDto.Price);
+        product.ChangePrice(productPrice);
+
         var productQuantity = new StockQuantity(updateProductDto.Stock);
-        if (!updateProductDto.CategoryId.HasValue)
-            throw new DomainException("Category is required.");
+        product.ChangeStock(productQuantity);
 
         var productStatus = updateProductDto.Status;
         switch (productStatus)
         {
             case ProductStatus.Active:
-                entity.Publish();
+                product.Publish();
                 break;
             case ProductStatus.Archived:
-                entity.Archive();
+                product.Archive();
                 break;
             case ProductStatus.Draft:
-                entity.Draft();
+                product.Draft();
                 break;
             default:
-                entity.Deactivate();
+                product.Deactivate();
                 break;
         }
 
-        entity.ChangeName(productName); 
-        entity.ChangePrice(productPrice);
-        entity.ChangeDescription(productDescription);
-        entity.ChangeCategory((Guid)updateProductDto.CategoryId);
-        entity.ChangeStock(productQuantity);
+        var newSku = new Sku(updateProductDto.Sku);
+        if (!product.Sku.Equals(newSku))
+        {
+            var skuInUse = await _context.Products
+                .AnyAsync(p => p.Sku == newSku && p.Id != product.Id, ct);
 
+            if (skuInUse)
+                throw new DomainException($"A product with SKU '{newSku}' already exists.");
+
+            product.ChangeSku(newSku);
+        }
+
+        if (!updateProductDto.CategoryId.HasValue)
+            throw new DomainException("Category is required.");
+        product.ChangeCategory((Guid)updateProductDto.CategoryId);
+        
         await _context.SaveChangesAsync(ct);
+
         return true;
     }
 

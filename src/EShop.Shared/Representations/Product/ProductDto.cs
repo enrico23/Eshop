@@ -12,6 +12,8 @@ public class ProductDto
 
     public ProductStatus Status {get; set;}
 
+    public string Sku { get; set; } = null!;
+
     public Guid CategoryId { get; set; } 
     public string CategoryName { get; set; } = null!;
 }

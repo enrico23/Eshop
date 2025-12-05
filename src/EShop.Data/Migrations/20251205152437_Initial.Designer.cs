@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EShop.Data.Migrations
 {
     [DbContext(typeof(CatalogDbContext))]
-    [Migration("20251203141231_Initial")]
+    [Migration("20251205152437_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -25,7 +25,7 @@ namespace EShop.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("EShop.Domain.Category", b =>
+            modelBuilder.Entity("EShop.Domain.Catalog.Category", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -39,9 +39,51 @@ namespace EShop.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("a3b4f1de-8241-4ff0-9c5e-af4c4c7a1e10"),
+                            Name = "Laptops"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1e2d8ba-992f-4e8e-a0a9-5bcff3df8c77"),
+                            Name = "Desktops"
+                        },
+                        new
+                        {
+                            Id = new Guid("f5e1a4cc-2b9b-4db9-9b52-6d3f72440365"),
+                            Name = "Smartphones"
+                        },
+                        new
+                        {
+                            Id = new Guid("0b73b90f-9610-4f64-893e-37edc85c0a5f"),
+                            Name = "Tablets"
+                        },
+                        new
+                        {
+                            Id = new Guid("49d2e88d-241d-4fdb-9d41-cf4a6c9ab3c9"),
+                            Name = "Wearables"
+                        },
+                        new
+                        {
+                            Id = new Guid("7fb5c7d1-c2a4-4ff2-9f76-4e0b55a389b6"),
+                            Name = "Audio"
+                        },
+                        new
+                        {
+                            Id = new Guid("d0c52f04-4cd2-4e47-bc9f-06b251f8eae9"),
+                            Name = "Gaming"
+                        },
+                        new
+                        {
+                            Id = new Guid("3a4b77df-1a28-4f7e-b764-c4d62a6f6ed8"),
+                            Name = "Cameras"
+                        });
                 });
 
-            modelBuilder.Entity("EShop.Domain.Product", b =>
+            modelBuilder.Entity("Product", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -51,8 +93,9 @@ namespace EShop.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -63,10 +106,16 @@ namespace EShop.Data.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("Sku")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<int>("Stock")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -75,9 +124,9 @@ namespace EShop.Data.Migrations
                     b.ToTable("Products", (string)null);
                 });
 
-            modelBuilder.Entity("EShop.Domain.Product", b =>
+            modelBuilder.Entity("Product", b =>
                 {
-                    b.HasOne("EShop.Domain.Category", "Category")
+                    b.HasOne("EShop.Domain.Catalog.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -86,7 +135,7 @@ namespace EShop.Data.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("EShop.Domain.Category", b =>
+            modelBuilder.Entity("EShop.Domain.Catalog.Category", b =>
                 {
                     b.Navigation("Products");
                 });

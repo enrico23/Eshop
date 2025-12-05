@@ -54,7 +54,6 @@
 
    
     <MudItem xs="12">
-        <p>@Product.Status</p>
 
         <MudSelect T="ProductStatus" Label="Status" @bind-Value="Product.Status">
             @foreach (var status in Enum.GetValues<ProductStatus>())
@@ -64,6 +63,13 @@
                 </MudSelectItem>
             }
         </MudSelect>
+    </MudItem>
+
+    <MudItem xs="12">
+        <MudTextField @bind-Value="Product.Sku"
+                      Label="Sku"
+                      Required="true"
+                      For="@(() => Product.Sku)" />
     </MudItem>
 
     <MudItem xs="12">
