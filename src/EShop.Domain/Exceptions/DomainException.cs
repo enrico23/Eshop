@@ -1,4 +1,4 @@
-﻿namespace EShop.API.Exceptions;
+﻿namespace EShop.Domain.Exceptions;
 
 public class DomainException : Exception
 {

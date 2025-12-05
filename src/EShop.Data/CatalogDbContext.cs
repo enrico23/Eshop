@@ -1,5 +1,5 @@
 ﻿using EShop.Data.EntityConfigurations;
-using EShop.Domain;
+using EShop.Domain.Catalog;
 using Microsoft.EntityFrameworkCore;
 
 namespace EShop.Data;

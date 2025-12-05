@@ -1,5 +1,8 @@
-﻿using EShop.API.Exceptions;
-using EShop.Data;
+﻿using EShop.Data;
+using EShop.Domain;
+using EShop.Domain.Exceptions;
+using EShop.Domain.Products;
+using EShop.Shared.Domain;
 using EShop.Shared.Representations.Product;
 using Mapster;
 using MapsterMapper;
@@ -31,9 +34,8 @@ public class ProductService : IProductService
         IQueryable<Product> query = _context.Products.AsNoTracking();
 
         if(!string.IsNullOrEmpty(filter))
-        {
-            query = query.Where("Name.ToLower().Contains(@0) OR Description.ToLower().Contains(@0)", filter.ToLower());
-        }
+            query = query.Where("Name.ToLower().Contains(@0)", filter.ToLower());
+        
 
         if (!string.IsNullOrEmpty(orderBy))
         {
@@ -70,22 +72,24 @@ public class ProductService : IProductService
 
     public async Task<ProductDto> AddAsync(CreateProductDto createProductDto, CancellationToken ct)
     {
-        if (createProductDto is null)
-            throw new ArgumentNullException(nameof(createProductDto));
+        ArgumentNullException.ThrowIfNull(createProductDto, nameof(createProductDto));
 
-        var productName = createProductDto.Name?.Trim();
-        if (string.IsNullOrWhiteSpace(productName))
-            throw new DomainException("Product name is required.");
+        var productName = Product.ValidateName(createProductDto.Name);
 
-        var alreadyExists = await _context.Products.AnyAsync(b => b.Name.ToLower() == productName.ToLower(), ct);
+        var alreadyExists = await _context.Products
+            .AnyAsync(b => b.Name.ToLower() == productName.ToLower(), ct);
         if (alreadyExists)
             throw new DomainException($"A product with name '{productName}' already exists.");
 
+        var productDescription = new ProductDescription(createProductDto.Description);
+        var productPrice = new Money(createProductDto.Price);
+        var productQuantity = new StockQuantity(createProductDto.Stock);
+
         var product = Product.Create(
             productName,
-            createProductDto.Description,
-            createProductDto.Price,
-            createProductDto.Stock,
+            productDescription,
+            productPrice,
+            productQuantity,
             createProductDto.CategoryId.GetValueOrDefault());
 
         await _context.Products.AddAsync(product, ct);
@@ -96,25 +100,41 @@ public class ProductService : IProductService
 
     public async Task<bool> UpdateAsync(Guid id, UpdateProductDto updateProductDto, CancellationToken ct)
     {
-        if (updateProductDto is null)
-            throw new ArgumentNullException(nameof(updateProductDto));
+        ArgumentNullException.ThrowIfNull(updateProductDto, nameof(updateProductDto));
 
         var entity = await _context.Products.FirstOrDefaultAsync(b => b.Id == id, ct);
         if (entity is null)
             return false;
 
-        var productName = updateProductDto.Name?.Trim();
-        if (string.IsNullOrWhiteSpace(productName))
-            throw new DomainException("Product Name name is required.");
-
+        var productName = Product.ValidateName(updateProductDto.Name);
+        var productDescription = new ProductDescription(updateProductDto.Description);
+        var productPrice = new Money(updateProductDto.Price);
+        var productQuantity = new StockQuantity(updateProductDto.Stock);
         if (!updateProductDto.CategoryId.HasValue)
             throw new DomainException("Category is required.");
 
+        var productStatus = updateProductDto.Status;
+        switch (productStatus)
+        {
+            case ProductStatus.Active:
+                entity.Publish();
+                break;
+            case ProductStatus.Archived:
+                entity.Archive();
+                break;
+            case ProductStatus.Draft:
+                entity.Draft();
+                break;
+            default:
+                entity.Deactivate();
+                break;
+        }
+
         entity.ChangeName(productName); 
-        entity.ChangePrice(updateProductDto.Price);
-        entity.ChangeDescription(updateProductDto.Description);
+        entity.ChangePrice(productPrice);
+        entity.ChangeDescription(productDescription);
         entity.ChangeCategory((Guid)updateProductDto.CategoryId);
-        entity.ChangeStock(updateProductDto.Stock);
+        entity.ChangeStock(productQuantity);
 
         await _context.SaveChangesAsync(ct);
         return true;
