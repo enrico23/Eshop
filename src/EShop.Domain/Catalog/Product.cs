@@ -1,6 +1,8 @@
 ﻿using EShop.Domain;
+using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;
 using EShop.Domain.Products;
+using EShop.Shared.Domain;
 
 public sealed class Product
 {
@@ -82,6 +84,7 @@ public sealed class Product
         Stock = productQuantity;
     }
 
+    #region Product Status
     public void Publish()
     {
         if (Status == ProductStatus.Archived)
@@ -102,6 +105,15 @@ public sealed class Product
 
         Status = ProductStatus.Inactive;
     }
+
+    public void Draft()
+    {
+        if (Status == ProductStatus.Archived)
+            throw new DomainException("Cannot draft an archived product.");
+
+        Status = ProductStatus.Draft;
+    }
+    #endregion
 
     public void ChangeCategory(Guid categoryId)
     {

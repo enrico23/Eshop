@@ -1,4 +1,4 @@
-﻿using EShop.Domain;
+﻿using EShop.Domain.Catalog;
 using EShop.Shared.Representations.Category;
 using Mapster;
 

@@ -1,4 +1,4 @@
-﻿namespace EShop.Domain;
+﻿namespace EShop.Domain.Catalog;
 
 public sealed class Category
 {

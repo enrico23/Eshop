@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using EShop.Shared.Domain;
+using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Shared.Representations.Product;
 
@@ -22,4 +23,8 @@ public abstract class ProductUpsertDto
 
     [Required(ErrorMessage = "Please select a category.")]
     public Guid? CategoryId { get; set; }
+
+
+    [Required(ErrorMessage = "Please select a product status.")]
+    public ProductStatus Status{ get; set; }
 }

@@ -1,4 +1,4 @@
-﻿namespace EShop.Domain.Products;
+﻿namespace EShop.Shared.Domain;
 
 public enum ProductStatus
 {

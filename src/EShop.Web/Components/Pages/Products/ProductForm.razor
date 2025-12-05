@@ -1,4 +1,5 @@
-﻿@using EShop.Shared.Representations.Category
+﻿@using EShop.Shared.Domain
+@using EShop.Shared.Representations.Category
 @using EShop.Shared.Representations.Product
 @using MudBlazor
 @inherits ComponentBase
@@ -49,6 +50,20 @@
                 }
             </MudSelect>
         }
+    </MudItem>
+
+   
+    <MudItem xs="12">
+        <p>@Product.Status</p>
+
+        <MudSelect T="ProductStatus" Label="Status" @bind-Value="Product.Status">
+            @foreach (var status in Enum.GetValues<ProductStatus>())
+            {
+                <MudSelectItem T="ProductStatus" Value="@status">
+                    @status
+                </MudSelectItem>
+            }
+        </MudSelect>
     </MudItem>
 
     <MudItem xs="12">

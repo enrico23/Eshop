@@ -2,6 +2,7 @@
 using EShop.Domain;
 using EShop.Domain.Exceptions;
 using EShop.Domain.Products;
+using EShop.Shared.Domain;
 using EShop.Shared.Representations.Product;
 using Mapster;
 using MapsterMapper;
@@ -88,7 +89,7 @@ public class ProductService : IProductService
             productName,
             productDescription,
             productPrice,
-           productQuantity,
+            productQuantity,
             createProductDto.CategoryId.GetValueOrDefault());
 
         await _context.Products.AddAsync(product, ct);
@@ -111,6 +112,23 @@ public class ProductService : IProductService
         var productQuantity = new StockQuantity(updateProductDto.Stock);
         if (!updateProductDto.CategoryId.HasValue)
             throw new DomainException("Category is required.");
+
+        var productStatus = updateProductDto.Status;
+        switch (productStatus)
+        {
+            case ProductStatus.Active:
+                entity.Publish();
+                break;
+            case ProductStatus.Archived:
+                entity.Archive();
+                break;
+            case ProductStatus.Draft:
+                entity.Draft();
+                break;
+            default:
+                entity.Deactivate();
+                break;
+        }
 
         entity.ChangeName(productName); 
         entity.ChangePrice(productPrice);

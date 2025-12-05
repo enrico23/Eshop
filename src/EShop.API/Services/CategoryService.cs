@@ -1,5 +1,5 @@
 ﻿using EShop.Data;
-using EShop.Domain;
+using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;
 using EShop.Shared.Representations.Category;
 using Mapster;
