@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <FileScopedNamespace>true</FileScopedNamespace>
+    <UserSecretsId>cbb41217-1f42-43ac-8985-88c0d997c30d</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

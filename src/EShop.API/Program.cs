@@ -8,6 +8,11 @@ using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
+
 builder.AddServiceDefaults();
 
 builder.Services.AddExceptionHandler<DomainExceptionHandler>();
@@ -25,8 +30,7 @@ builder.Services.AddProblemDetails(options =>
     };
 });
 
-var connectionString = builder.Configuration.GetConnectionString("CatalogDb") 
-    ?? "Server=127.0.0.1,14347;User ID=sa;Password=Sample1234!;TrustServerCertificate=true;Initial Catalog=CatalogDb";
+var connectionString = builder.Configuration.GetConnectionString("CatalogDb");
 builder.Services.AddDbContext<CatalogDbContext>(options =>
     options.UseSqlServer(connectionString));
 
