@@ -16,4 +16,7 @@ public class ProductDto
 
     public Guid CategoryId { get; set; } 
     public string CategoryName { get; set; } = null!;
+
+
+    public List<ProductImageDto> Images { get; set; } = new();
 }

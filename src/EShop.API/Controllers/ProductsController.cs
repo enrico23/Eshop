@@ -1,6 +1,8 @@
-﻿using EShop.API.Services;
+﻿using EShop.API.Models;
+using EShop.API.Services;
 using EShop.Shared.Representations;
 using EShop.Shared.Representations.Product;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EShop.API.Controllers;
@@ -8,14 +10,12 @@ namespace EShop.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ProductsController : ControllerBase
+public class ProductsController(
+    IProductService productService, 
+    IFileStorage fileStorage) 
+    : ControllerBase
 {
-    private readonly IProductService _productService;
-
-    public ProductsController(IProductService productService)
-    {
-        _productService = productService;
-    }
+    private readonly IProductService _productService = productService;
 
     // GET: api/products?page=1&pageSize=20
     [HttpGet]
@@ -56,6 +56,55 @@ public class ProductsController : ControllerBase
             return BadRequest();
 
         var productDto = await _productService.AddAsync(createProductDto, ct);
+        var url = $"{Request.Scheme}://{Request.Host}/api/Products/{productDto.Id}";
+        return Created(url, productDto);
+    }
+
+    [HttpPost("v2")]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ProductDto>> PostMultiparFormDatatAsync(
+        [FromForm] CreateProductFormDto form,
+        CancellationToken ct = default)
+    {
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        string relativeUrl;
+        try
+        {
+            relativeUrl = await fileStorage.SaveImageAsync(form.File, ct);
+        }
+        catch (OperationCanceledException)
+        {
+            return StatusCode(StatusCodes.Status499ClientClosedRequest);
+        }
+        catch (BadHttpRequestException ex)
+        {
+            return StatusCode(ex.StatusCode, ex.Message);
+        }
+        catch (Exception)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, "Error saving file.");
+        }
+
+        var createProductDto = form.Adapt<CreateProductDto>();
+        createProductDto.Images =
+        [
+            new()
+            {
+                Url       = relativeUrl,
+                AltText   = form.Name, // or another form field
+                IsPrimary = true,
+                SortOrder = 0
+            }
+        ];
+
+        var productDto = await _productService.AddAsync(createProductDto, ct);
+
         var url = $"{Request.Scheme}://{Request.Host}/api/Products/{productDto.Id}";
         return Created(url, productDto);
     }

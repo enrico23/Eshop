@@ -1,4 +1,5 @@
 ﻿using EShop.Data;
+using EShop.Data.Migrations;
 using EShop.Domain;
 using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;
@@ -94,6 +95,14 @@ public class ProductService : IProductService
             productQuantity,
             createProductDto.CategoryId.GetValueOrDefault(),
             sku);
+
+        if(createProductDto.Images is not null)
+        {
+            foreach (ProductImageDto image in createProductDto.Images)
+            {
+                product.AddImage(image.Url);
+            }
+        }
 
         await _context.Products.AddAsync(product, ct);
 
