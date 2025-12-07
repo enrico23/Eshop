@@ -17,8 +17,6 @@ public class ProductsController(
 {
     private readonly IProductService _productService = productService;
 
-    private const long MaxFileSizeBytes = 5 * 1024 * 1024; // 5MB
-
     // GET: api/products?page=1&pageSize=20
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<ProductDto>), StatusCodes.Status200OK)]
@@ -75,7 +73,7 @@ public class ProductsController(
             return ValidationProblem(ModelState);
         }
 
-        string relativeUrl = string.Empty;
+        string relativeUrl;
         try
         {
             relativeUrl = await fileStorage.SaveImageAsync(form.File, ct);
