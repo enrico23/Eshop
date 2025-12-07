@@ -7,4 +7,6 @@ public class CreateProductFormDto : ProductUpsertDto
 {
     [Required]
     public IFormFile File { get; set; } = null!;
+
+    public string? ImageAltText { get; set; }
 }

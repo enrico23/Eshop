@@ -2,17 +2,22 @@
 using EShop.API.Services;
 using EShop.Shared.Representations;
 using EShop.Shared.Representations.Product;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace EShop.API.Controllers;
 
 
 [Route("api/[controller]")]
 [ApiController]
-public class ProductsController(IProductService productService) : ControllerBase
+public class ProductsController(
+    IProductService productService, 
+    IFileStorage fileStorage) 
+    : ControllerBase
 {
     private readonly IProductService _productService = productService;
+
+    private const long MaxFileSizeBytes = 5 * 1024 * 1024; // 5MB
 
     // GET: api/products?page=1&pageSize=20
     [HttpGet]
@@ -65,57 +70,46 @@ public class ProductsController(IProductService productService) : ControllerBase
         [FromForm] CreateProductFormDto form,
         CancellationToken ct = default)
     {
-        if (form.File == null || form.File.Length == 0)
-            return BadRequest("File is required.");
-        var file = form.File;
-
-        const long maxFileSizeBytes = 5 * 1024 * 1024; // 5MB
-        if (file.Length > maxFileSizeBytes)
+        if (!ModelState.IsValid)
         {
-            return BadRequest("File is too large. Max 5MB.");
+            return ValidationProblem(ModelState);
         }
 
-        if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+        string relativeUrl = string.Empty;
+        try
         {
-            return BadRequest("Only image files are allowed.");
+            relativeUrl = await fileStorage.SaveImageAsync(form.File, ct);
+        }
+        catch (OperationCanceledException)
+        {
+            return StatusCode(StatusCodes.Status499ClientClosedRequest);
+        }
+        catch (BadHttpRequestException ex)
+        {
+            return StatusCode(ex.StatusCode, ex.Message);
+        }
+        catch (Exception)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, "Error saving file.");
         }
 
-        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
-        if (!Directory.Exists(uploadsFolder))
-        {
-            Directory.CreateDirectory(uploadsFolder);
-        }
-
-        var extension = Path.GetExtension(file.FileName);
-        var fileName = $"{Guid.NewGuid()}{extension}";
-        var filePath = Path.Combine(uploadsFolder, fileName);
-
-        await using (var stream = new FileStream(filePath, FileMode.Create))
-        {
-            await file.CopyToAsync(stream, ct);
-        }
-
-        var relativeUrl = $"/uploads/{fileName}";
-
-        var productDto = await _productService.AddAsync(new CreateProductDto
-        {
-            Name = form.Name,
-            Description = form.Description,
-            Price = form.Price,
-            Status = form.Status,
-            Stock = form.Stock,
-            CategoryId = form.CategoryId,
-            Images = new List<ProductImageDto> { new ProductImageDto()
-                {
-                    Url = relativeUrl
-                } 
+        var createProductDto = form.Adapt<CreateProductDto>();
+        createProductDto.Images =
+        [
+            new()
+            {
+                Url       = relativeUrl,
+                AltText   = form.Name, // or another form field
+                IsPrimary = true,
+                SortOrder = 0
             }
-        }, ct);
+        ];
+
+        var productDto = await _productService.AddAsync(createProductDto, ct);
 
         var url = $"{Request.Scheme}://{Request.Host}/api/Products/{productDto.Id}";
         return Created(url, productDto);
     }
-
     // </snippet_Create>
 
     // PUT: api/products/{id:guid}

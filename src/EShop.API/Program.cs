@@ -36,6 +36,7 @@ TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
 
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();

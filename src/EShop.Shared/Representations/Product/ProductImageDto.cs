@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace EShop.Shared.Representations.Product;
+﻿namespace EShop.Shared.Representations.Product;
 
 public sealed class ProductImageDto
 {
