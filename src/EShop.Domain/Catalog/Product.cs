@@ -25,6 +25,9 @@ public sealed class Product
 
     public Category? Category { get; private set; }
 
+    private readonly List<ProductImage> _images = new();
+    public IReadOnlyCollection<ProductImage> Images => _images.AsReadOnly();
+
     public Product()
     {
     }
@@ -71,6 +74,8 @@ public sealed class Product
         Price = newPrice ?? throw new ArgumentNullException(nameof(newPrice));
     }
 
+    #region Product Stock
+
     public void IncreaseStock(int amount)
     {
         Stock = Stock.Increase(amount);
@@ -86,6 +91,8 @@ public sealed class Product
     {
         Stock = productQuantity;
     }
+
+    #endregion
 
     #region Product Status
     public void Publish()
@@ -125,8 +132,9 @@ public sealed class Product
         Sku = newSku ?? throw new ArgumentNullException(nameof(newSku));
     }
 
-    #endregion 
+    #endregion
 
+    #region category
 
     public void ChangeCategory(Guid categoryId)
     {
@@ -140,4 +148,72 @@ public sealed class Product
 
         return categoryId;
     }
+
+    #endregion
+
+    #region Product Images
+
+    public ProductImage AddImage(string url, string? altText = null)
+    {
+        if (_images.Any(i => i.Url == url))
+            throw new DomainException("This image is already associated with the product.");
+
+        var nextSortOrder = _images.Count == 0
+            ? 0
+            : _images.Max(i => i.SortOrder) + 1;
+
+        var isPrimary = !_images.Any(i => i.IsPrimary);
+
+        var image = ProductImage.Create(url, altText, nextSortOrder, isPrimary);
+        _images.Add(image);
+
+        return image;
+    }
+
+    public void RemoveImage(Guid imageId)
+    {
+        var image = _images.SingleOrDefault(i => i.Id == imageId)
+            ?? throw new DomainException("Image not found.");
+
+        var wasPrimary = image.IsPrimary;
+        _images.Remove(image);
+
+        // if we removed the primary image, optionally promote another one
+        if (wasPrimary && _images.Any())
+        {
+            var firstBySort = _images.OrderBy(i => i.SortOrder).First();
+            SetPrimaryImage(firstBySort.Id);
+        }
+    }
+
+    public void SetPrimaryImage(Guid imageId)
+    {
+        var image = _images.SingleOrDefault(i => i.Id == imageId)
+            ?? throw new DomainException("Image not found.");
+
+        foreach (var img in _images)
+        {
+            img.SetPrimary(img.Id == image.Id);
+        }
+    }
+
+    public void ReorderImages(IReadOnlyList<Guid> orderedIds)
+    {
+        if (orderedIds.Count != _images.Count ||
+            orderedIds.Except(_images.Select(i => i.Id)).Any())
+        {
+            throw new DomainException("Invalid image ordering.");
+        }
+
+        var orderMap = orderedIds
+            .Select((id, index) => (id, index))
+            .ToDictionary(x => x.id, x => x.index);
+
+        foreach (var img in _images)
+        {
+            img.ChangeSortOrder(orderMap[img.Id]);
+        }
+    }
+
+    #endregion
 }

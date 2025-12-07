@@ -1,21 +1,18 @@
-﻿using EShop.API.Services;
+﻿using EShop.API.Models;
+using EShop.API.Services;
 using EShop.Shared.Representations;
 using EShop.Shared.Representations.Product;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace EShop.API.Controllers;
 
 
 [Route("api/[controller]")]
 [ApiController]
-public class ProductsController : ControllerBase
+public class ProductsController(IProductService productService) : ControllerBase
 {
-    private readonly IProductService _productService;
-
-    public ProductsController(IProductService productService)
-    {
-        _productService = productService;
-    }
+    private readonly IProductService _productService = productService;
 
     // GET: api/products?page=1&pageSize=20
     [HttpGet]
@@ -59,6 +56,66 @@ public class ProductsController : ControllerBase
         var url = $"{Request.Scheme}://{Request.Host}/api/Products/{productDto.Id}";
         return Created(url, productDto);
     }
+
+    [HttpPost("v2")]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ProductDto>> PostMultiparFormDatatAsync(
+        [FromForm] CreateProductFormDto form,
+        CancellationToken ct = default)
+    {
+        if (form.File == null || form.File.Length == 0)
+            return BadRequest("File is required.");
+        var file = form.File;
+
+        const long maxFileSizeBytes = 5 * 1024 * 1024; // 5MB
+        if (file.Length > maxFileSizeBytes)
+        {
+            return BadRequest("File is too large. Max 5MB.");
+        }
+
+        if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest("Only image files are allowed.");
+        }
+
+        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+        if (!Directory.Exists(uploadsFolder))
+        {
+            Directory.CreateDirectory(uploadsFolder);
+        }
+
+        var extension = Path.GetExtension(file.FileName);
+        var fileName = $"{Guid.NewGuid()}{extension}";
+        var filePath = Path.Combine(uploadsFolder, fileName);
+
+        await using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream, ct);
+        }
+
+        var relativeUrl = $"/uploads/{fileName}";
+
+        var productDto = await _productService.AddAsync(new CreateProductDto
+        {
+            Name = form.Name,
+            Description = form.Description,
+            Price = form.Price,
+            Status = form.Status,
+            Stock = form.Stock,
+            CategoryId = form.CategoryId,
+            Images = new List<ProductImageDto> { new ProductImageDto()
+                {
+                    Url = relativeUrl
+                } 
+            }
+        }, ct);
+
+        var url = $"{Request.Scheme}://{Request.Host}/api/Products/{productDto.Id}";
+        return Created(url, productDto);
+    }
+
     // </snippet_Create>
 
     // PUT: api/products/{id:guid}
