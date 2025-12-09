@@ -108,7 +108,18 @@
     Allowed: .png, .jpg, .jpeg, .webp – Max 5 MB
 </MudText>
 
-@if (_files != null)
+<hr />
+
+@if (Product.Images is not null && Product.Images.Any())
+{
+    <p>Product Images: @Product.Images?.Count()</p>
+    <MudText Class="mt-2" Color="Color.Default" Typo="Typo.body2">
+        @Product.Images!.First().Url
+    </MudText>
+}
+
+@* 
+    @if (_files != null)
 {
     <MudText Typo="@Typo.h6">@_files.Count() File@(_files.Count() == 1 ? "" : "s"):</MudText>
     <MudList T="string">
@@ -119,7 +130,9 @@
             </MudListItem>
         }
     </MudList>
-}
+} 
+
+*@
 
 
 @if (!string.IsNullOrEmpty(_previewImageUrl))
@@ -151,7 +164,6 @@
         Product.File = file;
 
         _files.Add(file);
-
 
         try
         {

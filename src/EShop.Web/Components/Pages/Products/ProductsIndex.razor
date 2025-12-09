@@ -121,7 +121,7 @@
         var saved = await ConfirmUpsertAsync<ProductUpsertDialog, CreateProductViewModel>(
             title: "Create product",
             parameters: parameters,
-            saveAction: model => CategoryApiClient.UploadFileAsync(model, model.File!, CancellationToken.None),
+            saveAction: model => CategoryApiClient.CreateProductAsync(model, model.File!, CancellationToken.None),
             successMessage: $"Product '{createProductDto.Name}' successfully created");
 
         if (saved && _grid is not null)
@@ -138,7 +138,8 @@
             Stock = existing.Stock,
             CategoryId = existing.CategoryId,
             Status = existing.Status,
-            Sku = existing.Sku
+            Sku = existing.Sku,
+            Images = existing.Images
         };
 
         var categories = await CategoryApiClient.GetAllCategoriesAsync();

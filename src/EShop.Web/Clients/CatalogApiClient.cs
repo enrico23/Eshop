@@ -19,13 +19,12 @@ public interface ICatalogApiClient
 
     #endregion
 
-    Task CreateProductAsync(CreateProductDto createCategoryDto, CancellationToken ct = default);
+    Task CreateProductAsync(CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default);
     Task DeleteProductAsync(Guid id, CancellationToken ct = default);
     Task<List<ProductDto>> GetAllProductsAsync(CancellationToken ct = default);
     Task<PagedResult<ProductDto>> GetPagedProductsAsync(int page = 1, int pageSize = 20, string orderBy = "Name", string orderDirection = "asc", string? filter = null, CancellationToken ct = default);
     Task UpdateProductAsync(Guid id, CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default);
 
-    Task UploadFileAsync(CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default);
 }
 
 
@@ -122,8 +121,12 @@ public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> l
         return result;
     }
 
-    public Task CreateProductAsync(CreateProductDto model, CancellationToken ct = default) =>
-        SendAsync(() => httpClient.PostAsJsonAsync(ProductsEndpointsBasePath, model, ct), ct);
+    public async Task CreateProductAsync(CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default)
+    {
+        using var form = BuildMultipart(model, file);
+        await SendAsync(() => httpClient.PostAsync($"{ProductsEndpointsBasePath}/v2", form, ct), ct);
+    }
+        
 
     public async Task UpdateProductAsync(Guid id, CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default)
     {
@@ -136,12 +139,6 @@ public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> l
         SendAsync(() => httpClient.DeleteAsync($"{ProductsEndpointsBasePath}/{id}", ct), ct);
 
     #endregion
-
-    public async Task UploadFileAsync(CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default)
-    {
-        using var form = BuildMultipart(model, file);
-        await SendAsync(() => httpClient.PostAsync($"{ProductsEndpointsBasePath}/v2", form), ct);
-    }
 
     private static MultipartFormDataContent BuildMultipart(CreateProductViewModel model, IBrowserFile? file)
     {
