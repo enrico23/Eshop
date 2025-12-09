@@ -3,6 +3,7 @@
 @using EShop.Web.Components.Pages.Categories
 @using EShop.Web.Exceptions
 @using EShop.Web.Components.Pages.Shared
+@using EShop.Web.Models
 @inherits BaseCrudPage
 
 <MudPaper Class="pa-4">
@@ -99,7 +100,7 @@
 
     private async Task OpenCreateDialogAsync()
     {
-        var createProductDto = new CreateProductDto
+        var createProductDto = new CreateProductViewModel
         {
             Name = string.Empty,
             Description = string.Empty,
@@ -117,10 +118,10 @@
             ["Categories"] = categories
         };
 
-        var saved = await ConfirmUpsertAsync<ProductUpsertDialog, CreateProductDto>(
+        var saved = await ConfirmUpsertAsync<ProductUpsertDialog, CreateProductViewModel>(
             title: "Create product",
             parameters: parameters,
-            saveAction: model => CategoryApiClient.CreateProductAsync(model, CancellationToken.None),
+            saveAction: model => CategoryApiClient.UploadFileAsync(model, model.File!, CancellationToken.None),
             successMessage: $"Product '{createProductDto.Name}' successfully created");
 
         if (saved && _grid is not null)
@@ -129,7 +130,7 @@
 
     private async Task OpenEditDialogAsync(ProductDto existing)
     {
-        var updateProductDto = new UpdateProductDto
+        var updateProductDto = new CreateProductViewModel
         {
             Name = existing.Name,
             Description = existing.Description!,
@@ -148,10 +149,10 @@
                 ["Categories"] = categories
             };
 
-        var saved = await ConfirmUpsertAsync<ProductUpsertDialog, UpdateProductDto>(
+        var saved = await ConfirmUpsertAsync<ProductUpsertDialog, CreateProductViewModel>(
            title: "Edit product",
            parameters: parameters,
-           saveAction: model => CategoryApiClient.UpdateProductAsync(existing.Id, model, CancellationToken.None),
+           saveAction: model => CategoryApiClient.UpdateProductAsync(existing.Id, model, model.File!, CancellationToken.None),
            successMessage: $"Product '{updateProductDto.Name}' successfully updated");
 
         if (saved && _grid is not null)

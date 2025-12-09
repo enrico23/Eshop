@@ -1,6 +1,7 @@
 ﻿@using EShop.Shared.Domain
 @using EShop.Shared.Representations.Category
 @using EShop.Shared.Representations.Product
+@using EShop.Web.Models
 @using MudBlazor
 @inherits ComponentBase
 
@@ -136,7 +137,7 @@
 
 @code {
     [Parameter]
-    public ProductUpsertDto Product { get; set; } = null!;
+    public CreateProductViewModel Product { get; set; } = null!;
 
     [Parameter]
     public List<CategoryDto> Categories { get; set; } = new();
@@ -147,7 +148,7 @@
 
     private async Task UploadFiles(IBrowserFile file)
     {
-       
+        Product.File = file;
 
         _files.Add(file);
 

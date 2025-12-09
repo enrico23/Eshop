@@ -7,7 +7,7 @@ public abstract class ApiClientBase(ILogger logger)
 {
     protected async Task<T?> SendAsync<T>(Func<Task<HttpResponseMessage>> action, CancellationToken ct = default)
     {
-        var response = await ExecuteAsync(action);
+        using var response = await ExecuteAsync(action);
 
         if (response.IsSuccessStatusCode)
         {
@@ -23,7 +23,7 @@ public abstract class ApiClientBase(ILogger logger)
 
     protected async Task SendAsync(Func<Task<HttpResponseMessage>> action, CancellationToken ct = default)
     {
-        var response = await ExecuteAsync(action);
+        using var response = await ExecuteAsync(action);
 
         if (!response.IsSuccessStatusCode)
             await ThrowApiException(response, ct);
@@ -52,7 +52,12 @@ public abstract class ApiClientBase(ILogger logger)
     {
         var body = await response.Content.ReadAsStringAsync(ct);
 
-        logger.LogError("API call failed. Status={StatusCode}, Body={Body}", response.StatusCode, body);
+        logger.LogError("API call failed. Status={StatusCode}", response.StatusCode);
+
+        if (logger.IsEnabled(LogLevel.Debug))
+        {
+            logger.LogDebug("API Response Body: {Body}", body);
+        }
 
         throw new ApiException(response.StatusCode, body);
     }

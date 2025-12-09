@@ -1,8 +1,33 @@
 ﻿using EShop.Shared.Representations;
 using EShop.Shared.Representations.Category;
 using EShop.Shared.Representations.Product;
+using EShop.Web.Models;
+using Microsoft.AspNetCore.Components.Forms;
+using System.Globalization;
 
 namespace EShop.Web.Clients;
+
+public interface ICatalogApiClient
+{
+    #region categories
+
+    Task CreateCategoryAsync(CreateCategoryDto createCategoryDto, CancellationToken ct = default);
+    Task DeleteCategoryAsync(Guid id, CancellationToken ct = default);
+    Task<List<CategoryDto>> GetAllCategoriesAsync(CancellationToken ct = default);
+    Task<PagedResult<CategoryDto>> GetPagedCategoriesAsync(int page = 1, int pageSize = 20, string orderBy = "Name", string orderDirection = "asc", string? filter = null, CancellationToken ct = default);
+    Task UpdateCategoryAsync(Guid id, UpdateCategoryDto updateCategoryDto, CancellationToken ct = default);
+
+    #endregion
+
+    Task CreateProductAsync(CreateProductDto createCategoryDto, CancellationToken ct = default);
+    Task DeleteProductAsync(Guid id, CancellationToken ct = default);
+    Task<List<ProductDto>> GetAllProductsAsync(CancellationToken ct = default);
+    Task<PagedResult<ProductDto>> GetPagedProductsAsync(int page = 1, int pageSize = 20, string orderBy = "Name", string orderDirection = "asc", string? filter = null, CancellationToken ct = default);
+    Task UpdateProductAsync(Guid id, CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default);
+
+    Task UploadFileAsync(CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default);
+}
+
 
 public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> logger)
     : ApiClientBase(logger), ICatalogApiClient
@@ -68,7 +93,6 @@ public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> l
         return result ?? [];
     }
 
-
     public async Task<PagedResult<ProductDto>> GetPagedProductsAsync(
         int page = 1,
         int pageSize = 20,
@@ -101,11 +125,48 @@ public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> l
     public Task CreateProductAsync(CreateProductDto model, CancellationToken ct = default) =>
         SendAsync(() => httpClient.PostAsJsonAsync(ProductsEndpointsBasePath, model, ct), ct);
 
-    public Task UpdateProductAsync(Guid id, UpdateProductDto model, CancellationToken ct = default) =>
-        SendAsync(() => httpClient.PutAsJsonAsync($"{ProductsEndpointsBasePath}/{id}", model, ct), ct);
+    public async Task UpdateProductAsync(Guid id, CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default)
+    {
+        using var form = BuildMultipart(model, file);
+        await SendAsync(() => httpClient.PutAsJsonAsync($"{ProductsEndpointsBasePath}/{id}", model, ct), ct);
+    }
+        
 
     public Task DeleteProductAsync(Guid id, CancellationToken ct = default) =>
         SendAsync(() => httpClient.DeleteAsync($"{ProductsEndpointsBasePath}/{id}", ct), ct);
 
     #endregion
+
+    public async Task UploadFileAsync(CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default)
+    {
+        using var form = BuildMultipart(model, file);
+        await SendAsync(() => httpClient.PostAsync($"{ProductsEndpointsBasePath}/v2", form), ct);
+    }
+
+    private static MultipartFormDataContent BuildMultipart(CreateProductViewModel model, IBrowserFile? file)
+    {
+        var form = new MultipartFormDataContent
+        {
+            { new StringContent(model.Name), "Name" },
+            { new StringContent(model.Description), "Description" },
+            { new StringContent(model.Sku), "Sku" },
+            { new StringContent(((int)model.Status).ToString()), "Status" },
+            { new StringContent(model.Price.ToString(CultureInfo.InvariantCulture)), "Price" },
+            { new StringContent(model.Stock.ToString(CultureInfo.InvariantCulture)), "Stock" },
+            { new StringContent(model.CategoryId!.Value.ToString()), "CategoryId" }
+        };
+
+        if (file is not null)
+        {
+            var stream = file.OpenReadStream(5_000_000);
+
+            var fileContent = new StreamContent(stream);
+            fileContent.Headers.ContentType =
+                new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType ?? "application/octet-stream");
+
+            form.Add(fileContent, "file", file.Name);
+        }
+
+        return form;
+    }
 }

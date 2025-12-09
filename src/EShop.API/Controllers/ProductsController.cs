@@ -97,7 +97,7 @@ public class ProductsController(
             new()
             {
                 Url       = relativeUrl,
-                AltText   = form.Name, // or another form field
+                AltText   = form.Name,
                 IsPrimary = true,
                 SortOrder = 0
             }

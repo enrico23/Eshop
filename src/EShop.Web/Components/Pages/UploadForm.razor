@@ -1,0 +1,62 @@
+﻿@page "/upload"
+@using System.Globalization
+@using EShop.Web.Exceptions
+@using EShop.Web.Models
+@inject ICatalogApiClient CatalogApiClient
+
+<h3>Test Upload</h3>
+
+<InputFile OnChange="OnFileChange" />
+@if (_file is not null)
+{
+    <p>Selected: @_file.Name (@_file.Size bytes)</p>
+    <button @onclick="Upload">Upload</button>
+}
+
+<p>@_status</p>
+
+@code {
+    private IBrowserFile? _file;
+    private string _status = "";
+
+    private void OnFileChange(InputFileChangeEventArgs e)
+    {
+        _file = e.File;
+        _status = "";
+    }
+
+    private async Task Upload()
+    {
+        if (_file is null)
+        {
+            _status = "No file selected.";
+            return;
+        }
+
+        var model = new CreateProductViewModel
+        {
+            Name = $"Test name {Guid.NewGuid()}",
+            Description = "Test description",
+            Price = 100,
+            Stock = 1,
+            Sku = "test-sku",
+            Status = EShop.Shared.Domain.ProductStatus.Draft,
+            CategoryId = new Guid("7fb5c7d1-c2a4-4ff2-9f76-4e0b55a389b6")
+        };
+
+        try
+        {     
+           await CatalogApiClient.UploadFileAsync(model, _file);
+          
+           _status = $"Status: completed";
+        }
+        catch (ApiException ex)
+        {
+            _status = $"API error: {ex.FriendlyMessage}";
+        }
+        catch (Exception ex)
+        {
+            _status = $"Unexpected error: {ex.Message}";
+        }
+    }
+}
