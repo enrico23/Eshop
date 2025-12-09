@@ -128,7 +128,7 @@ public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> l
     public async Task UpdateProductAsync(Guid id, CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default)
     {
         using var form = BuildMultipart(model, file);
-        await SendAsync(() => httpClient.PutAsJsonAsync($"{ProductsEndpointsBasePath}/{id}", model, ct), ct);
+        await SendAsync(() => httpClient.PutAsync($"{ProductsEndpointsBasePath}/v2/{id}", form, ct), ct);
     }
         
 
