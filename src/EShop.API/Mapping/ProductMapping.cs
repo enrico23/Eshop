@@ -18,12 +18,20 @@ public class ProductMapping : IRegister
             .Map(dest => dest.CategoryName, src => src.Category!.Name)
             .Map(dest => dest.Sku, src => src.Sku.Value);
 
-        config.NewConfig<CreateProductFormDto, CreateProductDto>()
+        config.NewConfig<ProductFormDto, CreateProductDto>()
            .Map(dest => dest.Name, src => src.Name)
            .Map(dest => dest.Description, src => src.Description)
            .Map(dest => dest.Price, src => src.Price)
            .Map(dest => dest.Stock, src => src.Stock)
            .Map(dest => dest.CategoryId, src => src.CategoryId)
            .Map(dest => dest.Sku, src => src.Sku);
+
+        config.NewConfig<ProductFormDto, UpdateProductDto>()
+          .Map(dest => dest.Name, src => src.Name)
+          .Map(dest => dest.Description, src => src.Description)
+          .Map(dest => dest.Price, src => src.Price)
+          .Map(dest => dest.Stock, src => src.Stock)
+          .Map(dest => dest.CategoryId, src => src.CategoryId)
+          .Map(dest => dest.Sku, src => src.Sku);
     }
 }

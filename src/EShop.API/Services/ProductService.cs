@@ -9,6 +9,7 @@ using EShop.Shared.Representations.Product;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Immutable;
 using System.Linq.Dynamic.Core;
 
 namespace EShop.API.Services;
@@ -119,20 +120,12 @@ public class ProductService : IProductService
         if (product is null)
             return false;
 
-        var productName = Product.ValidateName(updateProductDto.Name);
-        product.ChangeName(productName);
+        product.ChangeName(updateProductDto.Name);
+        product.ChangeDescription(new ProductDescription(updateProductDto.Description));
+        product.ChangePrice(new Money(updateProductDto.Price));
+        product.ChangeStock(new StockQuantity(updateProductDto.Stock));
 
-        var productDescription = new ProductDescription(updateProductDto.Description);
-        product.ChangeDescription(productDescription);
-
-        var productPrice = new Money(updateProductDto.Price);
-        product.ChangePrice(productPrice);
-
-        var productQuantity = new StockQuantity(updateProductDto.Stock);
-        product.ChangeStock(productQuantity);
-
-        var productStatus = updateProductDto.Status;
-        switch (productStatus)
+        switch (updateProductDto.Status)
         {
             case ProductStatus.Active:
                 product.Publish();
@@ -163,6 +156,16 @@ public class ProductService : IProductService
         if (!updateProductDto.CategoryId.HasValue)
             throw new DomainException("Category is required.");
         product.ChangeCategory((Guid)updateProductDto.CategoryId);
+
+
+        if(updateProductDto.Images is not null && updateProductDto.Images.Count > 0)
+        {
+           var newImages = updateProductDto.Images.Select(image =>
+               new ProductImageSpec( image.Url, image.AltText, image.IsPrimary))
+                .ToImmutableList();
+
+            product.ReplaceImages(newImages!);
+        }
         
         await _context.SaveChangesAsync(ct);
 
@@ -182,3 +185,4 @@ public class ProductService : IProductService
         return true;
     }
 }
+

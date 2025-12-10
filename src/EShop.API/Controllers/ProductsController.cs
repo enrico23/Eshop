@@ -1,5 +1,6 @@
 ﻿using EShop.API.Models;
 using EShop.API.Services;
+using EShop.Shared.Helpers;
 using EShop.Shared.Representations;
 using EShop.Shared.Representations.Product;
 using Mapster;
@@ -48,60 +49,36 @@ public class ProductsController(
     // POST: api/products
     // <snippet_Create>
     [HttpPost]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<ProductDto>> PostAsync(CreateProductDto createProductDto, CancellationToken ct = default)
-    {
-        if (createProductDto is null)
-            return BadRequest();
-
-        var productDto = await _productService.AddAsync(createProductDto, ct);
-        var url = $"{Request.Scheme}://{Request.Host}/api/Products/{productDto.Id}";
-        return Created(url, productDto);
-    }
-
-    [HttpPost("v2")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<ProductDto>> PostMultiparFormDatatAsync(
-        [FromForm] CreateProductFormDto form,
+    public async Task<IActionResult> PostMultiparFormDatatAsync(
+        [FromForm] ProductFormDto form,
         CancellationToken ct = default)
     {
         if (!ModelState.IsValid)
-        {
             return ValidationProblem(ModelState);
-        }
-
-        string relativeUrl;
-        try
-        {
-            relativeUrl = await fileStorage.SaveImageAsync(form.File, ct);
-        }
-        catch (OperationCanceledException)
-        {
-            return StatusCode(StatusCodes.Status499ClientClosedRequest);
-        }
-        catch (BadHttpRequestException ex)
-        {
-            return StatusCode(ex.StatusCode, ex.Message);
-        }
-        catch (Exception)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Error saving file.");
-        }
-
+        
         var createProductDto = form.Adapt<CreateProductDto>();
-        createProductDto.Images =
-        [
-            new()
-            {
-                Url       = relativeUrl,
-                AltText   = form.Name, // or another form field
-                IsPrimary = true,
-                SortOrder = 0
-            }
-        ];
+
+        if (form.File is not null)
+        {
+            var result = await TryExtensions.Try(() => fileStorage.SaveImageAsync(form.File, ct));
+
+            if (!result.IsSuccess)
+                return MapFileExceptionToResult(result.Error!);
+
+            createProductDto.Images =
+                  [
+                      new()
+                        {
+                            Url       = result.Value!,
+                            AltText   = form.Name,
+                            IsPrimary = true,
+                            SortOrder = 0
+                        }
+                  ];
+        }
 
         var productDto = await _productService.AddAsync(createProductDto, ct);
 
@@ -113,22 +90,46 @@ public class ProductsController(
     // PUT: api/products/{id:guid}
     // <snippet_Update>
     [HttpPut("{id:guid}")]
+    [Consumes("multipart/form-data")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> PutAsync(Guid id, UpdateProductDto updateProductDto, CancellationToken ct = default)
+    public async Task<IActionResult> PutAsync([FromRoute] Guid id, [FromForm] ProductFormDto form,
+        CancellationToken ct = default)
     {
-        if (updateProductDto is null)
-            return BadRequest();
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
 
         if (!await _productService.ExistsAsync(id))
             return NotFound();
+
+        var updateProductDto = form.Adapt<UpdateProductDto>();
+
+        if (form.File is not null)
+        {
+            var result = await TryExtensions.Try(()=> fileStorage.SaveImageAsync(form.File, ct));
+
+            if (!result.IsSuccess)
+                return MapFileExceptionToResult(result.Error!);
+
+            updateProductDto.Images =
+                [
+                    new()
+                    {
+                        Url       = result.Value!,
+                        AltText   = form.Name,
+                        IsPrimary = true,
+                        SortOrder = 0
+                    }
+                ];
+        }
 
         await _productService.UpdateAsync(id, updateProductDto, ct);
 
         return NoContent();
     }
-    // </snippet_Update>
+
+    //</snippet_Update>
 
     // DELETE: api/products/{id:guid}
     [HttpDelete("{id:guid}")]
@@ -142,4 +143,13 @@ public class ProductsController(
 
         return NoContent();
     }
+
+
+    private IActionResult MapFileExceptionToResult(Exception ex)
+       => ex switch
+       {
+           OperationCanceledException => StatusCode(StatusCodes.Status499ClientClosedRequest),
+           BadHttpRequestException httpEx => StatusCode(httpEx.StatusCode, httpEx.Message),
+           _ => StatusCode(StatusCodes.Status500InternalServerError, "Error saving file.")
+       };
 }

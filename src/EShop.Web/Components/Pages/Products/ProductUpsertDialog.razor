@@ -1,5 +1,6 @@
 ﻿@using EShop.Web.Clients
 @using EShop.Web.Exceptions
+@using EShop.Web.Models
 @using MudBlazor
 
 <MudDialog>
@@ -39,7 +40,7 @@
 @code {
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
 
-    [Parameter] public ProductUpsertDto Product { get; set; } = null!;
+    [Parameter] public CreateProductViewModel Product { get; set; } = null!;
 
     [Parameter] public List<CategoryDto> Categories { get; set; } = new();
 
