@@ -49,19 +49,6 @@ public class ProductsController(
     // POST: api/products
     // <snippet_Create>
     [HttpPost]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> PostAsync(CreateProductDto createProductDto, CancellationToken ct = default)
-    {
-        if (createProductDto is null)
-            return BadRequest();
-
-        var productDto = await _productService.AddAsync(createProductDto, ct);
-        var url = $"{Request.Scheme}://{Request.Host}/api/Products/{productDto.Id}";
-        return Created(url, productDto);
-    }
-
-    [HttpPost("v2")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -77,6 +64,7 @@ public class ProductsController(
         if (form.File is not null)
         {
             var result = await TryExtensions.Try(() => fileStorage.SaveImageAsync(form.File, ct));
+
             if (!result.IsSuccess)
                 return MapFileExceptionToResult(result.Error!);
 
@@ -102,28 +90,11 @@ public class ProductsController(
     // PUT: api/products/{id:guid}
     // <snippet_Update>
     [HttpPut("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> PutAsync(Guid id, UpdateProductDto updateProductDto, CancellationToken ct = default)
-    {
-        if (updateProductDto is null)
-            return BadRequest();
-
-        if (!await _productService.ExistsAsync(id))
-            return NotFound();
-
-        await _productService.UpdateAsync(id, updateProductDto, ct);
-
-        return NoContent();
-    }
-
-    [HttpPut("v2/{id:guid}")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> PutV2Async([FromRoute] Guid id, [FromForm] ProductFormDto form,
+    public async Task<IActionResult> PutAsync([FromRoute] Guid id, [FromForm] ProductFormDto form,
         CancellationToken ct = default)
     {
         if (!ModelState.IsValid)
@@ -137,6 +108,7 @@ public class ProductsController(
         if (form.File is not null)
         {
             var result = await TryExtensions.Try(()=> fileStorage.SaveImageAsync(form.File, ct));
+
             if (!result.IsSuccess)
                 return MapFileExceptionToResult(result.Error!);
 
@@ -171,6 +143,7 @@ public class ProductsController(
 
         return NoContent();
     }
+
 
     private IActionResult MapFileExceptionToResult(Exception ex)
        => ex switch

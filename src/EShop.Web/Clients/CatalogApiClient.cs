@@ -124,14 +124,14 @@ public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> l
     public async Task CreateProductAsync(CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default)
     {
         using var form = BuildMultipart(model, file);
-        await SendAsync(() => httpClient.PostAsync($"{ProductsEndpointsBasePath}/v2", form, ct), ct);
+        await SendAsync(() => httpClient.PostAsync($"{ProductsEndpointsBasePath}", form, ct), ct);
     }
         
 
     public async Task UpdateProductAsync(Guid id, CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default)
     {
         using var form = BuildMultipart(model, file);
-        await SendAsync(() => httpClient.PutAsync($"{ProductsEndpointsBasePath}/v2/{id}", form, ct), ct);
+        await SendAsync(() => httpClient.PutAsync($"{ProductsEndpointsBasePath}/{id}", form, ct), ct);
     }
         
 
