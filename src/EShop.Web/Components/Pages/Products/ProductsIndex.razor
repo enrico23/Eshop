@@ -15,7 +15,6 @@
                  SearchPlaceholder="Search..."
                  AddButtonText="Add Product"
                  OnAdd="OpenCreateDialogAsync"
-                 OnEdit="OpenEditDialogAsync"
                  OnDelete="OpenDeleteDialogAsync">
         <Columns>
             <PropertyColumn T="ProductDto"
@@ -49,6 +48,16 @@
                             Title="Status"
                             Sortable="true"
                             Filterable="false" />
+
+            <TemplateColumn T="ProductDto">
+                <CellTemplate>
+                    <MudStack Row>
+                        <MudLink Href="@($"/products/{context.Item.Id}/edit")">
+                            Edit
+                        </MudLink>
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn>
         </Columns>
     </GenericGrid>
 </MudPaper>

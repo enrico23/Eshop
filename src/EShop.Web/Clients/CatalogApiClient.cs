@@ -4,6 +4,7 @@ using EShop.Shared.Representations.Product;
 using EShop.Web.Models;
 using Microsoft.AspNetCore.Components.Forms;
 using System.Globalization;
+using System.Net.Http.Json;
 
 namespace EShop.Web.Clients;
 
@@ -19,12 +20,16 @@ public interface ICatalogApiClient
 
     #endregion
 
-    Task CreateProductAsync(CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default);
-    Task DeleteProductAsync(Guid id, CancellationToken ct = default);
+    #region Products
+
+   
     Task<List<ProductDto>> GetAllProductsAsync(CancellationToken ct = default);
     Task<PagedResult<ProductDto>> GetPagedProductsAsync(int page = 1, int pageSize = 20, string orderBy = "Name", string orderDirection = "asc", string? filter = null, CancellationToken ct = default);
+    Task<ProductDto?> GetByIdAsync(Guid id, CancellationToken ct = default);
+    Task CreateProductAsync(CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default);
     Task UpdateProductAsync(Guid id, CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default);
-
+    Task DeleteProductAsync(Guid id, CancellationToken ct = default);
+    #endregion
 }
 
 
@@ -121,13 +126,15 @@ public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> l
         return result;
     }
 
+    public Task<ProductDto?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
+        SendAsync<ProductDto>(() => httpClient.GetAsync($"{ProductsEndpointsBasePath}/{id}", ct), ct);
+
     public async Task CreateProductAsync(CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default)
     {
         using var form = BuildMultipart(model, file);
         await SendAsync(() => httpClient.PostAsync($"{ProductsEndpointsBasePath}", form, ct), ct);
     }
         
-
     public async Task UpdateProductAsync(Guid id, CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default)
     {
         using var form = BuildMultipart(model, file);
@@ -137,6 +144,8 @@ public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> l
 
     public Task DeleteProductAsync(Guid id, CancellationToken ct = default) =>
         SendAsync(() => httpClient.DeleteAsync($"{ProductsEndpointsBasePath}/{id}", ct), ct);
+
+   
 
     #endregion
 
@@ -166,4 +175,6 @@ public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> l
 
         return form;
     }
+
+   
 }

@@ -1,0 +1,80 @@
+﻿@page "/products/create"
+@page "/products/{Id:guid}/edit"
+@using EShop.Web.Models
+
+<PageTitle>Product</PageTitle>
+
+@if (_isLoading)
+{
+    <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+}
+else
+{
+    <MudPaper Class="pa-4">
+    @if(_isCreate)
+    {
+        <MudText Typo="Typo.h5">Create Product</MudText>
+    }
+    else
+    {
+        var productName = _product is null ? "" : _product.Name;
+        <MudText Typo="Typo.h5">Edit product @productName</MudText>
+    }
+     <MudSpacer />
+    </MudPaper>
+}
+
+@code {
+    [Parameter] public Guid? Id { get; set; }
+
+    [Inject] protected ICatalogApiClient CatalogApiClient { get; set; } = null!;
+
+    private bool _isCreate => !Id.HasValue;
+    private bool _isLoading = true;
+    private bool _isSaving;
+    private string _error = "";
+
+    private ProductDto? _product = null!;
+    private CreateProductViewModel _model = null!;
+    private List<CategoryDto> _categories = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _categories = await CatalogApiClient.GetAllCategoriesAsync();
+
+        _model = new CreateProductViewModel
+        {
+            Name = "",
+            Description = "",
+            Sku = "",
+            Price = 0.01m,
+            Stock = 1,
+            Status = EShop.Shared.Domain.ProductStatus.Draft
+        };
+
+        if (_isCreate)
+        {
+        }
+        else
+        {
+            _product = await CatalogApiClient.GetByIdAsync(Id!.Value);
+            if(_product is not null)
+            {
+                _model = new CreateProductViewModel()
+                {
+                    Name = _product.Name,
+                    Description = _product.Description ?? string.Empty,
+                    Sku = _product.Sku,
+                    Price = _product.Price,
+                    Stock = _product.Stock,
+                    Status = _product.Status,
+                    CategoryId = _product.CategoryId,
+                    Images = _product.Images
+                };
+            }
+        }
+
+        _isLoading = false;
+    }
+}
