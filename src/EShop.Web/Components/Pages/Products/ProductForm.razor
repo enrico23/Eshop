@@ -118,7 +118,7 @@
     </MudText>
 }
 
-@* 
+
     @if (_files != null)
 {
     <MudText Typo="@Typo.h6">@_files.Count() File@(_files.Count() == 1 ? "" : "s"):</MudText>
@@ -132,7 +132,7 @@
     </MudList>
 } 
 
-*@
+
 
 
 @if (!string.IsNullOrEmpty(_previewImageUrl))
@@ -159,8 +159,25 @@
 
     private string? _previewImageUrl;
 
+
+    protected override void OnParametersSet()
+    {
+        // if (_previewImageUrl is null && Product.Images is { Count: > 0 })
+        // {
+        //     var primary = Product.Images.FirstOrDefault(i => i.IsPrimary) ?? Product.Images.First();
+        //     _previewImageUrl = primary.Url;   this comes from the DB
+        // }
+    }
+
     private async Task UploadFiles(IBrowserFile file)
     {
+        // var file = _files.FirstOrDefault();
+        // if (file is null)
+        // {
+        //     _previewImageUrl = null;
+        //     return;
+        // }
+
         Product.File = file;
 
         _files.Add(file);

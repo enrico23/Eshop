@@ -12,7 +12,6 @@ public sealed class Product
 
     public ProductDescription Description { get; private set; } = null!;
 
-
     public Money Price { get; private set; } = null!;
 
     public StockQuantity Stock { get; private set; } = null!;
@@ -47,6 +46,8 @@ public sealed class Product
         };
     }
 
+    #region Name
+
     public void ChangeName(string newName)
     {
         Name = ValidateName(newName);
@@ -64,15 +65,25 @@ public sealed class Product
         return value;
     }
 
+    #endregion
+
+    #region Description
+
     public void ChangeDescription(ProductDescription newDescription)
     {
         Description = newDescription ?? throw new ArgumentNullException(nameof(newDescription));
     }
 
+    #endregion
+
+    #region Price
+
     public void ChangePrice(Money newPrice)
     {
         Price = newPrice ?? throw new ArgumentNullException(nameof(newPrice));
     }
+
+    #endregion 
 
     #region Product Stock
 
@@ -215,5 +226,41 @@ public sealed class Product
         }
     }
 
+    public void ReplaceImages(IReadOnlyList<ProductImageSpec> newImages)
+    {
+        ArgumentNullException.ThrowIfNull(newImages);
+
+        _images.Clear();
+
+        if (newImages.Count == 0)
+            return;
+
+        var primaryCount = newImages.Count(i => i.IsPrimary);
+        if (primaryCount > 1)
+            throw new DomainException("Only one primary image is allowed.");
+
+        ProductImage? requestedPrimary = null;
+
+        foreach (var spec in newImages)
+        {
+            var image = AddImage(spec.Url, spec.AltText);
+
+            if (spec.IsPrimary && requestedPrimary is null)
+            {
+                requestedPrimary = image;
+            }
+        }
+
+        if (requestedPrimary is not null)
+        {
+            SetPrimaryImage(requestedPrimary.Id);
+        }
+    }
+
     #endregion
 }
+
+public sealed record ProductImageSpec(
+    string Url,
+    string? AltText,
+    bool IsPrimary);
