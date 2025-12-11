@@ -2,6 +2,8 @@
 @page "/products/{Id:guid}/edit"
 @using EShop.Shared.Domain
 @using EShop.Web.Models
+@using EShop.Web.Exceptions
+@using System.Net
 
 <PageTitle>Product</PageTitle>
 
@@ -13,89 +15,113 @@ else
 {
     <MudPaper Class="pa-4">
         <MudText Typo="Typo.h5">@_title</MudText>
-     <MudSpacer />
-    </MudPaper>
+        <MudSpacer />
 
-    <MudGrid GutterSize="2">
+        <MudForm @ref="_form" Model="_model">
+            <MudGrid GutterSize="2">
 
-        <MudItem xs="12">
-            <MudTextField @bind-Value="_model.Name"
-                          Label="Name"
-                          Required="true"
-                          For="@(() => _model.Name)" />
-        </MudItem>
+                <MudItem xs="10">
+                    <MudTextField @bind-Value="_model.Name"
+                                  Label="Name"
+                                  Required="true"
+                                  For="@(() => _model.Name)" />
+                </MudItem>
 
-        <MudItem xs="12">
-            <MudTextField @bind-Value="_model.Price"
-                          Label="Price"
-                          Required="true"
-                          For="@(() => _model.Price)" />
-        </MudItem>
+                <MudItem xs="6">
+                    <MudTextField @bind-Value="_model.Price"
+                                  Label="Price"
+                                  Required="true"
+                                  For="@(() => _model.Price)" />
+                </MudItem>
 
-        <MudItem xs="12">
-            <MudTextField @bind-Value="_model.Stock"
-                          Label="Stock"
-                          Required="true"
-                          For="@(() => _model.Stock)" />
-        </MudItem>
+                <MudItem xs="4">
+                    <MudTextField @bind-Value="_model.Stock"
+                                  Label="Stock"
+                                  Required="true"
+                                  For="@(() => _model.Stock)" />
+                </MudItem>
 
-        <MudItem xs="12">
-            @if (_categories is null || _categories.Count == 0)
-            {
-                <MudAlert Severity="Severity.Warning">
-                    No categories are available. Please create a category first.
-                </MudAlert>
-            }
-            else
-            {
-                <MudSelect Label="Category"
-                           Placeholder="Select..."
-                           T="Guid ?" Required="true"
-                           @bind-Value="_model.CategoryId"
-                           For="@(() => _model.CategoryId)"
-                           FullWidth="true"
-                           Margin="Margin.Dense">
-
-                    @foreach (var category in _categories)
+                <MudItem xs="6">
+                    @if (_categories is null || _categories.Count == 0)
                     {
-                        <MudSelectItem T="Guid ?" Value="category.Id">@category.Name</MudSelectItem>
+                        <MudAlert Severity="Severity.Warning">
+                            No categories are available. Please create a category first.
+                        </MudAlert>
                     }
-                </MudSelect>
+                    else
+                    {
+                        <MudSelect Label="Category"
+                                   Placeholder="Select..."
+                                   T="Guid ?" Required="true"
+                                   @bind-Value="_model.CategoryId"
+                                   For="@(() => _model.CategoryId)"
+                                   FullWidth="true"
+                                   Margin="Margin.Dense">
+
+                            @foreach (var category in _categories)
+                            {
+                                <MudSelectItem T="Guid ?" Value="category.Id">@category.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
+                </MudItem>
+
+                <MudItem xs="4">
+
+                    <MudSelect T="ProductStatus" Label="Status" @bind-Value="_model.Status">
+                        @foreach (var status in Enum.GetValues<ProductStatus>())
+                        {
+                            <MudSelectItem T="ProductStatus" Value="@status">
+                                @status
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="10">
+                    <MudTextField @bind-Value="_model.Sku"
+                                  Label="Sku"
+                                  Required="true"
+                                  For="@(() => _model.Sku)" />
+                </MudItem>
+
+                <MudItem xs="10">
+                    <MudTextField T="string"
+                                  @bind-Value="_model.Description"
+                                  Label="Description"
+                                  For="@(() => _model.Description)"
+                                  Lines="4"
+                                  MaxLength="255"
+                                  Required="true"
+                                  TextLengthExceededMessage="Description cannot exceed 255 characters." />
+                </MudItem>
+
+            </MudGrid>
+
+            @if (!string.IsNullOrEmpty(_error))
+            {
+                <MudAlert Severity="Severity.Error" Class="mt-4">@_error</MudAlert>
             }
-        </MudItem>
 
+            <MudStack Row Class="mt-4">
+                <MudButton Color="Color.Primary"
+                           Variant="Variant.Filled"
+                           OnClick="SubmitAsync"
+                           Disabled="_isSaving || _categories.Count == 0">
+                    @(_isCreate ? "Create" : "Save")
+                </MudButton>
 
-        <MudItem xs="12">
-
-            <MudSelect T="ProductStatus" Label="Status" @bind-Value="_model.Status">
-                @foreach (var status in Enum.GetValues<ProductStatus>())
+                @if (_isSaving)
                 {
-                    <MudSelectItem T="ProductStatus" Value="@status">
-                        @status
-                    </MudSelectItem>
+                    <MudProgressCircular Class="ml-2"
+                                         Color="Color.Primary"
+                                         Size="Size.Medium"
+                                         Indeterminate="true" />
                 }
-            </MudSelect>
-        </MudItem>
+            </MudStack>
+        </MudForm>
 
-        <MudItem xs="12">
-            <MudTextField @bind-Value="_model.Sku"
-                          Label="Sku"
-                          Required="true"
-                          For="@(() => _model.Sku)" />
-        </MudItem>
-
-        <MudItem xs="12">
-            <MudTextField T="string"
-                          @bind-Value="_model.Description"
-                          Label="Description"
-                          For="@(() => _model.Description)"
-                          Lines="4"
-                          MaxLength="255"
-                          Required="true"
-                          TextLengthExceededMessage="Description cannot exceed 255 characters." />
-        </MudItem>
-
-    </MudGrid>
+    </MudPaper>
 }
 
 @code {
@@ -103,6 +129,8 @@ else
     [Parameter] public Guid? Id { get; set; }
 
     [Inject] protected ICatalogApiClient CatalogApiClient { get; set; } = null!;
+    [Inject] protected NavigationManager NavigationManager { get; set; } = null!;
+    [Inject] protected ISnackbar Snackbar { get; set; } = null!;
 
     private bool _isCreate => !Id.HasValue;
     private bool _isLoading = true;
@@ -113,6 +141,7 @@ else
     private ProductDto? _product = null!;
     private CreateProductViewModel _model = null!;
     private List<CategoryDto> _categories = new();
+    private MudForm _form = null!;
 
 
     protected override async Task OnInitializedAsync()
@@ -136,7 +165,7 @@ else
         else
         {
             _product = await CatalogApiClient.GetByIdAsync(Id!.Value);
-            if(_product is not null)
+            if (_product is not null)
             {
                 _title = $"Edit Product {_product.Name}";
 
@@ -155,5 +184,50 @@ else
         }
 
         _isLoading = false;
+    }
+
+    private async Task SubmitAsync()
+    {
+        _error = "";
+        _isSaving = true;
+
+        await _form.Validate();
+        if (!_form.IsValid)
+        {
+            _isSaving = false;
+            return;
+        }
+
+        try
+        {
+            if (_isCreate)
+            {
+                await CatalogApiClient.CreateProductAsync(_model, _model.File, CancellationToken.None);
+                Snackbar.Add($"Product '{_model.Name}' created successfully.", Severity.Success);
+            }
+            else
+            {
+                await CatalogApiClient.UpdateProductAsync(Id!.Value, _model, _model.File, CancellationToken.None);
+                Snackbar.Add($"Product '{_model.Name}' updated successfully.", Severity.Success);
+            }
+
+            NavigationManager.NavigateTo("/products");
+        }
+        catch (ApiException ex) when (ex.StatusCode is HttpStatusCode.Conflict)
+        {
+            Snackbar.Add(ex.Message!, Severity.Error);
+        }
+        catch (ApiException ex)
+        {
+            Snackbar.Add(ex.FriendlyMessage!, Severity.Error);
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Unexpected error.", Severity.Error);
+        }
+        finally
+        {
+            _isSaving = false;
+        }
     }
 }
