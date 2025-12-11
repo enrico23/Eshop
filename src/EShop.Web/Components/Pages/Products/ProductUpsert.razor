@@ -1,5 +1,6 @@
 ﻿@page "/products/create"
 @page "/products/{Id:guid}/edit"
+@using EShop.Shared.Domain
 @using EShop.Web.Models
 
 <PageTitle>Product</PageTitle>
@@ -11,20 +12,94 @@
 else
 {
     <MudPaper Class="pa-4">
-    @if(_isCreate)
-    {
-        <MudText Typo="Typo.h5">Create Product</MudText>
-    }
-    else
-    {
-        var productName = _product is null ? "" : _product.Name;
-        <MudText Typo="Typo.h5">Edit product @productName</MudText>
-    }
+        <MudText Typo="Typo.h5">@_title</MudText>
      <MudSpacer />
     </MudPaper>
+
+    <MudGrid GutterSize="2">
+
+        <MudItem xs="12">
+            <MudTextField @bind-Value="_model.Name"
+                          Label="Name"
+                          Required="true"
+                          For="@(() => _model.Name)" />
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudTextField @bind-Value="_model.Price"
+                          Label="Price"
+                          Required="true"
+                          For="@(() => _model.Price)" />
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudTextField @bind-Value="_model.Stock"
+                          Label="Stock"
+                          Required="true"
+                          For="@(() => _model.Stock)" />
+        </MudItem>
+
+        <MudItem xs="12">
+            @if (_categories is null || _categories.Count == 0)
+            {
+                <MudAlert Severity="Severity.Warning">
+                    No categories are available. Please create a category first.
+                </MudAlert>
+            }
+            else
+            {
+                <MudSelect Label="Category"
+                           Placeholder="Select..."
+                           T="Guid ?" Required="true"
+                           @bind-Value="_model.CategoryId"
+                           For="@(() => _model.CategoryId)"
+                           FullWidth="true"
+                           Margin="Margin.Dense">
+
+                    @foreach (var category in _categories)
+                    {
+                        <MudSelectItem T="Guid ?" Value="category.Id">@category.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            }
+        </MudItem>
+
+
+        <MudItem xs="12">
+
+            <MudSelect T="ProductStatus" Label="Status" @bind-Value="_model.Status">
+                @foreach (var status in Enum.GetValues<ProductStatus>())
+                {
+                    <MudSelectItem T="ProductStatus" Value="@status">
+                        @status
+                    </MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudTextField @bind-Value="_model.Sku"
+                          Label="Sku"
+                          Required="true"
+                          For="@(() => _model.Sku)" />
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudTextField T="string"
+                          @bind-Value="_model.Description"
+                          Label="Description"
+                          For="@(() => _model.Description)"
+                          Lines="4"
+                          MaxLength="255"
+                          Required="true"
+                          TextLengthExceededMessage="Description cannot exceed 255 characters." />
+        </MudItem>
+
+    </MudGrid>
 }
 
 @code {
+
     [Parameter] public Guid? Id { get; set; }
 
     [Inject] protected ICatalogApiClient CatalogApiClient { get; set; } = null!;
@@ -33,6 +108,7 @@ else
     private bool _isLoading = true;
     private bool _isSaving;
     private string _error = "";
+    private string _title = "";
 
     private ProductDto? _product = null!;
     private CreateProductViewModel _model = null!;
@@ -55,12 +131,15 @@ else
 
         if (_isCreate)
         {
+            _title = "Create Product";
         }
         else
         {
             _product = await CatalogApiClient.GetByIdAsync(Id!.Value);
             if(_product is not null)
             {
+                _title = $"Edit Product {_product.Name}";
+
                 _model = new CreateProductViewModel()
                 {
                     Name = _product.Name,
