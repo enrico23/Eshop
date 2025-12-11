@@ -1,5 +1,4 @@
 ﻿using EShop.Data;
-using EShop.Data.Migrations;
 using EShop.Domain;
 using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;

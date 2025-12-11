@@ -1,0 +1,156 @@
+@page "/products/create"
+@page "/products/{Id:guid}/edit"
+@using EShop.Shared.Domain
+@using EShop.Web.Models
+@using EShop.Web.Exceptions
+@using System.Net
+@using System.Linq
+@inherits ProductUpsertBase
+
+<PageTitle>@_title</PageTitle>
+
+@if (_isLoading)
+{
+    <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+}
+else
+{
+    <MudPaper Class="pa-4">
+        <MudButton Color="Color.Default"
+                   Variant="Variant.Text"
+                   StartIcon="@Icons.Material.Filled.ArrowBack"
+                   Disabled="_isSaving"
+                   OnClick="@GoBack">
+            Back to Products
+        </MudButton>
+
+        <MudDivider Invisible="true" Class="my-4" />
+
+        <MudText Typo="Typo.h5">@_title</MudText>
+       
+        <MudDivider Invisible="true" Class="my-2" />
+
+        <MudForm @ref="_form" Model="_model">
+            <MudTabs>
+                <MudTabPanel Text="Metadata" Icon="@Icons.Material.Filled.Info">
+                    <MudGrid GutterSize="2">
+                        <MudItem xs="10">
+                            <MudTextField @bind-Value="_model.Name" Label="Name" Required="true" For="@(() => _model.Name)" />
+                        </MudItem>
+
+                        <MudItem xs="6">
+                            <MudTextField @bind-Value="_model.Price" Label="Price" Required="true" For="@(() => _model.Price)" />
+                        </MudItem>
+
+                        <MudItem xs="4">
+                            <MudTextField @bind-Value="_model.Stock" Label="Stock" Required="true" For="@(() => _model.Stock)" />
+                        </MudItem>
+
+                        <MudItem xs="6">
+                            @if (_categories is null || _categories.Count == 0)
+                            {
+                                <MudAlert Severity="Severity.Warning">
+                                    No categories are available. Please create a category first.
+                                </MudAlert>
+                            }
+                            else
+                            {
+                                <MudSelect Label="Category"
+                                           Placeholder="Select..."
+                                           T="Guid ?" Required="true"
+                                           @bind-Value="_model.CategoryId"
+                                           For="@(() => _model.CategoryId)"
+                                           FullWidth="true"
+                                           Margin="Margin.Dense">
+
+                                    @foreach (var category in _categories)
+                                    {
+                                        <MudSelectItem T="Guid ?" Value="category.Id">@category.Name</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            }
+                        </MudItem>
+
+                        <MudItem xs="4">
+                            <MudSelect T="ProductStatus" Label="Status" @bind-Value="_model.Status">
+                                @foreach (var status in Enum.GetValues<ProductStatus>())
+                                {
+                                    <MudSelectItem T="ProductStatus" Value="@status">
+                                        @status
+                                    </MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+
+                        <MudItem xs="10">
+                            <MudTextField @bind-Value="_model.Sku" Label="Sku" Required="true" For="@(() => _model.Sku)" />
+                        </MudItem>
+
+                        <MudItem xs="10">
+                            <MudTextField T="string"
+                                          @bind-Value="_model.Description"
+                                          Label="Description"
+                                          For="@(() => _model.Description)"
+                                          Lines="4"
+                                          MaxLength="255"
+                                          Required="true"
+                                          TextLengthExceededMessage="Description cannot exceed 255 characters." />
+                        </MudItem>
+                    </MudGrid>
+                </MudTabPanel>
+
+                <MudTabPanel Text="Images" Icon="@Icons.Material.Filled.Image">
+                    <MudPaper Class="pa-3">
+                        <MudText Typo="Typo.subtitle1">Images</MudText>
+                        <MudDivider Class="my-2" />
+                        @if (_model.Images is { Count: > 0 })
+                        {
+                            <MudGrid GutterSize="2">
+                                @foreach (var image in _model.Images.OrderBy(i => i.SortOrder))
+                                {
+                                    <MudItem xs="12" sm="6" md="4" lg="3">
+                                        <MudPaper Class="pa-1">
+                                            <MudImage Src="@image.Url"
+                                                      Alt="@(!string.IsNullOrWhiteSpace(image.AltText) ? image.AltText : _model.Name)"
+                                                      
+                                                      ObjectFit="ObjectFit.Cover" />
+                                            <MudStack Row  Class="mt-1 px-1">
+                                                <MudText Typo="Typo.caption">Sort: @image.SortOrder</MudText>
+                                                @if (image.IsPrimary)
+                                                {
+                                                    <p>Primary</p>
+                                                }
+                                            </MudStack>
+                                        </MudPaper>
+                                    </MudItem>
+                                }
+                            </MudGrid>
+                        }
+                        else
+                        {
+                            <MudAlert Severity="Severity.Info">No images uploaded yet.</MudAlert>
+                        }
+                    </MudPaper>
+                </MudTabPanel>
+            </MudTabs>
+
+            <MudStack Row Class="mt-4">
+                <MudButton Color="Color.Primary"
+                           Variant="Variant.Filled"
+                           OnClick="SubmitAsync"
+                           Disabled="_isSaving || _categories.Count == 0">
+                    @(_isCreate ? "Create" : "Save")
+                </MudButton>
+
+                @if (_isSaving)
+                {
+                    <MudProgressCircular Class="ml-2"
+                                         Color="Color.Primary"
+                                         Size="Size.Medium"
+                                         Indeterminate="true" />
+                }
+            </MudStack>
+        </MudForm>
+
+    </MudPaper>
+}

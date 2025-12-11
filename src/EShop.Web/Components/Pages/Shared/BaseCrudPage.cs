@@ -11,6 +11,7 @@ public abstract class BaseCrudPage : ComponentBase
     [Inject] protected ICatalogApiClient CategoryApiClient { get; set; } = null!;
     [Inject] protected IDialogService DialogService { get; set; } = null!;
     [Inject] protected ISnackbar Snackbar { get; set; } = null!;
+    [Inject] protected NavigationManager NavigationManager { get; set; } = null!;
 
     private DialogOptions _options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
 
