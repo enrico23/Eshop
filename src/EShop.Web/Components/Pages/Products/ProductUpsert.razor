@@ -1,9 +1,10 @@
-﻿@page "/products/create"
+@page "/products/create"
 @page "/products/{Id:guid}/edit"
 @using EShop.Shared.Domain
 @using EShop.Web.Models
 @using EShop.Web.Exceptions
 @using System.Net
+@using System.Linq
 
 <PageTitle>@_title</PageTitle>
 
@@ -19,85 +20,108 @@ else
         <MudSpacer />
 
         <MudForm @ref="_form" Model="_model">
-            <MudGrid GutterSize="2">
+            <MudTabs>
+                <MudTabPanel Text="Metadata" Icon="@Icons.Material.Filled.Info">
+                    <MudGrid GutterSize="2">
+                        <MudItem xs="10">
+                            <MudTextField @bind-Value="_model.Name" Label="Name" Required="true" For="@(() => _model.Name)" />
+                        </MudItem>
 
-                <MudItem xs="10">
-                    <MudTextField @bind-Value="_model.Name"
-                                  Label="Name"
-                                  Required="true"
-                                  For="@(() => _model.Name)" />
-                </MudItem>
+                        <MudItem xs="6">
+                            <MudTextField @bind-Value="_model.Price" Label="Price" Required="true" For="@(() => _model.Price)" />
+                        </MudItem>
 
-                <MudItem xs="6">
-                    <MudTextField @bind-Value="_model.Price"
-                                  Label="Price"
-                                  Required="true"
-                                  For="@(() => _model.Price)" />
-                </MudItem>
+                        <MudItem xs="4">
+                            <MudTextField @bind-Value="_model.Stock" Label="Stock" Required="true" For="@(() => _model.Stock)" />
+                        </MudItem>
 
-                <MudItem xs="4">
-                    <MudTextField @bind-Value="_model.Stock"
-                                  Label="Stock"
-                                  Required="true"
-                                  For="@(() => _model.Stock)" />
-                </MudItem>
-
-                <MudItem xs="6">
-                    @if (_categories is null || _categories.Count == 0)
-                    {
-                        <MudAlert Severity="Severity.Warning">
-                            No categories are available. Please create a category first.
-                        </MudAlert>
-                    }
-                    else
-                    {
-                        <MudSelect Label="Category"
-                                   Placeholder="Select..."
-                                   T="Guid ?" Required="true"
-                                   @bind-Value="_model.CategoryId"
-                                   For="@(() => _model.CategoryId)"
-                                   FullWidth="true"
-                                   Margin="Margin.Dense">
-
-                            @foreach (var category in _categories)
+                        <MudItem xs="6">
+                            @if (_categories is null || _categories.Count == 0)
                             {
-                                <MudSelectItem T="Guid ?" Value="category.Id">@category.Name</MudSelectItem>
+                                <MudAlert Severity="Severity.Warning">
+                                    No categories are available. Please create a category first.
+                                </MudAlert>
                             }
-                        </MudSelect>
-                    }
-                </MudItem>
+                            else
+                            {
+                                <MudSelect Label="Category"
+                                           Placeholder="Select..."
+                                           T="Guid ?" Required="true"
+                                           @bind-Value="_model.CategoryId"
+                                           For="@(() => _model.CategoryId)"
+                                           FullWidth="true"
+                                           Margin="Margin.Dense">
 
-                <MudItem xs="4">
+                                    @foreach (var category in _categories)
+                                    {
+                                        <MudSelectItem T="Guid ?" Value="category.Id">@category.Name</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            }
+                        </MudItem>
 
-                    <MudSelect T="ProductStatus" Label="Status" @bind-Value="_model.Status">
-                        @foreach (var status in Enum.GetValues<ProductStatus>())
+                        <MudItem xs="4">
+                            <MudSelect T="ProductStatus" Label="Status" @bind-Value="_model.Status">
+                                @foreach (var status in Enum.GetValues<ProductStatus>())
+                                {
+                                    <MudSelectItem T="ProductStatus" Value="@status">
+                                        @status
+                                    </MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+
+                        <MudItem xs="10">
+                            <MudTextField @bind-Value="_model.Sku" Label="Sku" Required="true" For="@(() => _model.Sku)" />
+                        </MudItem>
+
+                        <MudItem xs="10">
+                            <MudTextField T="string"
+                                          @bind-Value="_model.Description"
+                                          Label="Description"
+                                          For="@(() => _model.Description)"
+                                          Lines="4"
+                                          MaxLength="255"
+                                          Required="true"
+                                          TextLengthExceededMessage="Description cannot exceed 255 characters." />
+                        </MudItem>
+                    </MudGrid>
+                </MudTabPanel>
+
+                <MudTabPanel Text="Images" Icon="@Icons.Material.Filled.Image">
+                    <MudPaper Class="pa-3">
+                        <MudText Typo="Typo.subtitle1">Images</MudText>
+                        <MudDivider Class="my-2" />
+                        @if (_model.Images is { Count: > 0 })
                         {
-                            <MudSelectItem T="ProductStatus" Value="@status">
-                                @status
-                            </MudSelectItem>
+                            <MudGrid GutterSize="2">
+                                @foreach (var image in _model.Images.OrderBy(i => i.SortOrder))
+                                {
+                                    <MudItem xs="12" sm="6" md="4" lg="3">
+                                        <MudPaper Class="pa-1">
+                                            <MudImage Src="@image.Url"
+                                                      Alt="@(!string.IsNullOrWhiteSpace(image.AltText) ? image.AltText : _model.Name)"
+                                                      
+                                                      ObjectFit="ObjectFit.Cover" />
+                                            <MudStack Row  Class="mt-1 px-1">
+                                                <MudText Typo="Typo.caption">Sort: @image.SortOrder</MudText>
+                                                @if (image.IsPrimary)
+                                                {
+                                                    <p>Primary</p>
+                                                }
+                                            </MudStack>
+                                        </MudPaper>
+                                    </MudItem>
+                                }
+                            </MudGrid>
                         }
-                    </MudSelect>
-                </MudItem>
-
-                <MudItem xs="10">
-                    <MudTextField @bind-Value="_model.Sku"
-                                  Label="Sku"
-                                  Required="true"
-                                  For="@(() => _model.Sku)" />
-                </MudItem>
-
-                <MudItem xs="10">
-                    <MudTextField T="string"
-                                  @bind-Value="_model.Description"
-                                  Label="Description"
-                                  For="@(() => _model.Description)"
-                                  Lines="4"
-                                  MaxLength="255"
-                                  Required="true"
-                                  TextLengthExceededMessage="Description cannot exceed 255 characters." />
-                </MudItem>
-
-            </MudGrid>
+                        else
+                        {
+                            <MudAlert Severity="Severity.Info">No images uploaded yet.</MudAlert>
+                        }
+                    </MudPaper>
+                </MudTabPanel>
+            </MudTabs>
 
             @if (!string.IsNullOrEmpty(_error))
             {
@@ -121,55 +145,6 @@ else
                 }
             </MudStack>
         </MudForm>
-
-        <MudDivider Class="my-6" />
-
-        <MudText Typo="Typo.h5">Upload product image</MudText>
-
-        <MudDivider Class="my-4" />
-
-        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles"
-                       MaxFileSize="5_000_000"
-                       MaxItems="1"
-                       Accept=".png,.jpg,.jpeg,.webp">
-            <ActivatorContent>
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.CloudUpload">
-                    Upload Files
-                </MudButton>
-            </ActivatorContent>
-        </MudFileUpload>
-
-
-        <MudText Class="mt-2" Color="Color.Default" Typo="Typo.body2">
-            Allowed: .png, .jpg, .jpeg, .webp – Max 5 MB
-        </MudText>
-
-        <hr />
-
-        <MudDivider Class="my-4" />
-
-        <MudItem xs="10">
-      
-          @if (_model.Images is { Count: > 0 })
-          {
-              <MudGrid GutterSize="2">
-                  @foreach (var image in _model.Images.OrderBy(i => i.SortOrder))
-                  {
-                      <MudItem xs="12" sm="6" md="4" lg="3">
-                          <MudPaper Class="pa-1">
-                              @image.Url
-                          </MudPaper>
-                      </MudItem>
-                  }
-              </MudGrid>
-          }
-          else
-          {
-              <MudAlert Severity="Severity.Info">No images uploaded yet.</MudAlert>
-          }
-        </MudItem>
 
     </MudPaper>
 }
@@ -279,10 +254,5 @@ else
         {
             _isSaving = false;
         }
-    }
-
-    private async Task UploadFiles(IBrowserFile file)
-    {
-        _model.File = file;
     }
 }
