@@ -57,6 +57,25 @@
 
     private GenericGrid<ProductDto>? _grid;
 
+    protected override Task OnInitializedAsync()
+    {
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        var toast = query["error"];
+
+        if (toast == "notfound")
+            Snackbar.Add("Product not found.", Severity.Warning);
+        else if (toast == "failed")
+            Snackbar.Add("Failed to load product.", Severity.Error);
+        else if (toast == "catagories")
+            Snackbar.Add("Failed to load the categories.", Severity.Error);
+        else if (toast == "catagories")
+            Snackbar.Add("Unexpected error while loading the product.", Severity.Error);
+
+        return Task.CompletedTask;
+    }
+
+
     private async Task<GridData<ProductDto>> LoadProductAsync(GridState<ProductDto> state, string? searchText)
     {
         var sortBy = "Name";

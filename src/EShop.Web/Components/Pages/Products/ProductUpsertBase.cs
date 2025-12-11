@@ -29,7 +29,20 @@ public class ProductUpsertBase : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        _categories = await CatalogApiClient.GetAllCategoriesAsync();
+        try
+        {
+            _categories = await CatalogApiClient.GetAllCategoriesAsync();
+        }
+        catch (ApiException)
+        {
+            NavigationManager.NavigateTo("/products?error=categories");
+            return;
+        }
+        catch (Exception)
+        {
+            NavigationManager.NavigateTo("/products?error=unexpected");
+            return;
+        }
 
         _model = new CreateProductViewModel
         {
@@ -47,9 +60,17 @@ public class ProductUpsertBase : ComponentBase
         }
         else
         {
-            _product = await CatalogApiClient.GetByIdAsync(Id!.Value);
-            if (_product is not null)
+            try
             {
+                _product = await CatalogApiClient.GetByIdAsync(Id!.Value);
+
+                if (_product is null)
+                {
+                    _isLoading = false;
+                    NavigationManager.NavigateTo("/products?error=notfound");
+                    return;
+                }
+
                 _title = $"Edit Product {_product.Name}";
 
                 _model = new CreateProductViewModel()
@@ -63,6 +84,19 @@ public class ProductUpsertBase : ComponentBase
                     CategoryId = _product.CategoryId,
                     Images = _product.Images
                 };
+               
+            }
+            catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+            {
+                NavigationManager.NavigateTo("/products?error=notfound");
+            }
+            catch (ApiException)
+            {
+                NavigationManager.NavigateTo("/products?error=failed");
+            }
+            catch (Exception)
+            {
+                NavigationManager.NavigateTo("/products?error=unexpected");
             }
         }
 
