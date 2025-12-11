@@ -4,11 +4,20 @@ var builder = DistributedApplication.CreateBuilder(args);
 var disableFrontend = builder.Configuration.GetValue("DisableFrontend", false);
 var dependenciesOnly = builder.Configuration.GetValue("DependenciesOnly", false);
 
+// AZURE BLOB STORAGE
+var storage = builder.AddAzureStorage("storage")
+  .RunAsEmulator(azurite =>
+  {
+      azurite.WithLifetime(ContainerLifetime.Persistent);
+      azurite.WithDataVolume();
+  }).AddBlobs("Blobs");
+
 // SQL SERVER & DB SETUP
 var databaseName = "CatalogDb";
 var password = builder.AddParameter("password", secret: true);
 var sql = builder.AddSqlServer("sql", port:14347, password: password)
-    .WithLifetime(ContainerLifetime.Persistent); ;
+    .WithDataVolume()
+    .WithLifetime(ContainerLifetime.Persistent);
 var db = sql.AddDatabase(databaseName);
 
 // EF MIGRATIONS
@@ -21,6 +30,9 @@ if (!dependenciesOnly)
     // API CONFIGURATION
     var catalogApi = builder.AddProject<Projects.EShop_API>("api")
            .WithReference(db)
+           .WaitFor(db)
+           .WithReference(storage)
+           .WaitFor(storage)
            .WaitFor(migrationWorkerService);
 
     // FRONTEND

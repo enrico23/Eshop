@@ -4,6 +4,7 @@ using EShop.Web.Clients;
 using EShop.Web.Exceptions;
 using EShop.Web.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 using System.Net;
 
@@ -84,7 +85,7 @@ public class ProductUpsertBase : ComponentBase
                     CategoryId = _product.CategoryId,
                     Images = _product.Images
                 };
-               
+
             }
             catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
             {
@@ -148,4 +149,15 @@ public class ProductUpsertBase : ComponentBase
     }
 
     protected void GoBack() => NavigationManager.NavigateTo("/products");
+
+    protected async Task UploadFiles(IBrowserFile file)
+    {
+        _model.File = file;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected string GetImage(string url)
+    {
+        return $"https://localhost:7078/api/images/{url}";
+    }
 }

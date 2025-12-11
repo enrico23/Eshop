@@ -110,7 +110,7 @@ else
                                 {
                                     <MudItem xs="12" sm="6" md="4" lg="3">
                                         <MudPaper Class="pa-1">
-                                            <MudImage Src="@image.Url"
+                                            <MudImage Src="@GetImage(image.Url)"
                                                       Alt="@(!string.IsNullOrWhiteSpace(image.AltText) ? image.AltText : _model.Name)"
                                                       
                                                       ObjectFit="ObjectFit.Cover" />
@@ -130,6 +130,28 @@ else
                         {
                             <MudAlert Severity="Severity.Info">No images uploaded yet.</MudAlert>
                         }
+
+                        <MudText Typo="Typo.h5">Upload product image</MudText>
+
+                        <MudDivider Class="my-2" />
+
+                        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles"
+                                       MaxFileSize="5_000_000"
+                                       MaxItems="1"
+                                       Accept=".png,.jpg,.jpeg,.webp">
+                            <ActivatorContent>
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Primary"
+                                           StartIcon="@Icons.Material.Filled.CloudUpload">
+                                    Upload Files
+                                </MudButton>
+                            </ActivatorContent>
+                        </MudFileUpload>
+
+
+                        <MudText Class="mt-2" Color="Color.Default" Typo="Typo.body2">
+                            Allowed: .png, .jpg, .jpeg, .webp – Max 5 MB
+                        </MudText>
                     </MudPaper>
                 </MudTabPanel>
             </MudTabs>
