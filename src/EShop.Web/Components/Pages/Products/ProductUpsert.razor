@@ -5,7 +5,7 @@
 @using EShop.Web.Exceptions
 @using System.Net
 
-<PageTitle>Product</PageTitle>
+<PageTitle>@_title</PageTitle>
 
 @if (_isLoading)
 {
@@ -15,6 +15,7 @@ else
 {
     <MudPaper Class="pa-4">
         <MudText Typo="Typo.h5">@_title</MudText>
+        <br />
         <MudSpacer />
 
         <MudForm @ref="_form" Model="_model">
@@ -120,6 +121,55 @@ else
                 }
             </MudStack>
         </MudForm>
+
+        <MudDivider Class="my-6" />
+
+        <MudText Typo="Typo.h5">Upload product image</MudText>
+
+        <MudDivider Class="my-4" />
+
+        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles"
+                       MaxFileSize="5_000_000"
+                       MaxItems="1"
+                       Accept=".png,.jpg,.jpeg,.webp">
+            <ActivatorContent>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.CloudUpload">
+                    Upload Files
+                </MudButton>
+            </ActivatorContent>
+        </MudFileUpload>
+
+
+        <MudText Class="mt-2" Color="Color.Default" Typo="Typo.body2">
+            Allowed: .png, .jpg, .jpeg, .webp – Max 5 MB
+        </MudText>
+
+        <hr />
+
+        <MudDivider Class="my-4" />
+
+        <MudItem xs="10">
+      
+          @if (_model.Images is { Count: > 0 })
+          {
+              <MudGrid GutterSize="2">
+                  @foreach (var image in _model.Images.OrderBy(i => i.SortOrder))
+                  {
+                      <MudItem xs="12" sm="6" md="4" lg="3">
+                          <MudPaper Class="pa-1">
+                              @image.Url
+                          </MudPaper>
+                      </MudItem>
+                  }
+              </MudGrid>
+          }
+          else
+          {
+              <MudAlert Severity="Severity.Info">No images uploaded yet.</MudAlert>
+          }
+        </MudItem>
 
     </MudPaper>
 }
@@ -229,5 +279,10 @@ else
         {
             _isSaving = false;
         }
+    }
+
+    private async Task UploadFiles(IBrowserFile file)
+    {
+        _model.File = file;
     }
 }

@@ -14,7 +14,8 @@
                  PageSizeOptions="new[] {5, 10, 25, 50 }"
                  SearchPlaceholder="Search..."
                  AddButtonText="Add Product"
-                 OnAdd="OpenCreateDialogAsync"
+                 OnAdd="NavigateToCreateProduct"
+                 OnEdit="NavigateToEditProduct"
                  OnDelete="OpenDeleteDialogAsync">
         <Columns>
             <PropertyColumn T="ProductDto"
@@ -48,21 +49,12 @@
                             Title="Status"
                             Sortable="true"
                             Filterable="false" />
-
-            <TemplateColumn T="ProductDto">
-                <CellTemplate>
-                    <MudStack Row>
-                        <MudLink Href="@($"/products/{context.Item.Id}/edit")">
-                            Edit
-                        </MudLink>
-                    </MudStack>
-                </CellTemplate>
-            </TemplateColumn>
         </Columns>
     </GenericGrid>
 </MudPaper>
 
 @code {
+
     private GenericGrid<ProductDto>? _grid;
 
     private async Task<GridData<ProductDto>> LoadProductAsync(GridState<ProductDto> state, string? searchText)
@@ -107,66 +99,14 @@
         };
     }
 
-    private async Task OpenCreateDialogAsync()
+    private async Task NavigateToCreateProduct()
     {
-        var createProductDto = new CreateProductViewModel
-        {
-            Name = string.Empty,
-            Description = string.Empty,
-            Price = 0.01m,
-            Stock = 1,
-            CategoryId = null,
-            Status = ProductStatus.Draft
-        };
-
-        var categories = await CategoryApiClient.GetAllCategoriesAsync();
-
-        var parameters = new DialogParameters
-        {
-            ["Product"] = createProductDto,
-            ["Categories"] = categories
-        };
-
-        var saved = await ConfirmUpsertAsync<ProductUpsertDialog, CreateProductViewModel>(
-            title: "Create product",
-            parameters: parameters,
-            saveAction: model => CategoryApiClient.CreateProductAsync(model, model.File!, CancellationToken.None),
-            successMessage: $"Product '{createProductDto.Name}' successfully created");
-
-        if (saved && _grid is not null)
-            await _grid.ReloadAsync();
+        NavigationManager.NavigateTo("/products/create");
     }
 
-    private async Task OpenEditDialogAsync(ProductDto existing)
+    private async Task NavigateToEditProduct(ProductDto existing)
     {
-        var updateProductDto = new CreateProductViewModel
-        {
-            Name = existing.Name,
-            Description = existing.Description!,
-            Price = existing.Price,
-            Stock = existing.Stock,
-            CategoryId = existing.CategoryId,
-            Status = existing.Status,
-            Sku = existing.Sku,
-            Images = existing.Images
-        };
-
-        var categories = await CategoryApiClient.GetAllCategoriesAsync();
-
-        var parameters = new DialogParameters
-            {
-                ["Product"] = updateProductDto,
-                ["Categories"] = categories
-            };
-
-        var saved = await ConfirmUpsertAsync<ProductUpsertDialog, CreateProductViewModel>(
-           title: "Edit product",
-           parameters: parameters,
-           saveAction: model => CategoryApiClient.UpdateProductAsync(existing.Id, model, model.File!, CancellationToken.None),
-           successMessage: $"Product '{updateProductDto.Name}' successfully updated");
-
-        if (saved && _grid is not null)
-            await _grid!.ReloadAsync();
+        NavigationManager.NavigateTo($"/products/{existing.Id}/edit");
     }
 
     private async Task OpenDeleteDialogAsync(ProductDto item)
