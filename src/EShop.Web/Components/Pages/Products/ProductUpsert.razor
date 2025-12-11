@@ -16,9 +16,18 @@
 else
 {
     <MudPaper Class="pa-4">
+        <MudButton Color="Color.Default"
+                   Variant="Variant.Text"
+                   StartIcon="@Icons.Material.Filled.ArrowBack"
+                   OnClick="@GoBack">
+            Back to Products
+        </MudButton>
+
+        <MudDivider Invisible="true" Class="my-4" />
+
         <MudText Typo="Typo.h5">@_title</MudText>
-        <br />
-        <MudSpacer />
+       
+        <MudDivider Invisible="true" Class="my-2" />
 
         <MudForm @ref="_form" Model="_model">
             <MudTabs>

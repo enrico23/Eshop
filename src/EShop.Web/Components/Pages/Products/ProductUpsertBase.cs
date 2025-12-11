@@ -112,4 +112,6 @@ public class ProductUpsertBase : ComponentBase
             _isSaving = false;
         }
     }
+
+    protected void GoBack() => NavigationManager.NavigateTo("/products");
 }
