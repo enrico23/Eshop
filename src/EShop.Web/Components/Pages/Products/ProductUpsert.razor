@@ -5,6 +5,7 @@
 @using EShop.Web.Exceptions
 @using System.Net
 @using System.Linq
+@inherits ProductUpsertBase
 
 <PageTitle>@_title</PageTitle>
 
@@ -123,11 +124,6 @@ else
                 </MudTabPanel>
             </MudTabs>
 
-            @if (!string.IsNullOrEmpty(_error))
-            {
-                <MudAlert Severity="Severity.Error" Class="mt-4">@_error</MudAlert>
-            }
-
             <MudStack Row Class="mt-4">
                 <MudButton Color="Color.Primary"
                            Variant="Variant.Filled"
@@ -147,112 +143,4 @@ else
         </MudForm>
 
     </MudPaper>
-}
-
-@code {
-
-    [Parameter] public Guid? Id { get; set; }
-
-    [Inject] protected ICatalogApiClient CatalogApiClient { get; set; } = null!;
-    [Inject] protected NavigationManager NavigationManager { get; set; } = null!;
-    [Inject] protected ISnackbar Snackbar { get; set; } = null!;
-
-    private bool _isCreate => !Id.HasValue;
-    private bool _isLoading = true;
-    private bool _isSaving;
-    private string _error = "";
-    private string _title = "";
-
-    private ProductDto? _product = null!;
-    private CreateProductViewModel _model = null!;
-    private List<CategoryDto> _categories = new();
-    private MudForm _form = null!;
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        _categories = await CatalogApiClient.GetAllCategoriesAsync();
-
-        _model = new CreateProductViewModel
-        {
-            Name = "",
-            Description = "",
-            Sku = "",
-            Price = 0.01m,
-            Stock = 1,
-            Status = EShop.Shared.Domain.ProductStatus.Draft
-        };
-
-        if (_isCreate)
-        {
-            _title = "Create Product";
-        }
-        else
-        {
-            _product = await CatalogApiClient.GetByIdAsync(Id!.Value);
-            if (_product is not null)
-            {
-                _title = $"Edit Product {_product.Name}";
-
-                _model = new CreateProductViewModel()
-                {
-                    Name = _product.Name,
-                    Description = _product.Description ?? string.Empty,
-                    Sku = _product.Sku,
-                    Price = _product.Price,
-                    Stock = _product.Stock,
-                    Status = _product.Status,
-                    CategoryId = _product.CategoryId,
-                    Images = _product.Images
-                };
-            }
-        }
-
-        _isLoading = false;
-    }
-
-    private async Task SubmitAsync()
-    {
-        _error = "";
-        _isSaving = true;
-
-        await _form.Validate();
-        if (!_form.IsValid)
-        {
-            _isSaving = false;
-            return;
-        }
-
-        try
-        {
-            if (_isCreate)
-            {
-                await CatalogApiClient.CreateProductAsync(_model, _model.File, CancellationToken.None);
-                Snackbar.Add($"Product '{_model.Name}' created successfully.", Severity.Success);
-            }
-            else
-            {
-                await CatalogApiClient.UpdateProductAsync(Id!.Value, _model, _model.File, CancellationToken.None);
-                Snackbar.Add($"Product '{_model.Name}' updated successfully.", Severity.Success);
-            }
-
-            NavigationManager.NavigateTo("/products");
-        }
-        catch (ApiException ex) when (ex.StatusCode is HttpStatusCode.Conflict)
-        {
-            Snackbar.Add(ex.Message!, Severity.Error);
-        }
-        catch (ApiException ex)
-        {
-            Snackbar.Add(ex.FriendlyMessage!, Severity.Error);
-        }
-        catch (Exception)
-        {
-            Snackbar.Add("Unexpected error.", Severity.Error);
-        }
-        finally
-        {
-            _isSaving = false;
-        }
-    }
 }
