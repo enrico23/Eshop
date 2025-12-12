@@ -19,10 +19,13 @@ public class ProductUpsertBase : ComponentBase
     [Inject] protected ISnackbar Snackbar { get; set; } = null!;
     [Inject] protected ApiClientConfig ApiClientConfig { get; set; } = null!;
 
+
     protected bool _isCreate => !Id.HasValue;
     protected bool _isLoading = true;
     protected bool _isSaving;
     protected string _title = "";
+    protected IBrowserFile? _previewPrimaryImage;
+    protected string? _previewPrimaryImageUrl;
 
     protected ProductDto? _product = null!;
     protected CreateProductViewModel _model = null!;
@@ -151,15 +154,33 @@ public class ProductUpsertBase : ComponentBase
         }
     }
 
-    protected async Task UploadFiles(IBrowserFile file)
+    protected async Task UploadPrimaryImage(IBrowserFile file)
     {
+        _previewPrimaryImage = file;
         _model.File = file;
+
+        try
+        {
+            using var stream = file.OpenReadStream(5_000_000);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            var bytes = ms.ToArray();
+
+            var base64 = Convert.ToBase64String(bytes);
+            var contentType = file.ContentType ?? "image/png";
+
+            _previewPrimaryImageUrl = $"data:{contentType};base64,{base64}";
+        }
+        catch (Exception)
+        {
+            _previewPrimaryImageUrl = null;
+        }
         await InvokeAsync(StateHasChanged);
     }
 
     protected string GetImage(string url)
     {
         var baseUrl = ApiClientConfig.BaseUrl;
-        return $"{baseUrl}{url}";
+        return $"{baseUrl}/api/images/{url}";
     }
 }

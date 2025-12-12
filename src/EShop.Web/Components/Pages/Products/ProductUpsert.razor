@@ -36,15 +36,15 @@ else
                             <MudTextField @bind-Value="_model.Name" Label="Name" Required="true" For="@(() => _model.Name)" />
                         </MudItem>
 
-                        <MudItem xs="6">
+                        <MudItem xs="5">
                             <MudTextField @bind-Value="_model.Price" Label="Price" Required="true" For="@(() => _model.Price)" />
                         </MudItem>
 
-                        <MudItem xs="4">
+                        <MudItem xs="5">
                             <MudTextField @bind-Value="_model.Stock" Label="Stock" Required="true" For="@(() => _model.Stock)" />
                         </MudItem>
 
-                        <MudItem xs="6">
+                        <MudItem xs="5">
                             @if (_categories is null || _categories.Count == 0)
                             {
                                 <MudAlert Severity="Severity.Warning">
@@ -69,7 +69,7 @@ else
                             }
                         </MudItem>
 
-                        <MudItem xs="4">
+                        <MudItem xs="5">
                             <MudSelect T="ProductStatus" Label="Status" @bind-Value="_model.Status">
                                 @foreach (var status in Enum.GetValues<ProductStatus>())
                                 {
@@ -95,71 +95,67 @@ else
                                             TextLengthExceededMessage="Description cannot exceed 255 characters." />
                         </MudItem>
                     </MudGrid>
+
                     <MudDivider Class="my-2" />
-
-                    <MudText Typo="Typo.h5">Upload product image</MudText>
-
-                    @if (_model.Images is { Count: > 0 })
+                    @if (_isCreate)
                     {
-                        <MudGrid GutterSize="2">
-                            @foreach (var image in _model.Images.OrderBy(i => i.SortOrder))
-                            {
-                                <MudItem xs="12" sm="6" md="4" lg="3">
-                                    @* <MudPaper Class="pa-1">
-                                        <MudImage Src="@GetImage(image.Url)" Alt="@image.AltText"
-                                        Width="200" Height="150" 
-                                         Elevation="25" Class="rounded-lg ma-4" />
-                                       
-                                    </MudPaper> *@
+                        <MudText Typo="Typo.h5">Upload primary product image</MudText>
 
-                                    <p>@GetImage(image.Url)</p>
-                                </MudItem>
-                            }
-                        </MudGrid>
-                    }
-                    else
-                    {
-                        <MudAlert Severity="Severity.Info">No images uploaded yet.</MudAlert>
-                    }
+                        <MudDivider Class="my-2" />
 
-                    <MudDivider Class="my-2" />
+                        <MudFileUpload T="IBrowserFile" FilesChanged="UploadPrimaryImage"
+                        MaxFileSize="5_000_000"
+                        MaxItems="1"
+                        Accept=".png,.jpg,.jpeg,.webp">
+                            <ActivatorContent>
+                                <MudButton Variant="Variant.Filled"
+                                Color="Color.Primary"
+                                StartIcon="@Icons.Material.Filled.CloudUpload">
+                                    Upload Files
+                                </MudButton>
+                            </ActivatorContent>
+                        </MudFileUpload>
 
-                    <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles"
-                                   MaxFileSize="5_000_000"
-                                   MaxItems="1"
-                                   Accept=".png,.jpg,.jpeg,.webp">
-                        <ActivatorContent>
-                            <MudButton Variant="Variant.Filled"
-                                       Color="Color.Primary"
-                                       StartIcon="@Icons.Material.Filled.CloudUpload">
-                                Upload Files
-                            </MudButton>
-                        </ActivatorContent>
-                    </MudFileUpload>
-
-
-                    <MudText Class="mt-2" Color="Color.Default" Typo="Typo.body2">
-                        Allowed: .png, .jpg, .jpeg, .webp – Max 5 MB
-                    </MudText>
-
-                    <MudDivider Class="my-2" />
-
-                    <MudStack Row Class="mt-4">
-                        <MudButton Color="Color.Primary"
-                                    Variant="Variant.Filled"
-                                    OnClick="SubmitAsync"
-                                    Disabled="_isSaving || _categories.Count == 0">
-                            @(_isCreate ? "Create" : "Save")
-                        </MudButton>
-
-                        @if (_isSaving)
+                         @if(_previewPrimaryImage is not null)
                         {
-                            <MudProgressCircular Class="ml-2"
-                                                    Color="Color.Primary"
-                                                    Size="Size.Medium"
-                                                    Indeterminate="true" />
+                            <MudList T="string">
+                                <MudListItem Icon="@Icons.Material.Filled.AttachFile" @key="@_previewPrimaryImage">
+                                    @_previewPrimaryImage.Name <code>@_previewPrimaryImage.Size bytes</code>
+                                </MudListItem>
+                            </MudList>
+
+                            <img src="@_previewPrimaryImageUrl"
+                                 alt="Preview"
+                                 style="max-width: 300px; max-height: 300px; border-radius: 8px;" />
                         }
-                    </MudStack>
+
+                        <MudText Class="mt-2" Color="Color.Default" Typo="Typo.body2">
+                            Allowed: .png, .jpg, .jpeg, .webp – Max 5 MB
+                        </MudText>
+                       
+                    }
+
+                        <MudDivider Class="my-2" />
+
+                        <MudStack Row Class="mt-4">
+                            <MudButton Color="Color.Primary"
+                            Variant="Variant.Filled"
+                            OnClick="SubmitAsync"
+                            Disabled="_isSaving || _categories.Count == 0">
+                                @(_isCreate ? "Create" : "Save")
+                            </MudButton>
+
+                            @if (_isSaving)
+
+                            {
+
+                                <MudProgressCircular Class="ml-2"
+                                Color="Color.Primary"
+                                Size="Size.Medium"
+                                Indeterminate="true" />
+                            }
+
+                        </MudStack>
 
 
                 </MudForm>
@@ -169,6 +165,27 @@ else
                 <MudPaper Class="pa-3">
                     <MudText Typo="Typo.subtitle1">Images</MudText>
                     <MudDivider Class="my-2" />
+
+                    @if (_model.Images is { Count: > 0 })
+                    {
+                        <MudGrid GutterSize="2">
+                            @foreach (var image in _model.Images.OrderBy(i => i.SortOrder))
+                            {
+                                <MudItem xs="12" sm="6" md="4" lg="3">
+                                    <MudPaper Class="pa-1">
+                                        <MudImage Src="@GetImage(image.Url)" Alt="@image.AltText"
+                                                  Width="200" Height="150"
+                                                  Elevation="25" Class="rounded-lg ma-4" />
+
+                                    </MudPaper>
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    }
+                    else
+                    {
+                        <MudAlert Severity="Severity.Info">No images uploaded yet.</MudAlert>
+                    }
                 </MudPaper>
             </MudTabPanel>
         </MudTabs>

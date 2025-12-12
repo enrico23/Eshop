@@ -43,8 +43,4 @@
     <EditorConfigFiles Remove="C:\dev\EShop\src\EShop.API\.editorconfig" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="uploads\" />
-  </ItemGroup>
-
 </Project>
