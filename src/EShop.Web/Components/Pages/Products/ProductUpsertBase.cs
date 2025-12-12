@@ -4,6 +4,7 @@ using EShop.Web.Clients;
 using EShop.Web.Exceptions;
 using EShop.Web.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 using System.Net;
 
@@ -16,6 +17,7 @@ public class ProductUpsertBase : ComponentBase
     [Inject] protected ICatalogApiClient CatalogApiClient { get; set; } = null!;
     [Inject] protected NavigationManager NavigationManager { get; set; } = null!;
     [Inject] protected ISnackbar Snackbar { get; set; } = null!;
+    [Inject] protected ApiClientConfig ApiClientConfig { get; set; } = null!;
 
     protected bool _isCreate => !Id.HasValue;
     protected bool _isLoading = true;
@@ -103,6 +105,8 @@ public class ProductUpsertBase : ComponentBase
         _isLoading = false;
     }
 
+    protected void GoBack() => NavigationManager.NavigateTo("/products");
+
     protected async Task SubmitAsync()
     {
         _isSaving = true;
@@ -147,5 +151,15 @@ public class ProductUpsertBase : ComponentBase
         }
     }
 
-    protected void GoBack() => NavigationManager.NavigateTo("/products");
+    protected async Task UploadFiles(IBrowserFile file)
+    {
+        _model.File = file;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected string GetImage(string url)
+    {
+        var baseUrl = ApiClientConfig.BaseUrl;
+        return $"{baseUrl}{url}";
+    }
 }
