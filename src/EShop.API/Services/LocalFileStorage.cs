@@ -2,6 +2,7 @@
 
 public interface IFileStorage
 {
+    bool Delete(string url);
     Task<string> SaveImageAsync(IFormFile file, CancellationToken ct = default);
 }
 
@@ -9,6 +10,17 @@ public class LocalFileStorage(IWebHostEnvironment environment) : IFileStorage
 {
     private const long MaxFileSizeBytes = 5 * 1024 * 1024; // 5MB
 
+    public bool Delete(string url)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(url);
+
+        var root = environment.WebRootPath ?? environment.ContentRootPath;
+        var uploadsFolder = Path.Combine(root, "uploads");
+        var filePath = Path.Combine(uploadsFolder, url);
+        System.IO.File.Delete(filePath);
+
+        return true;
+    }
 
     public async Task<string> SaveImageAsync(IFormFile file, CancellationToken ct = default)
     {
@@ -41,6 +53,6 @@ public class LocalFileStorage(IWebHostEnvironment environment) : IFileStorage
         await using var stream = System.IO.File.Create(filePath);
         await file.CopyToAsync(stream, ct);
 
-        return $"/uploads/{fileName}";
+        return $"{fileName}";
     }
 }
