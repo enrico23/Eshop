@@ -1,4 +1,5 @@
-﻿using EShop.Shared.Representations;
+﻿using EShop.API.Models;
+using EShop.Shared.Representations;
 using EShop.Shared.Representations.Product;
 
 namespace EShop.API.Services;
@@ -13,9 +14,9 @@ public interface IProductService
 
     Task<ProductDto?> GetByIdAsync(Guid id, CancellationToken ct);
 
-    Task<ProductDto> AddAsync(CreateProductDto createProductDto, CancellationToken ct);
+    Task<ProductDto> AddAsync(ProductFormDto productFormDto, CancellationToken ct);
 
-    Task<bool> UpdateAsync(Guid id, UpdateProductDto updateProductDto, CancellationToken ct);
+    Task<bool> UpdateAsync(Guid id, ProductFormDto productFormDto, CancellationToken ct);
 
     Task<bool> DeleteAsync(Guid id, CancellationToken ct);
 }

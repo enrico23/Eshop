@@ -58,29 +58,8 @@ public class ProductsController(
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
-        
-        var createProductDto = form.Adapt<CreateProductDto>();
 
-        if (form.File is not null)
-        {
-            var result = await TryExtensions.Try(() => fileStorage.SaveImageAsync(form.File, ct));
-
-            if (!result.IsSuccess)
-                return MapFileExceptionToResult(result.Error!);
-
-            createProductDto.Images =
-                  [
-                      new()
-                        {
-                            Url       = result.Value!,
-                            AltText   = form.Name,
-                            IsPrimary = true,
-                            SortOrder = 0
-                        }
-                  ];
-        }
-
-        var productDto = await _productService.AddAsync(createProductDto, ct);
+        var productDto = await _productService.AddAsync(form, ct);
 
         var url = $"{Request.Scheme}://{Request.Host}/api/Products/{productDto.Id}";
         return Created(url, productDto);
@@ -103,32 +82,10 @@ public class ProductsController(
         if (!await _productService.ExistsAsync(id))
             return NotFound();
 
-        var updateProductDto = form.Adapt<UpdateProductDto>();
-
-        if (form.File is not null)
-        {
-            var result = await TryExtensions.Try(()=> fileStorage.SaveImageAsync(form.File, ct));
-
-            if (!result.IsSuccess)
-                return MapFileExceptionToResult(result.Error!);
-
-            updateProductDto.Images =
-                [
-                    new()
-                    {
-                        Url       = result.Value!,
-                        AltText   = form.Name,
-                        IsPrimary = true,
-                        SortOrder = 0
-                    }
-                ];
-        }
-
-        await _productService.UpdateAsync(id, updateProductDto, ct);
+        await _productService.UpdateAsync(id, form, ct);
 
         return NoContent();
     }
-
     //</snippet_Update>
 
     // DELETE: api/products/{id:guid}
@@ -143,13 +100,4 @@ public class ProductsController(
 
         return NoContent();
     }
-
-
-    private IActionResult MapFileExceptionToResult(Exception ex)
-       => ex switch
-       {
-           OperationCanceledException => StatusCode(StatusCodes.Status499ClientClosedRequest),
-           BadHttpRequestException httpEx => StatusCode(httpEx.StatusCode, httpEx.Message),
-           _ => StatusCode(StatusCodes.Status500InternalServerError, "Error saving file.")
-       };
 }
