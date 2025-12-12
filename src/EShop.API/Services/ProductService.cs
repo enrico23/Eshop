@@ -6,25 +6,14 @@ using EShop.Domain.Products;
 using EShop.Shared.Domain;
 using EShop.Shared.Representations.Product;
 using Mapster;
-using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
 using System.Linq.Dynamic.Core;
 
 namespace EShop.API.Services;
 
-public class ProductService : IProductService
-{
-    private readonly CatalogDbContext _context;
-
-    private readonly IMapper _mapper;
-
-    public ProductService(CatalogDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
- 
+public class ProductService(CatalogDbContext context, IFileStorage fileStorage) : IProductService
+{ 
     public async Task<Shared.Representations.PagedResult<ProductDto>> GetPagedAsync(
         int page, int pageSize, 
         string orderBy = "Name", string orderDirection = "asc",
@@ -33,7 +22,7 @@ public class ProductService : IProductService
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 200);
 
-        IQueryable<Product> query = _context.Products.AsNoTracking();
+        IQueryable<Product> query = context.Products.AsNoTracking();
 
         if(!string.IsNullOrEmpty(filter))
             query = query.Where("Name.ToLower().Contains(@0)", filter.ToLower());
@@ -58,14 +47,14 @@ public class ProductService : IProductService
 
     public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default)
     {
-        return await _context.Products
+        return await context.Products
             .AsNoTracking()
             .AnyAsync(b => b.Id == id, ct);
     }
 
     public async Task<ProductDto?> GetByIdAsync(Guid id, CancellationToken ct)
     {
-        return await _context.Products
+        return await context.Products
             .AsNoTracking()
             .Where(b => b.Id == id)
             .ProjectToType<ProductDto>()
@@ -78,7 +67,7 @@ public class ProductService : IProductService
 
         var productName = Product.ValidateName(createProductDto.Name);
 
-        var alreadyExists = await _context.Products
+        var alreadyExists = await context.Products
             .AnyAsync(b => b.Name.ToLower() == productName.ToLower(), ct);
         if (alreadyExists)
             throw new DomainException($"A product with name '{productName}' already exists.");
@@ -104,9 +93,9 @@ public class ProductService : IProductService
             }
         }
 
-        await _context.Products.AddAsync(product, ct);
+        await context.Products.AddAsync(product, ct);
 
-        await _context.SaveChangesAsync(ct);
+        await context.SaveChangesAsync(ct);
 
         return product.Adapt<ProductDto>();
     }
@@ -115,7 +104,7 @@ public class ProductService : IProductService
     {
         ArgumentNullException.ThrowIfNull(updateProductDto, nameof(updateProductDto));
 
-        var product = await _context.Products.FirstOrDefaultAsync(b => b.Id == id, ct);
+        var product = await context.Products.FirstOrDefaultAsync(b => b.Id == id, ct);
         if (product is null)
             return false;
 
@@ -143,7 +132,7 @@ public class ProductService : IProductService
         var newSku = new Sku(updateProductDto.Sku);
         if (!product.Sku.Equals(newSku))
         {
-            var skuInUse = await _context.Products
+            var skuInUse = await context.Products
                 .AnyAsync(p => p.Sku == newSku && p.Id != product.Id, ct);
 
             if (skuInUse)
@@ -166,20 +155,28 @@ public class ProductService : IProductService
             product.ReplaceImages(newImages!);
         }
         
-        await _context.SaveChangesAsync(ct);
+        await context.SaveChangesAsync(ct);
 
         return true;
     }
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)
     {
-        var entity = await _context.Products.FirstOrDefaultAsync(b => b.Id == id, ct);
+        var entity = await context.Products.FirstOrDefaultAsync(b => b.Id == id, ct);
 
         if (entity is null)
             return false;
 
-        _context.Products.Remove(entity);
-        await _context.SaveChangesAsync(ct);
+        if (entity.Images.Count != 0)
+        { 
+            foreach(var image in entity.Images.ToList())
+            {
+              await fileStorage.DeleteImageAsync(image.Url, ct);
+            }
+        }
+
+        context.Products.Remove(entity);
+        await context.SaveChangesAsync(ct);
 
         return true;
     }

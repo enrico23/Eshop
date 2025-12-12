@@ -12,12 +12,11 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // CATALOG API HTTP CLIENT
-var catalogApiBaseFromConfig = builder.Configuration["services:api:http:0"];
-var catalogApiBaseFromEnv = Environment.GetEnvironmentVariable("services__api__http__0");
-var catalogApiBase = catalogApiBaseFromConfig ?? catalogApiBaseFromEnv ?? "http://localhost:5002/";
+var catalogApiBase = builder.Configuration.GetValue("services:api:http:0","http://localhost:5002/");
+builder.Services.AddSingleton(new ApiClientConfig { BaseUrl = catalogApiBase });
 builder.Services.AddHttpClient<ICatalogApiClient, CatalogApiClient>(client =>
 {
-    client.BaseAddress = new Uri(catalogApiBase);
+    client.BaseAddress = new Uri(catalogApiBase, UriKind.Absolute);
 });
 
 var app = builder.Build();
@@ -31,7 +30,6 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 
 app.UseAntiforgery();
 

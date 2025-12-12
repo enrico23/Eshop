@@ -17,6 +17,7 @@ public class ProductUpsertBase : ComponentBase
     [Inject] protected ICatalogApiClient CatalogApiClient { get; set; } = null!;
     [Inject] protected NavigationManager NavigationManager { get; set; } = null!;
     [Inject] protected ISnackbar Snackbar { get; set; } = null!;
+    [Inject] protected ApiClientConfig ApiClientConfig { get; set; } = default!;
 
     protected bool _isCreate => !Id.HasValue;
     protected bool _isLoading = true;
@@ -158,6 +159,7 @@ public class ProductUpsertBase : ComponentBase
 
     protected string GetImage(string url)
     {
-        return $"https://localhost:7078/api/images/{url}";
+        var baseUrl = ApiClientConfig.BaseUrl;
+        return $"{baseUrl}/api/images/{url}";
     }
 }
