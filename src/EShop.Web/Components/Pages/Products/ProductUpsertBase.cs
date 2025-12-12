@@ -40,11 +40,13 @@ public class ProductUpsertBase : ComponentBase
         }
         catch (ApiException)
         {
+            _isLoading = false;
             NavigationManager.NavigateTo("/products?error=categories");
             return;
         }
         catch (Exception)
         {
+            _isLoading = false;
             NavigationManager.NavigateTo("/products?error=unexpected");
             return;
         }
@@ -175,6 +177,7 @@ public class ProductUpsertBase : ComponentBase
         {
             _previewPrimaryImageUrl = null;
         }
+
         await InvokeAsync(StateHasChanged);
     }
 
