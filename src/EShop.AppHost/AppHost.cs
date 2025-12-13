@@ -4,6 +4,14 @@ var builder = DistributedApplication.CreateBuilder(args);
 var disableFrontend = builder.Configuration.GetValue("DisableFrontend", false);
 var dependenciesOnly = builder.Configuration.GetValue("DependenciesOnly", false);
 
+// AZURE BLOB STORAGE
+//var storage = builder.AddAzureStorage("storage")
+//  .RunAsEmulator(azurite =>
+//  {
+//      azurite.WithLifetime(ContainerLifetime.Persistent);
+//      azurite.WithDataVolume();
+//  }).AddBlobs("Blobs");
+
 // SQL SERVER & DB SETUP
 var databaseName = "CatalogDb";
 var password = builder.AddParameter("password", secret: true);
