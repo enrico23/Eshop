@@ -27,16 +27,16 @@ public abstract class ProductUpsertBase : ComponentBase
     protected IBrowserFile? PreviewPrimaryImage;
     protected string? _previewPrimaryImageUrl;
 
-    protected ProductDto? _product = null!;
+    protected ProductDto? Product = null!;
     protected CreateProductViewModel UpsertModel = null!;
-    protected List<CategoryDto> _categories = new();
-    protected MudForm _form = null!;
+    protected List<CategoryDto> Categories = new();
+    protected MudForm UpsertForm = null!;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            _categories = await CatalogApiClient.GetAllCategoriesAsync();
+            Categories = await CatalogApiClient.GetAllCategoriesAsync();
         }
         catch (ApiException)
         {
@@ -69,27 +69,27 @@ public abstract class ProductUpsertBase : ComponentBase
         {
             try
             {
-                _product = await CatalogApiClient.GetByIdAsync(Id!.Value);
+                Product = await CatalogApiClient.GetByIdAsync(Id!.Value);
 
-                if (_product is null)
+                if (Product is null)
                 {
                     IsLoading = false;
                     NavigationManager.NavigateTo("/products?error=notfound");
                     return;
                 }
 
-                PageTitle = $"Edit Product {_product.Name}";
+                PageTitle = $"Edit Product {Product.Name}";
 
                 UpsertModel = new CreateProductViewModel()
                 {
-                    Name = _product.Name,
-                    Description = _product.Description ?? string.Empty,
-                    Sku = _product.Sku,
-                    Price = _product.Price,
-                    Stock = _product.Stock,
-                    Status = _product.Status,
-                    CategoryId = _product.CategoryId,
-                    Images = _product.Images
+                    Name = Product.Name,
+                    Description = Product.Description ?? string.Empty,
+                    Sku = Product.Sku,
+                    Price = Product.Price,
+                    Stock = Product.Stock,
+                    Status = Product.Status,
+                    CategoryId = Product.CategoryId,
+                    Images = Product.Images
                 };
                
             }
@@ -114,8 +114,8 @@ public abstract class ProductUpsertBase : ComponentBase
     {
         IsSaving = true;
 
-        await _form.Validate();
-        if (!_form.IsValid)
+        await UpsertForm.Validate();
+        if (!UpsertForm.IsValid)
         {
             IsSaving = false;
             return;

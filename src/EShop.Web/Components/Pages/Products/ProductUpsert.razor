@@ -15,7 +15,7 @@
 }
 else
 {
-<MudForm @ref="_form" Model="UpsertModel">
+<MudForm @ref="UpsertForm" Model="UpsertModel">
     <MudPaper Class="pa-4">
         
         <MudGrid AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
@@ -55,6 +55,8 @@ else
 
         <!-- Main layout: Left (tabs + form) / Right (sidebar cards) -->
 
+        
+
             <MudGrid Spacing="3">
 
                 <!-- LEFT -->
@@ -62,6 +64,7 @@ else
                     <MudPaper Elevation="1" Class="pa-4">
                        
                         <MudTabs Rounded="true" Border="true" ApplyEffectsToContainer="true">
+
                             <MudTabPanel Text="Metadata" Icon="@Icons.Material.Filled.Info">
                                 
                                 <MudItem xs="12">
@@ -115,28 +118,29 @@ else
                                 <MudGrid Spacing="2" Class="mt-2">
 
                                     <!-- Left: existing images -->
-                                    <MudItem xs="12" md="6">
+                                    <MudItem xs="12" md="7">
                                         <MudPaper Class="pa-3" Elevation="0" Outlined="true">
-                                            <MudStack Spacing="2">
-                                                <MudStack Row="true" AlignItems="AlignItems.Center" JustifyContent="space-between">
-                                                    <MudText Typo="Typo.subtitle1">Primary Image</MudText>
-                                                </MudStack>
-                                                
+                                            <MudText Typo="Typo.subtitle1" Class="mb-2">Primary Image</MudText>
 
-                                            @if (UpsertModel.Images?.FirstOrDefault() is not null)
+                                            @if (UpsertModel.Images is { Count: > 0 })
                                             {
-                                                var primaryImage = UpsertModel.Images.First();
+                                                <MudGrid Spacing="2">
+                                                    @foreach (var image in UpsertModel.Images.OrderBy(i => i.SortOrder))
+                                                    {
+                                                        <MudItem xs="6" sm="4" lg="3">
+                                                            <MudPaper Class="pa-2" Outlined="true">
+                                                                <div class="img-frame">
+                                                                    <img src="@GetImage(image.Url)"
+                                                                         alt="@image.AltText"
+                                                                         class="img-cover" />
+                                                                </div>
 
-                                                <MudPaper Outlined="true" Class="pa-2">
-                                                    <div class="img-frame img-frame--wide">
-                                                        <img src="@GetImage(primaryImage.Url)" alt="@primaryImage.AltText" class="img-cover" />
-                                                    </div>
-
-                                                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="mt-2">
-                                                            <MudIcon Icon="@Icons.Material.Filled.Camera" Size="Size.Small" />
-                                                            <MudText Typo="Typo.subtitle2">&nbsp;</MudText>
-                                                        </MudStack>
-                                                </MudPaper>
+                                                                @* Optional: caption/actions *@
+                                                                @* <MudText Typo="Typo.caption" Class="mt-1">@image.AltText</MudText> *@
+                                                            </MudPaper>
+                                                        </MudItem>
+                                                    }
+                                                </MudGrid>
                                             }
                                             else
                                             {
@@ -144,17 +148,19 @@ else
                                                     No images uploaded yet.
                                                 </MudAlert>
                                             }
-                                            </MudStack>
                                         </MudPaper>
                                     </MudItem>
 
                                     <!-- Right: upload + preview -->
-                                    <MudItem xs="12" md="6">
+                                    <MudItem xs="12" md="5">
                                         <MudPaper Class="pa-3" Elevation="0" Outlined="true">
                                             <MudStack Spacing="2">
 
                                                 <MudStack Row="true" AlignItems="AlignItems.Center" JustifyContent="space-between">
                                                     <MudText Typo="Typo.subtitle1">Upload Preview</MudText>
+
+                                                    @* Your upload control/button goes here *@
+                                                    @* <MudButton ...>Upload files</MudButton> *@
                                                 </MudStack>
 
                                                 @if (PreviewPrimaryImage is not null)
@@ -241,11 +247,11 @@ else
                             </MudItem>
                         </MudPaper>
 
-                        <MudPaper Elevation="1" Class="pa-4">
+                        <MudPaper ECvation="1" Class="pa-4">
                             <MudText Typo="Typo.h6" Class="mb-2">Classification</MudText>
 
                             <MudItem xs="12">
-                                @if (_categories is null || _categories.Count == 0)
+                                @if (Categories is null || Categories.Count == 0)
                                 {
                                     <MudAlert Severity="Severity.Warning">
                                         No categories are available. Please create a category first.
@@ -261,7 +267,7 @@ else
                                                 FullWidth="true"
                                                 Margin="Margin.Dense">
 
-                                        @foreach (var category in _categories)
+                                        @foreach (var category in Categories)
                                         {
                                             <MudSelectItem T="Guid ?" Value="category.Id">@category.Name</MudSelectItem>
                                         }
