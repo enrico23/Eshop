@@ -1,4 +1,5 @@
-﻿using EShop.Data;
+﻿using EShop.API.Models;
+using EShop.Data;
 using EShop.Domain;
 using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;
@@ -19,12 +20,15 @@ public class ProductService : IProductService
 
     private readonly IMapper _mapper;
 
-    public ProductService(CatalogDbContext context, IMapper mapper)
+    private readonly IFileStorage _fileStorage;
+
+    public ProductService(CatalogDbContext context, IMapper mapper, IFileStorage fileStorage)
     {
         _context = context;
         _mapper = mapper;
+        _fileStorage = fileStorage;
     }
- 
+
     public async Task<Shared.Representations.PagedResult<ProductDto>> GetPagedAsync(
         int page, int pageSize, 
         string orderBy = "Name", string orderDirection = "asc",
@@ -72,36 +76,34 @@ public class ProductService : IProductService
             .FirstOrDefaultAsync(ct);
     }
 
-    public async Task<ProductDto> AddAsync(CreateProductDto createProductDto, CancellationToken ct)
+    public async Task<ProductDto> AddAsync(ProductFormDto productFormDto, CancellationToken ct)
     {
-        ArgumentNullException.ThrowIfNull(createProductDto, nameof(createProductDto));
+        ArgumentNullException.ThrowIfNull(productFormDto, nameof(productFormDto));
 
-        var productName = Product.ValidateName(createProductDto.Name);
+        var productName = Product.ValidateName(productFormDto.Name);
 
         var alreadyExists = await _context.Products
             .AnyAsync(b => b.Name.ToLower() == productName.ToLower(), ct);
         if (alreadyExists)
             throw new DomainException($"A product with name '{productName}' already exists.");
 
-        var productDescription = new ProductDescription(createProductDto.Description);
-        var productPrice = new Money(createProductDto.Price);
-        var productQuantity = new StockQuantity(createProductDto.Stock);
-        var sku = new Sku(createProductDto.Sku);
+        var productDescription = new ProductDescription(productFormDto.Description);
+        var productPrice = new Money(productFormDto.Price);
+        var productQuantity = new StockQuantity(productFormDto.Stock);
+        var sku = new Sku(productFormDto.Sku);
 
         var product = Product.Create(
             productName,
             productDescription,
             productPrice,
             productQuantity,
-            createProductDto.CategoryId.GetValueOrDefault(),
+            productFormDto.CategoryId.GetValueOrDefault(),
             sku);
 
-        if(createProductDto.Images is not null)
+        if(productFormDto.File is not null)
         {
-            foreach (ProductImageDto image in createProductDto.Images)
-            {
-                product.AddImage(image.Url);
-            }
+            var newUrl = await _fileStorage.SaveImageAsync(productFormDto.File, ct);
+            product.AddImage(newUrl);
         }
 
         await _context.Products.AddAsync(product, ct);
@@ -111,20 +113,20 @@ public class ProductService : IProductService
         return product.Adapt<ProductDto>();
     }
 
-    public async Task<bool> UpdateAsync(Guid id, UpdateProductDto updateProductDto, CancellationToken ct)
+    public async Task<bool> UpdateAsync(Guid id, ProductFormDto productFormDto, CancellationToken ct)
     {
-        ArgumentNullException.ThrowIfNull(updateProductDto, nameof(updateProductDto));
+        ArgumentNullException.ThrowIfNull(productFormDto, nameof(productFormDto));
 
         var product = await _context.Products.FirstOrDefaultAsync(b => b.Id == id, ct);
         if (product is null)
             return false;
 
-        product.ChangeName(updateProductDto.Name);
-        product.ChangeDescription(new ProductDescription(updateProductDto.Description));
-        product.ChangePrice(new Money(updateProductDto.Price));
-        product.ChangeStock(new StockQuantity(updateProductDto.Stock));
+        product.ChangeName(productFormDto.Name);
+        product.ChangeDescription(new ProductDescription(productFormDto.Description));
+        product.ChangePrice(new Money(productFormDto.Price));
+        product.ChangeStock(new StockQuantity(productFormDto.Stock));
 
-        switch (updateProductDto.Status)
+        switch (productFormDto.Status)
         {
             case ProductStatus.Active:
                 product.Publish();
@@ -140,7 +142,7 @@ public class ProductService : IProductService
                 break;
         }
 
-        var newSku = new Sku(updateProductDto.Sku);
+        var newSku = new Sku(productFormDto.Sku);
         if (!product.Sku.Equals(newSku))
         {
             var skuInUse = await _context.Products
@@ -152,20 +154,29 @@ public class ProductService : IProductService
             product.ChangeSku(newSku);
         }
 
-        if (!updateProductDto.CategoryId.HasValue)
+        if (!productFormDto.CategoryId.HasValue)
             throw new DomainException("Category is required.");
-        product.ChangeCategory((Guid)updateProductDto.CategoryId);
+        product.ChangeCategory((Guid)productFormDto.CategoryId);
 
 
-        if(updateProductDto.Images is not null && updateProductDto.Images.Count > 0)
+        if (productFormDto.File is not null)
         {
-           var newImages = updateProductDto.Images.Select(image =>
-               new ProductImageSpec( image.Url, image.AltText, image.IsPrimary))
-                .ToImmutableList();
+            foreach (var image in product.Images)
+            {
+                _fileStorage.Delete(image.Url);
+            }
+
+            var newUrl = await _fileStorage.SaveImageAsync(productFormDto.File, ct);
+
+            product.AddImage(newUrl);
+
+            var newImages = new List<ProductImageSpec> {
+                new ProductImageSpec(newUrl, productFormDto.Name, true)
+            }.ToImmutableList();
 
             product.ReplaceImages(newImages!);
         }
-        
+
         await _context.SaveChangesAsync(ct);
 
         return true;
@@ -177,6 +188,14 @@ public class ProductService : IProductService
 
         if (entity is null)
             return false;
+
+        if(entity.Images.Count > 0)
+        {
+            foreach (var image in entity.Images)
+            {
+                _fileStorage.Delete(image.Url);
+            }
+        }
 
         _context.Products.Remove(entity);
         await _context.SaveChangesAsync(ct);
