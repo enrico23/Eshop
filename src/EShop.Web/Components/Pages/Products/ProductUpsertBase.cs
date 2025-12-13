@@ -10,7 +10,7 @@ using System.Net;
 
 namespace EShop.Web.Components.Pages.Products;
 
-public class ProductUpsertBase : ComponentBase
+public abstract class ProductUpsertBase : ComponentBase
 {
     [Parameter] public Guid? Id { get; set; }
 
@@ -20,15 +20,15 @@ public class ProductUpsertBase : ComponentBase
     [Inject] protected ApiClientConfig ApiClientConfig { get; set; } = null!;
 
 
-    protected bool _isCreate => !Id.HasValue;
-    protected bool _isLoading = true;
-    protected bool _isSaving;
-    protected string _title = "";
-    protected IBrowserFile? _previewPrimaryImage;
+    protected bool IsCreate => !Id.HasValue;
+    protected bool IsLoading = true;
+    protected bool IsSaving;
+    protected string PageTitle = "";
+    protected IBrowserFile? PreviewPrimaryImage;
     protected string? _previewPrimaryImageUrl;
 
     protected ProductDto? _product = null!;
-    protected CreateProductViewModel _model = null!;
+    protected CreateProductViewModel UpsertModel = null!;
     protected List<CategoryDto> _categories = new();
     protected MudForm _form = null!;
 
@@ -40,18 +40,18 @@ public class ProductUpsertBase : ComponentBase
         }
         catch (ApiException)
         {
-            _isLoading = false;
+            IsLoading = false;
             NavigationManager.NavigateTo("/products?error=categories");
             return;
         }
         catch (Exception)
         {
-            _isLoading = false;
+            IsLoading = false;
             NavigationManager.NavigateTo("/products?error=unexpected");
             return;
         }
 
-        _model = new CreateProductViewModel
+        UpsertModel = new CreateProductViewModel
         {
             Name = "",
             Description = "",
@@ -61,9 +61,9 @@ public class ProductUpsertBase : ComponentBase
             Status = EShop.Shared.Domain.ProductStatus.Draft
         };
 
-        if (_isCreate)
+        if (IsCreate)
         {
-            _title = "Create Product";
+            PageTitle = "Create Product";
         }
         else
         {
@@ -73,14 +73,14 @@ public class ProductUpsertBase : ComponentBase
 
                 if (_product is null)
                 {
-                    _isLoading = false;
+                    IsLoading = false;
                     NavigationManager.NavigateTo("/products?error=notfound");
                     return;
                 }
 
-                _title = $"Edit Product {_product.Name}";
+                PageTitle = $"Edit Product {_product.Name}";
 
-                _model = new CreateProductViewModel()
+                UpsertModel = new CreateProductViewModel()
                 {
                     Name = _product.Name,
                     Description = _product.Description ?? string.Empty,
@@ -107,33 +107,31 @@ public class ProductUpsertBase : ComponentBase
             }
         }
 
-        _isLoading = false;
+        IsLoading = false;
     }
-
-    protected void GoBack() => NavigationManager.NavigateTo("/products");
 
     protected async Task SubmitAsync()
     {
-        _isSaving = true;
+        IsSaving = true;
 
         await _form.Validate();
         if (!_form.IsValid)
         {
-            _isSaving = false;
+            IsSaving = false;
             return;
         }
 
         try
         {
-            if (_isCreate)
+            if (IsCreate)
             {
-                await CatalogApiClient.CreateProductAsync(_model, _model.File, CancellationToken.None);
-                Snackbar.Add($"Product '{_model.Name}' created successfully.", Severity.Success);
+                await CatalogApiClient.CreateProductAsync(UpsertModel, UpsertModel.File, CancellationToken.None);
+                Snackbar.Add($"Product '{UpsertModel.Name}' created successfully.", Severity.Success);
             }
             else
             {
-                await CatalogApiClient.UpdateProductAsync(Id!.Value, _model, _model.File, CancellationToken.None);
-                Snackbar.Add($"Product '{_model.Name}' updated successfully.", Severity.Success);
+                await CatalogApiClient.UpdateProductAsync(Id!.Value, UpsertModel, UpsertModel.File, CancellationToken.None);
+                Snackbar.Add($"Product '{UpsertModel.Name}' updated successfully.", Severity.Success);
             }
 
             NavigationManager.NavigateTo("/products");
@@ -152,14 +150,14 @@ public class ProductUpsertBase : ComponentBase
         }
         finally
         {
-            _isSaving = false;
+            IsSaving = false;
         }
     }
 
     protected async Task UploadPrimaryImage(IBrowserFile file)
     {
-        _previewPrimaryImage = file;
-        _model.File = file;
+        PreviewPrimaryImage = file;
+        UpsertModel.File = file;
 
         try
         {

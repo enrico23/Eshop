@@ -7,187 +7,311 @@
 @using System.Linq
 @inherits ProductUpsertBase
 
-<PageTitle>@_title</PageTitle>
+<PageTitle>@PageTitle</PageTitle>
 
-@if (_isLoading)
+@if (IsLoading)
 {
     <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
 }
 else
 {
+<MudForm @ref="_form" Model="UpsertModel">
     <MudPaper Class="pa-4">
-        <MudButton Color="Color.Default"
-                   Variant="Variant.Text"
-                   StartIcon="@Icons.Material.Filled.ArrowBack"
-                   Disabled="_isSaving"
-                   OnClick="@GoBack">
-            Back to Products
-        </MudButton>
+        
+        <MudGrid AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
+            <MudItem xs="12" md="6">
+                <MudText Typo="Typo.h4">@PageTitle
+                        <MudChip T="ProductDto" Variant="Variant.Filled" Size="Size.Small">
+                            @UpsertModel.Status
+                        </MudChip>
+                </MudText>
+            </MudItem>
+
+            <MudItem xs="12" md="6">
+                <MudStack Row="true" JustifyContent="flex-end" AlignItems="AlignItems.Center" Spacing="2" Class="header-actions">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@IsSaving" OnClick="SubmitAsync">
+                        Save
+                    </MudButton>
+
+                    <MudButton Variant="Variant.Outlined" Color="Color.Default" Disabled=IsSaving" 
+                                   OnClick="@(()=> NavigationManager.NavigateTo("/products"))">
+                        Cancel
+                    </MudButton>
+
+                        @if (IsSaving)
+
+                        {
+
+                            <MudProgressCircular Class="ml-2"
+                                                 Color="Color.Primary"
+                                                 Size="Size.Medium"
+                                                 Indeterminate="true" />
+                        }
+                </MudStack>
+            </MudItem>
+        </MudGrid>
 
         <MudDivider Invisible="true" Class="my-4" />
-        <MudText Typo="Typo.h5">@_title</MudText>
-        <MudDivider Invisible="true" Class="my-2" />
 
-        <MudTabs>
-            <MudTabPanel Text="Metadata" Icon="@Icons.Material.Filled.Info">
-                <MudForm @ref="_form" Model="_model">
-                    <MudGrid GutterSize="2">
-                        <MudItem xs="10">
-                            <MudTextField @bind-Value="_model.Name" Label="Name" Required="true" For="@(() => _model.Name)" />
-                        </MudItem>
+        <!-- Main layout: Left (tabs + form) / Right (sidebar cards) -->
 
-                        <MudItem xs="5">
-                            <MudTextField @bind-Value="_model.Price" Label="Price" Required="true" For="@(() => _model.Price)" />
-                        </MudItem>
+            <MudGrid Spacing="3">
 
-                        <MudItem xs="5">
-                            <MudTextField @bind-Value="_model.Stock" Label="Stock" Required="true" For="@(() => _model.Stock)" />
-                        </MudItem>
+                <!-- LEFT -->
+                <MudItem xs="12" md="8">
+                    <MudPaper Elevation="1" Class="pa-4">
+                       
+                        <MudTabs Rounded="true" Border="true" ApplyEffectsToContainer="true">
+                            <MudTabPanel Text="Metadata" Icon="@Icons.Material.Filled.Info">
+                                
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="UpsertModel.Name" Label="Name" Required="true" For="@(() => UpsertModel.Name)" />
+                                </MudItem>
 
-                        <MudItem xs="5">
-                            @if (_categories is null || _categories.Count == 0)
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="UpsertModel.Price" Label="Price" Required="true" For="@(() => UpsertModel.Price)" />
+                                </MudItem>
+
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="UpsertModel.Stock" Label="Stock" Required="true" For="@(() => UpsertModel.Stock)" />
+                                </MudItem>
+
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="UpsertModel.Sku" Label="Sku" Required="true" For="@(() => UpsertModel.Sku)" />
+                                </MudItem>
+
+                                <MudItem xs="12">
+                                    <MudTextField T="string"
+                                                    @bind-Value="UpsertModel.Description"
+                                                    Label="Description"
+                                                    For="@(() => UpsertModel.Description)"
+                                                    Lines="4"
+                                                    MaxLength="255"
+                                                    Required="true"
+                                                    TextLengthExceededMessage="Description cannot exceed 255 characters." />
+                                </MudItem>
+                                
+                                <!-- Primary image header row -->
+                                <MudStack Row="true" AlignItems="AlignItems.Center" JustifyContent="space-between" Class="mt-2">
+                                    <MudText Typo="Typo.h6">Primary image</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary"> ( PNG JPG WEBP 5 MB )</MudText>
+                                    <MudTooltip Text="Upload primary image">
+                                        <MudFileUpload T="IBrowserFile" FilesChanged="UploadPrimaryImage"
+                                                        MaxFileSize="5_000_000"
+                                                        MaxItems="1"
+                                                        Accept=".png,.jpg,.jpeg,.webp">
+                                            <ActivatorContent>
+                                                <MudButton Variant="Variant.Filled"
+                                                            Color="Color.Primary"
+                                                            StartIcon="@Icons.Material.Filled.CloudUpload">
+                                                    Upload Files
+                                                </MudButton>
+                                            </ActivatorContent>
+                                        </MudFileUpload>
+                                    </MudTooltip>
+                                    
+                                </MudStack>
+
+                                <MudGrid Spacing="2" Class="mt-2">
+
+                                    <!-- Left: existing images -->
+                                    <MudItem xs="12" md="6">
+                                        <MudPaper Class="pa-3" Elevation="0" Outlined="true">
+                                            <MudStack Spacing="2">
+                                                <MudStack Row="true" AlignItems="AlignItems.Center" JustifyContent="space-between">
+                                                    <MudText Typo="Typo.subtitle1">Primary Image</MudText>
+                                                </MudStack>
+                                                
+
+                                            @if (UpsertModel.Images?.FirstOrDefault() is not null)
+                                            {
+                                                var primaryImage = UpsertModel.Images.First();
+
+                                                <MudPaper Outlined="true" Class="pa-2">
+                                                    <div class="img-frame img-frame--wide">
+                                                        <img src="@GetImage(primaryImage.Url)" alt="@primaryImage.AltText" class="img-cover" />
+                                                    </div>
+
+                                                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="mt-2">
+                                                            <MudIcon Icon="@Icons.Material.Filled.Camera" Size="Size.Small" />
+                                                            <MudText Typo="Typo.subtitle2">&nbsp;</MudText>
+                                                        </MudStack>
+                                                </MudPaper>
+                                            }
+                                            else
+                                            {
+                                                <MudAlert Severity="Severity.Info" Dense="true" Variant="Variant.Outlined">
+                                                    No images uploaded yet.
+                                                </MudAlert>
+                                            }
+                                            </MudStack>
+                                        </MudPaper>
+                                    </MudItem>
+
+                                    <!-- Right: upload + preview -->
+                                    <MudItem xs="12" md="6">
+                                        <MudPaper Class="pa-3" Elevation="0" Outlined="true">
+                                            <MudStack Spacing="2">
+
+                                                <MudStack Row="true" AlignItems="AlignItems.Center" JustifyContent="space-between">
+                                                    <MudText Typo="Typo.subtitle1">Upload Preview</MudText>
+                                                </MudStack>
+
+                                                @if (PreviewPrimaryImage is not null)
+                                                {
+                                                    <MudPaper Outlined="true" Class="pa-2">
+                                                        <div class="img-frame img-frame--wide">
+                                                            <img src="@_previewPrimaryImageUrl" alt="Preview" class="img-cover" />
+                                                        </div>
+
+                                                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="mt-2">
+                                                            <MudIcon Icon="@Icons.Material.Filled.AttachFile" Size="Size.Small" />
+                                                            <MudText Typo="Typo.subtitle2">@PreviewPrimaryImage.Name</MudText>
+                                                            <MudSpacer />
+                                                            <MudText Typo="Typo.caption"><code>@PreviewPrimaryImage.Size</code> bytes</MudText>
+                                                        </MudStack>
+                                                    </MudPaper>
+                                                }
+                                                else
+                                                {
+                                                    <MudAlert Severity="Severity.Info" Dense="true" Variant="Variant.Outlined">
+                                                        Upload an image to preview it here.
+                                                    </MudAlert>
+                                                }
+
+                                            </MudStack>
+                                        </MudPaper>
+                                    </MudItem>
+
+                                </MudGrid>
+
+                            </MudTabPanel>
+
+                            @* @if (!IsCreate)
                             {
-                                <MudAlert Severity="Severity.Warning">
-                                    No categories are available. Please create a category first.
-                                </MudAlert>
-                            }
-                            else
-                            {
-                                <MudSelect Label="Category"
-                                            Placeholder="Select..."
-                                            T="Guid ?" Required="true"
-                                            @bind-Value="_model.CategoryId"
-                                            For="@(() => _model.CategoryId)"
-                                            FullWidth="true"
-                                            Margin="Margin.Dense">
+                                <MudTabPanel Text="Images" Icon="@Icons.Material.Filled.Image">
+                                    <MudPaper Class="pa-3">
+                                        <MudText Typo="Typo.subtitle1">Images</MudText>
+                                        <MudDivider Class="my-2" />
 
-                                    @foreach (var category in _categories)
+                                        @if (_model.Images is { Count: > 0 })
+                                        {
+                                            <MudGrid GutterSize="2">
+                                                @foreach (var image in _model.Images.OrderBy(i => i.SortOrder))
+                                                {
+                                                    <MudItem xs="12" sm="6" md="4" lg="3">
+                                                        <MudPaper Class="pa-1">
+                                                            <MudImage Src="@GetImage(image.Url)" Alt="@image.AltText"
+                                                            Width="200" Height="150"
+                                                            Elevation="25" Class="rounded-lg ma-4" />
+
+                                                        </MudPaper>
+                                                    </MudItem>
+                                                }
+                                            </MudGrid>
+                                        }
+                                        else
+                                        {
+                                            <MudAlert Severity="Severity.Info">No images uploaded yet.</MudAlert>
+                                        }
+                                    </MudPaper>
+                                </MudTabPanel>
+                            } *@
+                        </MudTabs>
+
+                        
+                    </MudPaper>
+               </MudItem>
+
+               <!-- RIGHT SIDEBAR -->
+               <MudItem xs="12" md="4">
+                   <MudStack Spacing="3">
+                        <MudPaper Elevation="1" Class="pa-4">
+                            <MudText Typo="Typo.h6" Class="mb-2">Publishing</MudText>
+
+                            <MudItem xs="12">
+                                <MudSelect T="ProductStatus" Label="Status" @bind-Value="UpsertModel.Status">
+                                    @foreach (var status in Enum.GetValues<ProductStatus>())
                                     {
-                                        <MudSelectItem T="Guid?" Value="category.Id">@category.Name</MudSelectItem>
+                                        <MudSelectItem T="ProductStatus" Value="@status">
+                                            @status
+                                        </MudSelectItem>
                                     }
                                 </MudSelect>
-                            }
-                        </MudItem>
+                            </MudItem>
+                        </MudPaper>
 
-                        <MudItem xs="5">
-                            <MudSelect T="ProductStatus" Label="Status" @bind-Value="_model.Status">
-                                @foreach (var status in Enum.GetValues<ProductStatus>())
+                        <MudPaper Elevation="1" Class="pa-4">
+                            <MudText Typo="Typo.h6" Class="mb-2">Classification</MudText>
+
+                            <MudItem xs="12">
+                                @if (_categories is null || _categories.Count == 0)
                                 {
-                                    <MudSelectItem T="ProductStatus" Value="@status">
-                                        @status
-                                    </MudSelectItem>
+                                    <MudAlert Severity="Severity.Warning">
+                                        No categories are available. Please create a category first.
+                                    </MudAlert>
                                 }
-                            </MudSelect>
-                        </MudItem>
+                                else
+                                {
+                                    <MudSelect Label="Category"
+                                                Placeholder="Select..."
+                                                T="Guid ?" Required="true"
+                                                @bind-Value="UpsertModel.CategoryId"
+                                                For="@(() => UpsertModel.CategoryId)"
+                                                FullWidth="true"
+                                                Margin="Margin.Dense">
 
-                        <MudItem xs="10">
-                            <MudTextField @bind-Value="_model.Sku" Label="Sku" Required="true" For="@(() => _model.Sku)" />
-                        </MudItem>
+                                        @foreach (var category in _categories)
+                                        {
+                                            <MudSelectItem T="Guid ?" Value="category.Id">@category.Name</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                }
+                            </MudItem>
+                        </MudPaper>
 
-                        <MudItem xs="10">
-                            <MudTextField T="string"
-                                            @bind-Value="_model.Description"
-                                            Label="Description"
-                                            For="@(() => _model.Description)"
-                                            Lines="4"
-                                            MaxLength="255"
-                                            Required="true"
-                                            TextLengthExceededMessage="Description cannot exceed 255 characters." />
-                        </MudItem>
-                    </MudGrid>
+                        <MudPaper Elevation="1" Class="pa-4">
+                            <MudText Typo="Typo.h6" Class="mb-2">Audit</MudText>
 
-                    <MudDivider Class="my-2" />
-                    @if (_isCreate)
-                    {
-                        <MudText Typo="Typo.h5">Upload primary product image</MudText>
+                            <MudStack Spacing="2">
+                                <div>
+                                    <MudText Typo="Typo.subtitle2">Created</MudText>
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary"> Some date</MudText>
+                                </div>
 
-                        <MudDivider Class="my-2" />
+                                <div>
+                                    <MudText Typo="Typo.subtitle2">Updated</MudText>
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">Some Date</MudText>
+                                </div>
+                            </MudStack>
+                        </MudPaper>
+                    </MudStack>
+                </MudItem>
 
-                        <MudFileUpload T="IBrowserFile" FilesChanged="UploadPrimaryImage"
-                        MaxFileSize="5_000_000"
-                        MaxItems="1"
-                        Accept=".png,.jpg,.jpeg,.webp">
-                            <ActivatorContent>
-                                <MudButton Variant="Variant.Filled"
-                                Color="Color.Primary"
-                                StartIcon="@Icons.Material.Filled.CloudUpload">
-                                    Upload Files
-                                </MudButton>
-                            </ActivatorContent>
-                        </MudFileUpload>
+            </MudGrid>
 
-                         @if(_previewPrimaryImage is not null)
-                        {
-                            <MudList T="string">
-                                <MudListItem Icon="@Icons.Material.Filled.AttachFile" @key="@_previewPrimaryImage">
-                                    @_previewPrimaryImage.Name <code>@_previewPrimaryImage.Size bytes</code>
-                                </MudListItem>
-                            </MudList>
+        </MudPaper>
 
-                            <img src="@_previewPrimaryImageUrl"
-                                 alt="Preview"
-                                 style="max-width: 300px; max-height: 300px; border-radius: 8px;" />
-                        }
-
-                        <MudText Class="mt-2" Color="Color.Default" Typo="Typo.body2">
-                            Allowed: .png, .jpg, .jpeg, .webp – Max 5 MB
-                        </MudText>
-                       
-                    }
-
-                        <MudDivider Class="my-2" />
-
-                        <MudStack Row Class="mt-4">
-                            <MudButton Color="Color.Primary"
-                            Variant="Variant.Filled"
-                            OnClick="SubmitAsync"
-                            Disabled="_isSaving || _categories.Count == 0">
-                                @(_isCreate ? "Create" : "Save")
-                            </MudButton>
-
-                            @if (_isSaving)
-
-                            {
-
-                                <MudProgressCircular Class="ml-2"
-                                Color="Color.Primary"
-                                Size="Size.Medium"
-                                Indeterminate="true" />
-                            }
-
-                        </MudStack>
-
-
-                </MudForm>
-            </MudTabPanel>
-
-            <MudTabPanel Text="Images" Icon="@Icons.Material.Filled.Image">
-                <MudPaper Class="pa-3">
-                    <MudText Typo="Typo.subtitle1">Images</MudText>
-                    <MudDivider Class="my-2" />
-
-                    @if (_model.Images is { Count: > 0 })
-                    {
-                        <MudGrid GutterSize="2">
-                            @foreach (var image in _model.Images.OrderBy(i => i.SortOrder))
-                            {
-                                <MudItem xs="12" sm="6" md="4" lg="3">
-                                    <MudPaper Class="pa-1">
-                                        <MudImage Src="@GetImage(image.Url)" Alt="@image.AltText"
-                                                  Width="200" Height="150"
-                                                  Elevation="25" Class="rounded-lg ma-4" />
-
-                                    </MudPaper>
-                                </MudItem>
-                            }
-                        </MudGrid>
-                    }
-                    else
-                    {
-                        <MudAlert Severity="Severity.Info">No images uploaded yet.</MudAlert>
-                    }
-                </MudPaper>
-            </MudTabPanel>
-        </MudTabs>
-    </MudPaper>
+    </MudForm>
 }
+
+<style>
+    /* Consistent thumbnail sizing (no stretching, no weird max-width battles) */
+    .img-frame {
+        width: 100%;
+        aspect-ratio: 1 / 1; /* square thumbs */
+        overflow: hidden;
+        border-radius: 8px;
+    }
+
+    .img-frame--wide {
+        aspect-ratio: 16 / 9; /* preview area */
+    }
+
+    .img-cover {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* key: consistent crops */
+        display: block;
+    }
+</style>
