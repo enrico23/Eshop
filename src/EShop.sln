@@ -37,6 +37,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{1CFF8CA6-A14
 		..\docs\api\errorhandling.md = ..\docs\api\errorhandling.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.API.Tests", "EShop.API.Tests\EShop.API.Tests.csproj", "{C806C5B5-D90D-63A4-0E5E-57CF8846865F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +77,10 @@ Global
 		{B4CB8617-7C61-0298-845A-604C42139E0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B4CB8617-7C61-0298-845A-604C42139E0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B4CB8617-7C61-0298-845A-604C42139E0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C806C5B5-D90D-63A4-0E5E-57CF8846865F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C806C5B5-D90D-63A4-0E5E-57CF8846865F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C806C5B5-D90D-63A4-0E5E-57CF8846865F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C806C5B5-D90D-63A4-0E5E-57CF8846865F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
