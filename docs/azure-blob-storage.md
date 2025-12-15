@@ -31,3 +31,14 @@
 - Blobs are private: clients never get SAS URLs; images are streamed via the API.
 - Production: supply a real `Blobs` connection string; the initializer will create the container if missing.
 - Troubleshooting: if image requests 404, check the container exists and the `Blobs` connection string matches your target storage/emulator.
+
+
+## TODO / Improvements
+
+- Add content-type validation using file signatures (magic numbers) to block spoofed MIME types.
+- Add image resizing/thumbnails and store derivatives under prefixes; set cache headers when serving.
+- Add CDN/front-door caching and ETag support on GET /api/images/{id} to reduce blob round trips.
+- Enable soft delete or versioning (or use a staging container) to avoid race conditions during updates.
+- Add antivirus/malware scanning before making uploads available.
+- Instrument metrics/logging around upload/delete failures and blob size growth; add alerts.
+- If client-side uploads are needed later, add SAS generation with per-blob, short-lived tokens instead of direct keys.
