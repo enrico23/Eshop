@@ -31,17 +31,10 @@ builder.Services.AddProblemDetails(options =>
     };
 });
 
+// SQL SERVER 
 var connectionString = builder.Configuration.GetConnectionString("CatalogDb");
 builder.Services.AddDbContext<CatalogDbContext>(options =>
     options.UseSqlServer(connectionString));
-
-// // Mapster DI registration
-builder.Services.AddMapster();
-TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
-
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
 
 // BLOB FILE STORAGE
 var blobConnectionString = builder.Configuration.GetConnectionString("Blobs");
@@ -52,6 +45,13 @@ builder.Services.AddSingleton(sp =>
     return serviceClient.GetBlobContainerClient("product-images");
 });
 builder.Services.AddSingleton<IBlobFileStorageService, BlobFileStorageService>();
+
+// // Mapster DI registration
+builder.Services.AddMapster();
+TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
+
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();

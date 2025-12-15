@@ -14,20 +14,14 @@ using System.Linq.Dynamic.Core;
 
 namespace EShop.API.Services;
 
-public class ProductService : IProductService
+public class ProductService(CatalogDbContext context, IMapper mapper, IBlobFileStorageService blobFileStorageService) 
+    : IProductService
 {
-    private readonly CatalogDbContext _context;
+    private readonly CatalogDbContext _context = context;
 
-    private readonly IMapper _mapper;
+    private readonly IMapper _mapper = mapper;
 
-    private readonly IFileStorage _fileStorage;
-
-    public ProductService(CatalogDbContext context, IMapper mapper, IFileStorage fileStorage)
-    {
-        _context = context;
-        _mapper = mapper;
-        _fileStorage = fileStorage;
-    }
+    private readonly IBlobFileStorageService _blobFileStorageService = blobFileStorageService;
 
     public async Task<Shared.Representations.PagedResult<ProductDto>> GetPagedAsync(
         int page, int pageSize, 
@@ -102,7 +96,7 @@ public class ProductService : IProductService
 
         if(productFormDto.File is not null)
         {
-            var newUrl = await _fileStorage.SaveImageAsync(productFormDto.File, ct);
+            var newUrl = await _blobFileStorageService.UploadImageAsync(productFormDto.File, ct);
             product.AddImage(newUrl);
         }
 
@@ -163,11 +157,10 @@ public class ProductService : IProductService
         {
             foreach (var image in product.Images)
             {
-                _fileStorage.Delete(image.Url);
+                await _blobFileStorageService.DeleteImageAsync(image.Url);
             }
 
-            var newUrl = await _fileStorage.SaveImageAsync(productFormDto.File, ct);
-
+            var newUrl = await _blobFileStorageService.UploadImageAsync(productFormDto.File, ct);
             product.AddImage(newUrl);
 
             var newImages = new List<ProductImageSpec> {
@@ -193,7 +186,7 @@ public class ProductService : IProductService
         {
             foreach (var image in entity.Images)
             {
-                _fileStorage.Delete(image.Url);
+                await _blobFileStorageService.DeleteImageAsync(image.Url, ct);
             }
         }
 
