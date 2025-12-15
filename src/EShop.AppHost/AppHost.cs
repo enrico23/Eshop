@@ -30,6 +30,7 @@ if (!dependenciesOnly)
     var catalogApi = builder.AddProject<Projects.EShop_API>("CatalogApi")
            .WithReference(db)
            .WaitFor(db)
+            .WaitFor(migrationWorkerService)
            .WithReference(azureBlobStorage);
 
     // FRONTEND
