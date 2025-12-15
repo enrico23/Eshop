@@ -1,3 +1,5 @@
+using Azure.Storage.Blobs;
+using EShop.API;
 using EShop.API.Exceptions;
 using EShop.API.Services;
 using EShop.Data;
@@ -30,9 +32,20 @@ builder.Services.AddProblemDetails(options =>
     };
 });
 
+// SQL SERVER 
 var connectionString = builder.Configuration.GetConnectionString("CatalogDb");
 builder.Services.AddDbContext<CatalogDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+// BLOB FILE STORAGE
+var blobConnectionString = builder.Configuration.GetConnectionString("Blobs");
+builder.Services.AddSingleton(_ => new BlobServiceClient(blobConnectionString));
+builder.Services.AddSingleton(sp =>
+{
+    var serviceClient = sp.GetRequiredService<BlobServiceClient>();
+    return serviceClient.GetBlobContainerClient("product-images");
+});
+builder.Services.AddSingleton<IBlobFileStorageService, BlobFileStorageService>();
 
 // // Mapster DI registration
 builder.Services.AddMapster();
@@ -40,7 +53,6 @@ TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
 
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();

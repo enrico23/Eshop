@@ -12,7 +12,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // CATALOG API HTTP CLIENT
-var catalogApiBase = builder.Configuration.GetValue("services:api:http:0", "http://localhost:5002/");
+var catalogApiBase = builder.Configuration.GetValue("services:CatalogApi:https:0", "http://localhost:5002");
 builder.Services.AddSingleton(new ApiClientConfig { BaseUrl = catalogApiBase });
 builder.Services.AddHttpClient<ICatalogApiClient, CatalogApiClient>(client =>
 {
