@@ -1,5 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using EShop.API.Models;
 
 namespace EShop.API.Services;
 
@@ -12,17 +13,28 @@ public interface IBlobFileStorageService
     Task<(Stream Stream, string ContentType)> GetImageAsync(string imageId, CancellationToken ct = default);
 }
 
-public class BlobFileStorageService(BlobContainerClient container) : IBlobFileStorageService
+public class BlobFileStorageService : IBlobFileStorageService
 {
-    private const long MaxFileSizeBytes = 5 * 1024 * 1024;
+    private readonly BlobContainerClient container;
+    private readonly BlobFileStorageServiceOptions blobFileStorageServiceOptions;
+    private readonly long _maxUploadSizeBytes;
+
+    public BlobFileStorageService(
+        BlobContainerClient container, 
+        BlobFileStorageServiceOptions blobFileStorageServiceOptions)
+    {
+        this.container = container;
+        this.blobFileStorageServiceOptions = blobFileStorageServiceOptions;
+        _maxUploadSizeBytes = blobFileStorageServiceOptions.MaxUploadSizeBytes ?? 52428800;
+    }
 
     public async Task<string> UploadImageAsync(IFormFile file, CancellationToken ct = default)
     {
         if (file is null || file.Length == 0)
             throw new BadHttpRequestException("File is required.", StatusCodes.Status400BadRequest);
-
-        if (file.Length > MaxFileSizeBytes)
-            throw new BadHttpRequestException($"File is too large. Max {MaxFileSizeBytes / (1024 * 1024)} MB.", StatusCodes.Status413PayloadTooLarge);
+       
+        if (file.Length > _maxUploadSizeBytes)
+            throw new BadHttpRequestException($"File is too large. Max {_maxUploadSizeBytes / (1024 * 1024)} MB.", StatusCodes.Status413PayloadTooLarge);
 
         if (string.IsNullOrWhiteSpace(file.ContentType) || !file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
             throw new BadHttpRequestException("Only image files are allowed.", StatusCodes.Status400BadRequest);

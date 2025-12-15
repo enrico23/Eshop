@@ -1,5 +1,6 @@
 using Azure.Storage.Blobs;
 using EShop.API.Exceptions;
+using EShop.API.Models;
 using EShop.API.Services;
 using EShop.Data;
 using Mapster;
@@ -39,6 +40,18 @@ builder.Services.AddDbContext<CatalogDbContext>(options =>
 // BLOB FILE STORAGE
 var blobConnectionString = builder.Configuration.GetConnectionString("Blobs");
 builder.Services.AddSingleton(_ => new BlobServiceClient(blobConnectionString));
+builder.Services.AddSingleton(sp =>
+{
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    var options = configuration
+        .GetSection("AzureBlobStorage")
+        .Get<BlobFileStorageServiceOptions>();
+
+    return options is null
+        ? throw new InvalidOperationException(
+            "BlobFileStorageServiceOptions configuration section is missing or invalid.")
+        : options;
+});
 builder.Services.AddSingleton(sp =>
 {
     var serviceClient = sp.GetRequiredService<BlobServiceClient>();
