@@ -1,9 +1,6 @@
-﻿using Azure.Storage.Blobs;
-using NSubstitute;
-using EShop.API.Services;
-using Microsoft.AspNetCore.Http;
+﻿using EShop.API.Services;
 
-namespace EShop.API.Tests.Services.BlobFileStorageService;
+namespace EShop.API.Tests.Services.BlobFileStorageServiceTests;
 
 public sealed class DeleteImageAsyncTests
 {

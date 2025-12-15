@@ -1,11 +1,6 @@
-﻿using Azure;
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
-using EShop.API.Services;
-using Microsoft.AspNetCore.Http;
-using NSubstitute;
+﻿using EShop.API.Services;
 
-namespace EShop.API.Tests;
+namespace EShop.API.Tests.Services.BlobFileStorageServiceTests;
 
 public class UploadImageAsyncTests
 {
@@ -16,7 +11,7 @@ public class UploadImageAsyncTests
     public UploadImageAsyncTests()
     {
         var container = 
-            Substitute.For<BlobContainerClient>("UseDevelopmentStorage=true", "dummy-container");
+            Substitute.For<BlobContainerClient>();
 
         _blobFileStorage = new BlobFileStorageService(container);
     }

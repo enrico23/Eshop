@@ -44,12 +44,12 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
 
 // BLOB FILE STORAGE
-// Azure Blob Storage client registration
-builder.AddAzureBlobServiceClient("Blobs");
+var blobConnectionString = builder.Configuration.GetConnectionString("Blobs");
+builder.Services.AddSingleton(_ => new BlobServiceClient(blobConnectionString));
 builder.Services.AddSingleton(sp =>
 {
-    var blobServiceClient = sp.GetRequiredService<BlobServiceClient>();
-    return blobServiceClient.GetBlobContainerClient("product-images");
+    var serviceClient = sp.GetRequiredService<BlobServiceClient>();
+    return serviceClient.GetBlobContainerClient("product-images");
 });
 builder.Services.AddSingleton<IBlobFileStorageService, BlobFileStorageService>();
 

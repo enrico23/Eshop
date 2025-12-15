@@ -31,7 +31,8 @@
     <PackageReference Include="Mapster" Version="7.4.0" />
     <PackageReference Include="Mapster.DependencyInjection" Version="1.0.1" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.0" />
-    <PackageReference Include="Aspire.Azure.Storage.Blobs" Version="13.0.2" />
+    
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.26.0" />
   </ItemGroup>
 
   <ItemGroup>

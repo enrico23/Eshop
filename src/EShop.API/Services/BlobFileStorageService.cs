@@ -8,6 +8,8 @@ public interface IBlobFileStorageService
     Task<string> UploadImageAsync(IFormFile file, CancellationToken ct = default);
 
     Task<bool> DeleteImageAsync(string imageId, CancellationToken ct = default);
+
+    Task<(Stream Stream, string ContentType)> GetImageAsync(string imageId, CancellationToken ct = default);
 }
 
 public class BlobFileStorageService(BlobContainerClient container) : IBlobFileStorageService
@@ -51,5 +53,23 @@ public class BlobFileStorageService(BlobContainerClient container) : IBlobFileSt
         var response = await blobClient.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots, cancellationToken: ct);
 
         return response.Value;
+    }
+
+    public async Task<(Stream Stream, string ContentType)> GetImageAsync(string imageId, CancellationToken ct = default)
+    {
+
+        if (string.IsNullOrWhiteSpace(imageId))
+            throw new BadHttpRequestException("Image ID is required.", StatusCodes.Status400BadRequest);
+
+        var blobClient = container.GetBlobClient(imageId);
+
+        if (!await blobClient.ExistsAsync(ct))
+            throw new FileNotFoundException($"Image '{imageId}' not found.");
+
+        var response = await blobClient.DownloadAsync(ct);
+
+        var contentType = response.Value.Details.ContentType ?? "application/octet-stream";
+
+        return (response.Value.Content, contentType);
     }
 }
