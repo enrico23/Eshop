@@ -5,14 +5,16 @@ namespace EShop.API.Services;
 
 public interface IBlobFileStorageService
 {
-    Task<string> UploadAsync(IFormFile file, CancellationToken ct = default);
+    Task<string> UploadImageAsync(IFormFile file, CancellationToken ct = default);
+
+    Task<bool> DeleteImageAsync(string imageId, CancellationToken ct = default);
 }
 
 public class BlobFileStorageService(BlobContainerClient container) : IBlobFileStorageService
 {
     private const long MaxFileSizeBytes = 5 * 1024 * 1024;
 
-    public async Task<string> UploadAsync(IFormFile file, CancellationToken ct = default)
+    public async Task<string> UploadImageAsync(IFormFile file, CancellationToken ct = default)
     {
         if (file is null || file.Length == 0)
             throw new BadHttpRequestException("File is required.", StatusCodes.Status400BadRequest);
@@ -37,5 +39,17 @@ public class BlobFileStorageService(BlobContainerClient container) : IBlobFileSt
         }, ct);
 
         return blobName;
+    }
+
+    public async Task<bool> DeleteImageAsync(string imageId, CancellationToken ct = default)
+    {
+        if(string.IsNullOrWhiteSpace(imageId))
+            throw new BadHttpRequestException("Image ID is required.", StatusCodes.Status400BadRequest);
+        
+        var blobClient = container.GetBlobClient(imageId);
+
+        var response = await blobClient.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots, cancellationToken: ct);
+
+        return response.Value;
     }
 }

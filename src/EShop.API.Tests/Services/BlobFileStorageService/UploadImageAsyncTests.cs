@@ -3,22 +3,17 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using EShop.API.Services;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
-using Microsoft.Net.Http.Headers;
 using NSubstitute;
-using System.ComponentModel;
-using System.Reflection.Metadata;
-using static System.Reflection.Metadata.BlobBuilder;
 
 namespace EShop.API.Tests;
 
-public class BlobFileStorageTests
+public class UploadImageAsyncTests
 {
     private readonly IBlobFileStorageService _blobFileStorage;
 
     private const long MaxFileSizeBytes = 5 * 1024 * 1024;
 
-    public BlobFileStorageTests()
+    public UploadImageAsyncTests()
     {
         var container = 
             Substitute.For<BlobContainerClient>("UseDevelopmentStorage=true", "dummy-container");
@@ -31,7 +26,7 @@ public class BlobFileStorageTests
     {
         // Act & Assert
         var ex = await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
-              await _blobFileStorage.UploadAsync(null!, CancellationToken.None));
+              await _blobFileStorage.UploadImageAsync(null!, CancellationToken.None));
 
         Assert.NotNull(ex);
         Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);
@@ -45,7 +40,7 @@ public class BlobFileStorageTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
-              await _blobFileStorage.UploadAsync(emptyFile, CancellationToken.None));
+              await _blobFileStorage.UploadImageAsync(emptyFile, CancellationToken.None));
 
         Assert.NotNull(ex);
         Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);
@@ -64,7 +59,7 @@ public class BlobFileStorageTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
-              await _blobFileStorage.UploadAsync(tooLargeFile, CancellationToken.None));
+              await _blobFileStorage.UploadImageAsync(tooLargeFile, CancellationToken.None));
 
         Assert.NotNull(ex);
         Assert.Equal(StatusCodes.Status413PayloadTooLarge, ex.StatusCode);
@@ -74,10 +69,10 @@ public class BlobFileStorageTests
     public async Task UploadAsync_WhenContentTypeIsNull_Throws400()
     {
         // Arrange
-        var file = CreateFormFile(length: 1, fileName: "test.txt", contentType: null);
+        var file = FormFileHelpers.CreateFormFile(length: 1, fileName: "test.txt", contentType: null);
 
         // Act
-        var ex = await Assert.ThrowsAsync<BadHttpRequestException>(() => _blobFileStorage.UploadAsync(file));
+        var ex = await Assert.ThrowsAsync<BadHttpRequestException>(() => _blobFileStorage.UploadImageAsync(file));
 
         // Assert
         Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);
@@ -92,11 +87,11 @@ public class BlobFileStorageTests
     [InlineData("video/mp4")]
     public async Task UploadAsync_WhenContentTypeIsNotImage_Throws400(string contentType)
     {
-       // Arrange
-        var file = CreateFormFile(length: 1, fileName: "video.mpg", contentType: contentType);
+        // Arrange
+        var file = FormFileHelpers.CreateFormFile(length: 1, fileName: "video.mpg", contentType: contentType);
 
         // Act
-        var ex = await Assert.ThrowsAsync<BadHttpRequestException>(() => _blobFileStorage.UploadAsync(file));
+        var ex = await Assert.ThrowsAsync<BadHttpRequestException>(() => _blobFileStorage.UploadImageAsync(file));
 
         // Assert
         Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);
@@ -127,31 +122,13 @@ public class BlobFileStorageTests
 
         var sut = new BlobFileStorageService(container);
 
-        var file = CreateFormFile(length: 1, fileName: "image.png", contentType: "image/png");
+        var file = FormFileHelpers.CreateFormFile(length: 1, fileName: "image.png", contentType: "image/png");
 
         // Act
-        var result = await sut.UploadAsync(file, CancellationToken.None);
+        var result = await sut.UploadImageAsync(file, CancellationToken.None);
         
         // Assert
         Assert.NotNull(result);
         Assert.IsType<string>(result);
-    }
-
-    private static IFormFile CreateFormFile(long length, string fileName, string? contentType)
-    {
-        // Stream content is irrelevant for these tests; avoid large allocations.
-        var stream = new MemoryStream(new byte[1]);
-
-        var file = new FormFile(stream, 0, length, "file", fileName)
-        {
-            Headers = new HeaderDictionary()
-        };
-
-        if (contentType is not null)
-        {
-            file.Headers[HeaderNames.ContentType] = contentType;
-        }
-
-        return file;
     }
 }
