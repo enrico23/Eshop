@@ -60,3 +60,6 @@ the migrations alongside the data layer.
 ## API
 
 ➡️ [Error Handling](docs/api/errorhandling.md)
+Additional docs:
+
+- [Azure Blob Storage](docs/azure-blob-storage.md)
