@@ -1,33 +1,26 @@
-﻿using EShop.API.Services;
+﻿namespace EShop.API.Tests.Services.BlobFileStorageServiceTests;
 
-namespace EShop.API.Tests.Services.BlobFileStorageServiceTests;
-
-public sealed class GetImageAsyncTests
+public sealed class GetImageAsyncTests : BlobFileStorageTestBase
 {
     [Fact]
     public async Task GetImageAsync_WhenCalled_ThrowsBadHttpRequestException()
     {
         // Arrange
-        var sut = new BlobFileStorageService(Substitute.For<BlobContainerClient>());
+        var blobFileStorage = CreateSut();
 
         // Act & Assert
         await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
-            await sut.GetImageAsync(string.Empty, CancellationToken.None));
+            await blobFileStorage.GetImageAsync(string.Empty, CancellationToken.None));
     }
 
     [Fact]
     public async Task GetImageAsync_WhenBlobDoesNotExist_ThrowsFileNotFoundException()
     {
         // Arrange
-        var container = Substitute.For<BlobContainerClient>();
-        var blobClient = Substitute.For<BlobClient>();
+        BlobClient.ExistsAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(Response.FromValue(false, null!)));
 
-        container.GetBlobClient(Arg.Any<string>()).Returns(blobClient);
-
-        blobClient.ExistsAsync(Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult(Response.FromValue(false, null)));
-
-        var blobFileStorage = new BlobFileStorageService(container);
+        var blobFileStorage = CreateSut();
 
         // Act & Assert
         await Assert.ThrowsAsync<FileNotFoundException>(async () =>
@@ -38,12 +31,8 @@ public sealed class GetImageAsyncTests
     public async Task GetImageAsync_WhenBlobExists_ReturnsStreamAndContentType()
     {
         // Arrange
-        var container = Substitute.For<BlobContainerClient>();
-        var blobClient = Substitute.For<BlobClient>();
-        container.GetBlobClient(Arg.Any<string>()).Returns(blobClient);
-
         var existsResponse = Substitute.For<Response>();
-        blobClient.ExistsAsync(Arg.Any<CancellationToken>())
+        BlobClient.ExistsAsync(Arg.Any<CancellationToken>())
                   .Returns(Task.FromResult(Response.FromValue(true, existsResponse)));
 
         // Prepare download result
@@ -52,14 +41,14 @@ public sealed class GetImageAsyncTests
 
         // BlobDownloadInfo creation via factory
         var downloadInfo = BlobsModelFactory.BlobDownloadInfo(
-            content: expectedStream, contentType: expectedContentType
-            );
+            content: expectedStream, 
+            contentType: expectedContentType);
 
         var downloadResponse = Substitute.For<Response>();
-        blobClient.DownloadAsync(Arg.Any<CancellationToken>())
+        BlobClient.DownloadAsync(Arg.Any<CancellationToken>())
                   .Returns(Task.FromResult(Response.FromValue(downloadInfo, downloadResponse)));
 
-        var sut = new BlobFileStorageService(container);
+        var sut = CreateSut();
 
         // Act
         var (stream, contentType) = await sut.GetImageAsync("image.png", CancellationToken.None);

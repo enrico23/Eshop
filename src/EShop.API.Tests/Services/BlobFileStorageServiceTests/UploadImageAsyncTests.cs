@@ -1,27 +1,15 @@
-﻿using EShop.API.Services;
+﻿namespace EShop.API.Tests.Services.BlobFileStorageServiceTests;
 
-namespace EShop.API.Tests.Services.BlobFileStorageServiceTests;
-
-public class UploadImageAsyncTests
+public sealed class UploadImageAsyncTests : BlobFileStorageTestBase
 {
-    private readonly IBlobFileStorageService _blobFileStorage;
-
-    private const long MaxFileSizeBytes = 5 * 1024 * 1024;
-
-    public UploadImageAsyncTests()
-    {
-        var container = 
-            Substitute.For<BlobContainerClient>();
-
-        _blobFileStorage = new BlobFileStorageService(container);
-    }
-
     [Fact]
     public async Task When_File_Null_ThrowsBadHttpRequestException()
     {
         // Act & Assert
+        var blobFileStorage = CreateSut();
+
         var ex = await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
-              await _blobFileStorage.UploadImageAsync(null!, CancellationToken.None));
+              await blobFileStorage.UploadImageAsync(null!, CancellationToken.None));
 
         Assert.NotNull(ex);
         Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);
@@ -34,8 +22,9 @@ public class UploadImageAsyncTests
         var emptyFile = new FormFile(Stream.Null, 0, 0, "empty", "empty.txt");
 
         // Act & Assert
+        var blobFileStorage = CreateSut();
         var ex = await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
-              await _blobFileStorage.UploadImageAsync(emptyFile, CancellationToken.None));
+              await blobFileStorage.UploadImageAsync(emptyFile, CancellationToken.None));
 
         Assert.NotNull(ex);
         Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);
@@ -45,16 +34,18 @@ public class UploadImageAsyncTests
     public async Task UploadAsync_WhenFileExceedsMaxFielSize_ThrowsBadHttpRequestException()
     {
         // Arrange
+        var maxFileSizeBytes = Options.MaxUploadSizeBytes ?? 5242880;
         IFormFile tooLargeFile = new FormFile(
-            baseStream: new MemoryStream(new byte[1]), // stream content doesn't matter here
+            baseStream: new MemoryStream(new byte[1]),
             baseStreamOffset: 0,
-            length: MaxFileSizeBytes + 1, // force Length > MaxFileSizeBytes
+            length: maxFileSizeBytes + 1, // force Length > MaxFileSizeBytes
             name: "file",
             fileName: "too-large.bin");
 
         // Act & Assert
+        var blobFileStorage = CreateSut();
         var ex = await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
-              await _blobFileStorage.UploadImageAsync(tooLargeFile, CancellationToken.None));
+              await blobFileStorage.UploadImageAsync(tooLargeFile, CancellationToken.None));
 
         Assert.NotNull(ex);
         Assert.Equal(StatusCodes.Status413PayloadTooLarge, ex.StatusCode);
@@ -67,7 +58,9 @@ public class UploadImageAsyncTests
         var file = FormFileHelpers.CreateFormFile(length: 1, fileName: "test.txt", contentType: null);
 
         // Act
-        var ex = await Assert.ThrowsAsync<BadHttpRequestException>(() => _blobFileStorage.UploadImageAsync(file));
+        var blobFileStorage = CreateSut();
+        var ex = await Assert.ThrowsAsync<BadHttpRequestException>(() => 
+            blobFileStorage.UploadImageAsync(file));
 
         // Assert
         Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);
@@ -86,7 +79,9 @@ public class UploadImageAsyncTests
         var file = FormFileHelpers.CreateFormFile(length: 1, fileName: "video.mpg", contentType: contentType);
 
         // Act
-        var ex = await Assert.ThrowsAsync<BadHttpRequestException>(() => _blobFileStorage.UploadImageAsync(file));
+        var blobFileStorage = CreateSut();
+        var ex = await Assert.ThrowsAsync<BadHttpRequestException>(() 
+            => blobFileStorage.UploadImageAsync(file));
 
         // Assert
         Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);
@@ -97,30 +92,26 @@ public class UploadImageAsyncTests
     public async Task UploadAsync_WhenContentTypeIsImage_Succeeds()
     {
         // Arrange
-        var container = Substitute.For<BlobContainerClient>();
-        var blob = Substitute.For<BlobClient>();
-
-        container
+        Container
             .CreateIfNotExistsAsync(PublicAccessType.Blob, cancellationToken: Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<Response<BlobContainerInfo>>(null!));
 
-        container
+        Container
             .GetBlobClient(Arg.Any<string>())
-            .Returns(blob);
+            .Returns(BlobClient);
 
-        blob
+        BlobClient
             .UploadAsync(
                 Arg.Any<Stream>(),
                 Arg.Any<BlobUploadOptions>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<Response<BlobContentInfo>>(null!));
 
-        var sut = new BlobFileStorageService(container);
-
-        var file = FormFileHelpers.CreateFormFile(length: 1, fileName: "image.png", contentType: "image/png");
+        var sut = CreateSut();
+        var fakeImage = FakeImage("image/png", 1);
 
         // Act
-        var result = await sut.UploadImageAsync(file, CancellationToken.None);
+        var result = await sut.UploadImageAsync(fakeImage, CancellationToken.None);
         
         // Assert
         Assert.NotNull(result);
