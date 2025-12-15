@@ -1,8 +1,18 @@
 # Store and check out LF by default for text files
-* text eol=lf
+* text=auto eol=lf
+
 
 # Windows-only scripts keep CRLF to avoid execution issues
 *.bat  text eol=crlf
 *.cmd  text eol=crlf
 *.ps1  text eol=crlf
 *.psm1 text eol=crlf
+
+# Shell scripts keep LF to avoid execution issues
+*.sh     text eol=lf
+
+# binary files stay untouched
+*.png    binary
+*.jpg    binary
+*.pdf    binary
+*.zip    binary
