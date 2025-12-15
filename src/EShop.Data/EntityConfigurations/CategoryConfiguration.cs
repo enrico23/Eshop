@@ -16,6 +16,12 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 
         builder.Property(c => c.Name).IsRequired().HasMaxLength(200);
 
+        builder.Property(p => p.CreatedUtc)
+          .IsRequired()
+          .HasDefaultValueSql("SYSUTCDATETIME()");
+
+        builder.Property(p => p.UpdatedUtc);
+
 
         builder.HasData(
             new Category( new Guid("a3b4f1de-8241-4ff0-9c5e-af4c4c7a1e10"), "Laptops" ),

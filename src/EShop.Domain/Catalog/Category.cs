@@ -1,6 +1,6 @@
 ﻿namespace EShop.Domain.Catalog;
 
-public sealed class Category
+public sealed class Category : AuditableEntity
 {
     public Guid Id { get; private set; }
 
