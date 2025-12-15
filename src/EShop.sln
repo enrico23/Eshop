@@ -39,6 +39,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{1CFF8CA6-A14
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.API.Tests", "EShop.API.Tests\EShop.API.Tests.csproj", "{C806C5B5-D90D-63A4-0E5E-57CF8846865F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.BlobStorageInitializer", "EShop.BlobStorageInitializer\EShop.BlobStorageInitializer.csproj", "{8489B8DC-F975-9D8C-626B-D5AACF153E4F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{C806C5B5-D90D-63A4-0E5E-57CF8846865F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C806C5B5-D90D-63A4-0E5E-57CF8846865F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C806C5B5-D90D-63A4-0E5E-57CF8846865F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8489B8DC-F975-9D8C-626B-D5AACF153E4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8489B8DC-F975-9D8C-626B-D5AACF153E4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8489B8DC-F975-9D8C-626B-D5AACF153E4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8489B8DC-F975-9D8C-626B-D5AACF153E4F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

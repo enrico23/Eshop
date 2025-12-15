@@ -27,8 +27,6 @@ public class BlobFileStorageService(BlobContainerClient container) : IBlobFileSt
         if (string.IsNullOrWhiteSpace(file.ContentType) || !file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
             throw new BadHttpRequestException("Only image files are allowed.", StatusCodes.Status400BadRequest);
 
-        await container.CreateIfNotExistsAsync(PublicAccessType.Blob, cancellationToken: ct);
-
         var blobName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
 
         var blob = container.GetBlobClient(blobName);

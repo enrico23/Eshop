@@ -1,5 +1,4 @@
 using Azure.Storage.Blobs;
-using EShop.API;
 using EShop.API.Exceptions;
 using EShop.API.Services;
 using EShop.Data;

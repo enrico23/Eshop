@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EShop.API\EShop.API.csproj" />
+    <ProjectReference Include="..\EShop.BlobStorageInitializer\EShop.BlobStorageInitializer.csproj" />
     <ProjectReference Include="..\EShop.MigrationService\EShop.MigrationService.csproj" />
     <ProjectReference Include="..\EShop.Web\EShop.Web.csproj" />
   </ItemGroup>
