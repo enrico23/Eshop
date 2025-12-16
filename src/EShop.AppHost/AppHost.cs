@@ -24,6 +24,7 @@ var db = sql.AddDatabase(databaseName);
 
 // EF MIGRATIONS
 var migrationWorkerService = builder.AddProject<Projects.EShop_MigrationService>("EfCoreMigratorJob")
+    .WithEnvironment("SeedSampleData", "true")
     .WithReference(db)
     .WaitFor(db);
 
