@@ -3,14 +3,13 @@ using EShop.Domain;
 using EShop.Domain.Catalog;
 using EShop.Domain.Products;
 using Microsoft.EntityFrameworkCore;
-using System.Threading;
 
 namespace EShop.MigrationService;
 
-public class Worker(
+public class MigratorService(
     IServiceProvider serviceProvider, 
     IHostApplicationLifetime hostApplicationLifetime,
-     ILogger<Worker> logger) 
+     ILogger<MigratorService> logger) 
         : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
