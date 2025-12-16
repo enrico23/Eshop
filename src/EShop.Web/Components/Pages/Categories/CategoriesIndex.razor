@@ -102,7 +102,7 @@
            title: "Update Category",
            parameters: parameters,
            saveAction: model => CategoryApiClient.UpdateCategoryAsync(existing.Id, model, CancellationToken.None),
-           successMessage: $"Category '{updateCategoryDto.Name}' successfully created");
+           successMessage: $"Category '{updateCategoryDto.Name}' successfully updated");
 
         if (saved && _grid is not null)
             await _grid.ReloadAsync();
