@@ -3,12 +3,15 @@ using EShop.Domain;
 using EShop.Domain.Catalog;
 using EShop.Domain.Products;
 using Microsoft.EntityFrameworkCore;
+using System.Threading;
 
 namespace EShop.MigrationService;
 
 public class Worker(
     IServiceProvider serviceProvider, 
-    IHostApplicationLifetime hostApplicationLifetime) : BackgroundService
+    IHostApplicationLifetime hostApplicationLifetime,
+     ILogger<Worker> logger) 
+        : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -20,14 +23,26 @@ public class Worker(
 
             var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
             bool seedSampleData = configuration.GetValue<bool>("SeedSampleData");
-            await RunSeedingAsync(dbContext, seedSampleData, stoppingToken);
+
+            if (seedSampleData)
+            {
+                logger.LogInformation("Seeding sample data into CatalogDbContext...");
+                await RunSeedingAsync(dbContext, seedSampleData, stoppingToken);
+                logger.LogInformation("Seeding sample data completed.");
+            }
+            else
+            {
+                logger.LogInformation("Seeding sample data skipped (SeedSampleData=false).");
+            }
         }
 		catch (Exception)
 		{
 			throw;
 		}
-
-        hostApplicationLifetime.StopApplication();
+        finally
+        {
+            hostApplicationLifetime.StopApplication();
+        }
     }
 
     private static async Task RunMigrationAsync(CatalogDbContext dbContext, CancellationToken cancellationToken)
@@ -74,8 +89,12 @@ public class Worker(
             products.Add(product);
         }
 
-        await dbContext.Products.AddRangeAsync(products, ct);
-        await dbContext.SaveChangesAsync(ct);
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
+        {
+            await dbContext.Products.AddRangeAsync(products, ct);
+            await dbContext.SaveChangesAsync(ct);
+        });
     }
 
 
