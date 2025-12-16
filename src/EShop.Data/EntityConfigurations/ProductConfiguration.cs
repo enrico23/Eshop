@@ -49,6 +49,12 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
                v => new Sku(v)
            );
 
+        builder.Property(p => p.CreatedUtc)
+          .IsRequired()
+          .HasDefaultValueSql("SYSUTCDATETIME()");
+
+        builder.Property(p => p.UpdatedUtc);
+
         builder
             .HasOne(p => p.Category)
             .WithMany(c => c.Products)

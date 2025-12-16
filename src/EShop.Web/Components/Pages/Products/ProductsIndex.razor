@@ -22,7 +22,17 @@
                 TProperty="string"
                 Property="x => x.Name" 
                 Sortable="true" Filterable="false"
-                />
+                             >
+                <CellTemplate Context="cellContext">
+                    @{
+
+                        var editProductUrl = $"/products/{cellContext.Item.Id}/edit";
+                    }
+                    <MudLink Href=@editProductUrl>
+                        @cellContext.Item.Name
+                    </MudLink>
+                </CellTemplate>
+            </PropertyColumn>
 
             <PropertyColumn T="ProductDto"
                             TProperty="decimal"
@@ -49,6 +59,30 @@
                             Title="Status"
                             Sortable="true"
                             Filterable="false" />
+            <TemplateColumn T="ProductDto">
+                <HeaderTemplate>Image</HeaderTemplate>
+                 <CellTemplate Context="cellContext">
+                    @{
+                        var img = GetPrimaryOrFirstImage(cellContext.Item);
+                        var editProductUrl = $"/products/{cellContext.Item.Id}/edit";
+                    }
+                    <div class="img-frame img-frame--thumb">
+                        <MudLink Href="@editProductUrl">
+                            <div class="img-frame img-frame--thumb">
+                                @if (img is not null)
+                                {
+                                    <img src="@GetImageUrl(img.Url)" alt="@img.AltText" class="img-cover" />
+                                }
+                                else
+                                {
+                                    <div class="img-placeholder">No image</div>
+                                }
+                            </div>
+                        </MudLink>
+                    </div>
+                </CellTemplate>
+
+            </TemplateColumn>
         </Columns>
     </GenericGrid>
 </MudPaper>
@@ -56,6 +90,8 @@
 @code {
 
     private GenericGrid<ProductDto>? _grid;
+
+    [Inject] protected ApiClientConfig ApiClientConfig { get; set; } = null!;
 
     protected override Task OnInitializedAsync()
     {
@@ -69,12 +105,9 @@
             Snackbar.Add("Failed to load product.", Severity.Error);
         else if (toast == "catagories")
             Snackbar.Add("Failed to load the categories.", Severity.Error);
-        else if (toast == "catagories")
-            Snackbar.Add("Unexpected error while loading the product.", Severity.Error);
 
         return Task.CompletedTask;
     }
-
 
     private async Task<GridData<ProductDto>> LoadProductAsync(GridState<ProductDto> state, string? searchText)
     {
@@ -118,15 +151,12 @@
         };
     }
 
-    private async Task NavigateToCreateProduct()
-    {
+    private void NavigateToCreateProduct() => 
         NavigationManager.NavigateTo("/products/create");
-    }
 
-    private async Task NavigateToEditProduct(ProductDto existing)
-    {
+    private void NavigateToEditProduct(ProductDto existing) =>
         NavigationManager.NavigateTo($"/products/{existing.Id}/edit");
-    }
+
 
     private async Task OpenDeleteDialogAsync(ProductDto item)
     {
@@ -140,4 +170,15 @@
         if (deleted && _grid is not null)
             await _grid.ReloadAsync();
     }
+
+    private static ProductImageDto? GetPrimaryOrFirstImage(ProductDto product)
+    {
+        if (product.Images is null || product.Images.Count == 0)
+            return null;
+
+        return product.Images.FirstOrDefault(i => i.IsPrimary)
+            ?? product.Images.OrderBy(i => i.SortOrder).First();
+    }
+
+    private string GetImageUrl(string url) => $"{ApiClientConfig.BaseUrl}/api/images/{url}";
 }

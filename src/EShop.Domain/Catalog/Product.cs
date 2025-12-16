@@ -4,7 +4,7 @@ using EShop.Domain.Exceptions;
 using EShop.Domain.Products;
 using EShop.Shared.Domain;
 
-public sealed class Product
+public sealed class Product : AuditableEntity
 {
     public Guid Id { get; private set; }
 
