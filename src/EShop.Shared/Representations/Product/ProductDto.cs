@@ -2,7 +2,7 @@
 
 namespace EShop.Shared.Representations.Product;
 
-public class ProductDto
+public class ProductDto : BaseEntityDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;

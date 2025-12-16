@@ -24,8 +24,8 @@ public class CatalogDbContext : DbContext
         return base.SaveChanges(acceptAllChangesOnSuccess);
     }
 
-    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken =
-    default)
+    public override Task<int> SaveChangesAsync(
+        bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         ApplyAuditInfo();
         return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
