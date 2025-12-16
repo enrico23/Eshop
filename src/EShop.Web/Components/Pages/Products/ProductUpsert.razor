@@ -244,24 +244,3 @@ else
         </MudPaper>
     </MudForm>
 }
-
-<style>
-    /* Consistent thumbnail sizing (no stretching, no weird max-width battles) */
-    .img-frame {
-        width: 100%;
-        aspect-ratio: 1 / 1; /* square thumbs */
-        overflow: hidden;
-        border-radius: 8px;
-    }
-
-    .img-frame--wide {
-        aspect-ratio: 16 / 9; /* preview area */
-    }
-
-    .img-cover {
-        width: 100%;
-        height: 100%;
-        object-fit: cover; /* key: consistent crops */
-        display: block;
-    }
-</style>
