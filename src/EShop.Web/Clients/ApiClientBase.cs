@@ -1,4 +1,5 @@
 ﻿using EShop.Web.Exceptions;
+using Polly.Timeout;
 using System.Net;
 
 namespace EShop.Web.Clients;
@@ -35,6 +36,11 @@ public abstract class ApiClientBase(ILogger logger)
         {
             return await action();
         }
+        catch (TimeoutRejectedException ex)
+        {
+            logger.LogError(ex, "API call timed out (resilience).");
+            throw new ApiException(HttpStatusCode.RequestTimeout, "The request to the server timed out.");
+        }
         catch (HttpRequestException ex)
         {
             logger.LogError(ex, "Network error while calling API.");
@@ -42,7 +48,6 @@ public abstract class ApiClientBase(ILogger logger)
         }
         catch (TaskCanceledException ex) when (!ex.CancellationToken.IsCancellationRequested)
         {
-            // Timeout (NOT user cancellation)
             logger.LogError(ex, "API call timed out.");
             throw new ApiException(HttpStatusCode.RequestTimeout, "The request to the server timed out.");
         }
