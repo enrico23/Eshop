@@ -12,7 +12,13 @@
 *.sh     text eol=lf
 
 # binary files stay untouched
-*.png    binary
-*.jpg    binary
-*.pdf    binary
-*.zip    binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.7z binary
+*.dll binary
+*.exe binary

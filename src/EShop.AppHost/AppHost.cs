@@ -1,8 +1,10 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
 var disableFrontend = builder.Configuration.GetValue("DisableFrontend", false);
 var dependenciesOnly = builder.Configuration.GetValue("DependenciesOnly", false);
+var seedSampleData = builder.Environment.IsDevelopment();
 
 // AZURE BLOB STORAGE
 var azureBlobStorage = builder.AddAzureStorage("AzureBlobStorageEmulator")
@@ -26,6 +28,10 @@ var db = sql.AddDatabase(databaseName);
 var migrationWorkerService = builder.AddProject<Projects.EShop_MigrationService>("EfCoreMigratorJob")
     .WithReference(db)
     .WaitFor(db);
+if (seedSampleData)
+{
+    migrationWorkerService = migrationWorkerService.WithEnvironment("SeedSampleData", "true");
+}
 
 if (!dependenciesOnly)
 {
