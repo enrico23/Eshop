@@ -9,9 +9,12 @@ namespace EShop.MigrationService;
 public class MigratorService(
     IServiceProvider serviceProvider, 
     IHostApplicationLifetime hostApplicationLifetime,
+    IConfiguration configuration,
      ILogger<MigratorService> logger) 
         : BackgroundService
 {
+    private readonly bool seedSampleData = configuration.GetValue<bool>("SeedSampleData");
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
 		try
@@ -19,9 +22,6 @@ public class MigratorService(
             using var scope = serviceProvider.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
             await RunMigrationAsync(dbContext, stoppingToken);
-
-            var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-            bool seedSampleData = configuration.GetValue<bool>("SeedSampleData");
 
             if (seedSampleData)
             {
@@ -61,9 +61,20 @@ public class MigratorService(
         if (await dbContext.Products.AnyAsync(ct))
             return;
 
-        var categories = await dbContext.Categories.AsNoTracking().ToListAsync(ct);
-        if (categories.Count == 0)
+        if(await dbContext.Categories.AnyAsync(ct))
             return;
+
+        var categories = new List<Category>()
+        {
+            new(new Guid("a3b4f1de-8241-4ff0-9c5e-af4c4c7a1e10"), "Laptops"),
+            new(new Guid("c1e2d8ba-992f-4e8e-a0a9-5bcff3df8c77"), "Desktops"),
+            new(new Guid("f5e1a4cc-2b9b-4db9-9b52-6d3f72440365"), "Smartphones"),
+            new(new Guid("0b73b90f-9610-4f64-893e-37edc85c0a5f"), "Tablets"),
+            new(new Guid("49d2e88d-241d-4fdb-9d41-cf4a6c9ab3c9"), "Wearables"),
+            new(new Guid("7fb5c7d1-c2a4-4ff2-9f76-4e0b55a389b6"), "Audio"),
+            new(new Guid("d0c52f04-4cd2-4e47-bc9f-06b251f8eae9"), "Gaming"),
+            new(new Guid("3a4b77df-1a28-4f7e-b764-c4d62a6f6ed8"), "Cameras")
+        };
 
         var rng = Random.Shared;
         var adjectives = new[] 
@@ -73,7 +84,7 @@ public class MigratorService(
         var usedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         var products = new List<Product>();
-
+     
         for (var i = 0; i < 21; i++)
         {
             var name = GenerateUniqueName(adjectives, nouns, usedNames, rng);
@@ -91,6 +102,7 @@ public class MigratorService(
         var strategy = dbContext.Database.CreateExecutionStrategy();
         await strategy.ExecuteAsync(async () =>
         {
+            await dbContext.Categories.AddRangeAsync(categories, ct);
             await dbContext.Products.AddRangeAsync(products, ct);
             await dbContext.SaveChangesAsync(ct);
         });
@@ -113,7 +125,7 @@ public class MigratorService(
 
     private static decimal GeneratePrice(Random rng)
     {
-        var raw = rng.NextDouble() * 950 + 50; // $50–$1000
+        var raw = rng.NextDouble() * 950 + 50; // 50–1000
         return Math.Round((decimal)raw, 2, MidpointRounding.AwayFromZero);
     }
 }

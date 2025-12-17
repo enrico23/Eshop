@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EShop.Data.Migrations
 {
     [DbContext(typeof(CatalogDbContext))]
-    [Migration("20251205152437_Initial")]
+    [Migration("20251217073930_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -31,56 +31,22 @@ namespace EShop.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTimeOffset>("CreatedUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<DateTimeOffset?>("UpdatedUtc")
+                        .HasColumnType("datetimeoffset");
+
                     b.HasKey("Id");
 
                     b.ToTable("Categories", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("a3b4f1de-8241-4ff0-9c5e-af4c4c7a1e10"),
-                            Name = "Laptops"
-                        },
-                        new
-                        {
-                            Id = new Guid("c1e2d8ba-992f-4e8e-a0a9-5bcff3df8c77"),
-                            Name = "Desktops"
-                        },
-                        new
-                        {
-                            Id = new Guid("f5e1a4cc-2b9b-4db9-9b52-6d3f72440365"),
-                            Name = "Smartphones"
-                        },
-                        new
-                        {
-                            Id = new Guid("0b73b90f-9610-4f64-893e-37edc85c0a5f"),
-                            Name = "Tablets"
-                        },
-                        new
-                        {
-                            Id = new Guid("49d2e88d-241d-4fdb-9d41-cf4a6c9ab3c9"),
-                            Name = "Wearables"
-                        },
-                        new
-                        {
-                            Id = new Guid("7fb5c7d1-c2a4-4ff2-9f76-4e0b55a389b6"),
-                            Name = "Audio"
-                        },
-                        new
-                        {
-                            Id = new Guid("d0c52f04-4cd2-4e47-bc9f-06b251f8eae9"),
-                            Name = "Gaming"
-                        },
-                        new
-                        {
-                            Id = new Guid("3a4b77df-1a28-4f7e-b764-c4d62a6f6ed8"),
-                            Name = "Cameras"
-                        });
                 });
 
             modelBuilder.Entity("Product", b =>
@@ -91,6 +57,11 @@ namespace EShop.Data.Migrations
 
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -117,6 +88,9 @@ namespace EShop.Data.Migrations
                     b.Property<int>("Stock")
                         .HasColumnType("int");
 
+                    b.Property<DateTimeOffset?>("UpdatedUtc")
+                        .HasColumnType("datetimeoffset");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
@@ -132,7 +106,43 @@ namespace EShop.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.OwnsMany("ProductImage", "Images", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("AltText")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b1.Property<bool>("IsPrimary")
+                                .HasColumnType("bit");
+
+                            b1.Property<Guid>("ProductId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<int>("SortOrder")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("Url")
+                                .IsRequired()
+                                .HasMaxLength(1000)
+                                .HasColumnType("nvarchar(1000)");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("ProductId");
+
+                            b1.ToTable("ProductImages", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("ProductId");
+                        });
+
                     b.Navigation("Category");
+
+                    b.Navigation("Images");
                 });
 
             modelBuilder.Entity("EShop.Domain.Catalog.Category", b =>
