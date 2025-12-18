@@ -11,8 +11,10 @@
                 DefaultPageSize="10"
                 PageSizeOptions="new[] {5, 10, 25, 50 }"
                 SearchPlaceholder="Search..."
+                ShowAddButton="true"
                 AddButtonText="Add Category"
                 OnAdd="OpenCreateDialogAsync"
+                ShowActions="true"
                 OnEdit="OpenEditDialogAsync"
                 OnDelete="OpenDeleteDialogAsync">
         <Columns>
@@ -31,7 +33,7 @@
     private GenericGrid<CategoryDto>? _grid;
 
     private async Task<GridData<CategoryDto>> LoadCategoryAsync(GridState<CategoryDto> state, string? searchText)
-    => await LoadGridAsync(
+        => await LoadGridAsync(
             state,
             searchText,
             defaultSortBy: "Name",
@@ -79,7 +81,8 @@
 
         var ok = await SaveWithFeedbackAsync(
             returned,
-            saveAction: (m, ct) => CatalogApiClient.UpdateCategoryAsync(
+            saveAction: (m, ct) => 
+            CatalogApiClient.UpdateCategoryAsync(
                 existing.Id,
                 new UpdateCategoryDto { Name = m.Name, },
                 ct),
