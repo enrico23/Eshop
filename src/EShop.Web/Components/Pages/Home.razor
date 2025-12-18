@@ -7,6 +7,19 @@
 @inherits CrudPageBase
 
 <MudPaper Class="pa-4">
+
+    <MudStack Row="true" AlignItems="AlignItems.Center">
+        <MudText Typo="Typo.h6">Shop</MudText>
+        <MudSpacer />
+        <MudButton Variant="Variant.Outlined"
+                   StartIcon="@Icons.Material.Filled.Login"
+                   OnClick="@(() => NavigationManager.NavigateTo("/login"))">
+            Login
+        </MudButton>
+    </MudStack>
+
+    <MudDivider Class="my-3" />
+
     <GenericGrid TItem="ProductDto"
                  @ref="_grid"
                  ServerData="LoadProductAsync"
