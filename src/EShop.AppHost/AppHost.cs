@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using System.Text.Json.Nodes;
 
 var builder = DistributedApplication.CreateBuilder(args);
 var disableFrontend = builder.Configuration.GetValue("DisableFrontend", false);
@@ -29,18 +30,35 @@ var migrationWorkerService = builder.AddProject<Projects.EShop_MigrationService>
     .WithReference(db)
     .WaitFor(db);
 if (seedSampleData)
-{
     migrationWorkerService = migrationWorkerService.WithEnvironment("SeedSampleData", "true");
-}
 
+// SERVICE BUS
+var serviceBus = builder.AddAzureServiceBus("messaging")
+    .RunAsEmulator(emulator =>
+    {
+        emulator.WithLifetime(ContainerLifetime.Persistent);
+    });
+var serviceBusQueue = serviceBus.AddServiceBusQueue("images-queue");
+serviceBus.AddServiceBusQueue("dead-letter-queue");
+
+var imagesQueueWorker = builder.AddProject<Projects.EShop_ImagesQueueWorker>("ImagesQueueWorker")
+    .WithReference(serviceBusQueue)
+    .WaitFor(serviceBusQueue)
+    .WithReference(azureBlobStorage)
+    .WaitFor(azureBlobStorage);
+
+// APPLICATION PROJECTS
 if (!dependenciesOnly)
 {
     // API CONFIGURATION
     var catalogApi = builder.AddProject<Projects.EShop_API>("CatalogApi")
-           .WithReference(db)
            .WaitFor(db)
-            .WaitFor(migrationWorkerService)
-           .WithReference(azureBlobStorage);
+           .WithReference(db)
+           .WaitFor(migrationWorkerService)
+           .WaitFor(azureBlobStorage)
+           .WithReference(azureBlobStorage)
+           .WaitFor(serviceBusQueue)
+           .WithReference(serviceBusQueue);
 
     // FRONTEND
     if (!disableFrontend)

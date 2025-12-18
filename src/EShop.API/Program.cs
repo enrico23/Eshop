@@ -59,6 +59,9 @@ builder.Services.AddSingleton(sp =>
 });
 builder.Services.AddSingleton<IBlobFileStorageService, BlobFileStorageService>();
 
+// Service Bus Client
+builder.AddAzureServiceBusClient("messaging");
+
 // // Mapster DI registration
 builder.Services.AddMapster();
 TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
