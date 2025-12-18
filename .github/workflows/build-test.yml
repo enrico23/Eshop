@@ -12,6 +12,7 @@ permissions:
   checks: write
   pull-requests: write
   contents: read
+  actions: read
 
 jobs:
  build-test:
@@ -20,6 +21,9 @@ jobs:
     steps:
         - name: Checkout repository
           uses: actions/checkout@v4
+          
+        - run: npm ci
+        - run: npm test
 
         - name: Setup .NET SDK
           uses: actions/setup-dotnet@v5
@@ -33,11 +37,15 @@ jobs:
           run: dotnet build --no-restore --configuration Release
 
         - name: Run tests
-          run: dotnet test --no-build --configuration Release --verbosity normal
+          run: |
+              dotnet test --no-build --configuration Release --verbosity normal \
+              --logger "trx;LogFileName=test-results.trx" \
+              --results-directory TestResults
 
         - name: Publish Test Results
-          uses: dorny/test-reporter@v1
-          if: always
+          uses: dorny/test-reporter@v2
+          if: always()
           with:
-            name: 'Test Results'
-            path: '**/TestResults/*.trx'
+            name: xUnit Tests
+            path: TestResults/*.trx
+            reporter: dotnet-trx
