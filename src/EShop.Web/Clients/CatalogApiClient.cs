@@ -4,7 +4,6 @@ using EShop.Shared.Representations.Product;
 using EShop.Web.Models;
 using Microsoft.AspNetCore.Components.Forms;
 using System.Globalization;
-using System.Net.Http.Json;
 
 namespace EShop.Web.Clients;
 
@@ -33,7 +32,7 @@ public interface ICatalogApiClient
 }
 
 
-public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> logger)
+public sealed class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> logger)
     : ApiClientBase(logger), ICatalogApiClient
 {
     #region Categories
@@ -45,7 +44,6 @@ public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> l
         var result = await SendAsync<List<CategoryDto>>(() => httpClient.GetAsync($"{CategoriesEndpointsBasePath}/all", ct), ct);
         return result ?? [];
     }
-        
 
     public async Task<PagedResult<CategoryDto>> GetPagedCategoriesAsync(
         int page = 1,
@@ -145,8 +143,6 @@ public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> l
     public Task DeleteProductAsync(Guid id, CancellationToken ct = default) =>
         SendAsync(() => httpClient.DeleteAsync($"{ProductsEndpointsBasePath}/{id}", ct), ct);
 
-   
-
     #endregion
 
     private static MultipartFormDataContent BuildMultipart(CreateProductViewModel model, IBrowserFile? file)
@@ -175,6 +171,4 @@ public class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiClient> l
 
         return form;
     }
-
-   
 }
