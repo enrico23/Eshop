@@ -4,7 +4,7 @@
 @using EShop.Web.Exceptions
 @using EShop.Web.Components.Pages.Shared
 @using EShop.Web.Models
-@inherits BaseCrudPage
+@inherits CrudPageBase
 
 <MudPaper Class="pa-4">
     <GenericGrid TItem="ProductDto"
@@ -13,8 +13,10 @@
                  DefaultPageSize="10"
                  PageSizeOptions="new[] {5, 10, 25, 50 }"
                  SearchPlaceholder="Search..."
+                 ShowAddButton="true"
                  AddButtonText="Add Product"
                  OnAdd="NavigateToCreateProduct"
+                 ShowActions="true"
                  OnEdit="NavigateToEditProduct"
                  OnDelete="OpenDeleteDialogAsync">
         <Columns>
@@ -88,6 +90,7 @@
 </MudPaper>
 
 @code {
+    [Inject] protected ICatalogApiClient CatalogApiClient { get; set; } = null!;
 
     private GenericGrid<ProductDto>? _grid;
 
@@ -110,46 +113,13 @@
     }
 
     private async Task<GridData<ProductDto>> LoadProductAsync(GridState<ProductDto> state, string? searchText)
-    {
-        var sortBy = "Name";
-        var sortDirection = "asc";
-        var currentPage = state.Page;
-        var pageSize = state.PageSize;
-
-        var sortDefinition = state.SortDefinitions.FirstOrDefault();
-        if (sortDefinition != null)
-        {
-            sortBy = sortDefinition.SortBy;
-            sortDirection = sortDefinition.Descending ? "desc" : "asc";
-        }
-
-        var page = currentPage + 1;
-
-        try
-        {
-            var pagedData = await CategoryApiClient.GetPagedProductsAsync(page, pageSize, sortBy, sortDirection, searchText, CancellationToken.None);
-
-            return new GridData<ProductDto>
-            {
-                TotalItems = pagedData!.Total,
-                Items = pagedData.Items
-            };
-        }
-        catch (ApiException ex)
-        {
-            Snackbar.Add(ex.FriendlyMessage!, Severity.Error);
-        }
-        catch (Exception)
-        {
-            Snackbar.Add("Unexpected error.", Severity.Error);
-        }
-
-        return new GridData<ProductDto>
-        {
-            TotalItems = 0,
-            Items = new List<ProductDto>()
-        };
-    }
+      => await LoadGridAsync(
+          state,
+          searchText,
+          defaultSortBy: "Name",
+          loadPage: (page, pageSize, sortBy, sortDir, search, ct) =>
+              CatalogApiClient.GetPagedProductsAsync(page, pageSize, sortBy, sortDir, search, ct),
+          cancellationToken: CancellationToken.None);
 
     private void NavigateToCreateProduct() => 
         NavigationManager.NavigateTo("/products/create");
@@ -157,15 +127,13 @@
     private void NavigateToEditProduct(ProductDto existing) =>
         NavigationManager.NavigateTo($"/products/{existing.Id}/edit");
 
-
     private async Task OpenDeleteDialogAsync(ProductDto item)
     {
-        var deleted = await ConfirmDeleteAsync<ProductDto>(
-            item,
+        var deleted = await ConfirmDeleteAsync(
             title: "Delete Product",
-            message: $"Are you sure you want to delete product '{item.Name}'?",
-            deleteAction: action => CategoryApiClient.DeleteProductAsync(item.Id)
-        );
+            message: $"Are you sure you want to delete the product '{item.Name}'?",
+            deleteAction: ct => CatalogApiClient.DeleteProductAsync(item.Id, ct),
+            successMessage: $"Product '{item.Name}' deleted successfully.");
 
         if (deleted && _grid is not null)
             await _grid.ReloadAsync();

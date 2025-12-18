@@ -2,19 +2,21 @@
 @using EShop.Web.Components.Pages.Categories
 @using EShop.Web.Components.Pages.Shared
 @using EShop.Web.Exceptions
-@inherits BaseCrudPage
+@inherits CrudPageBase
 
 <MudPaper Class="pa-4">
     <GenericGrid TItem="CategoryDto"
-                 @ref="_grid"
-                 ServerData="LoadCategoryAsync"
-                 DefaultPageSize="10"
-                 PageSizeOptions="new[] {5, 10, 25, 50 }"
-                 SearchPlaceholder="Search..."
-                 AddButtonText="Add Category"
-                 OnAdd="OpenCreateDialogAsync"
-                 OnEdit="OpenEditDialogAsync"
-                 OnDelete="OpenDeleteDialogAsync">
+                @ref="_grid"
+                ServerData="LoadCategoryAsync"
+                DefaultPageSize="10"
+                PageSizeOptions="new[] {5, 10, 25, 50 }"
+                SearchPlaceholder="Search..."
+                ShowAddButton="true"
+                AddButtonText="Add Category"
+                OnAdd="OpenCreateDialogAsync"
+                ShowActions="true"
+                OnEdit="OpenEditDialogAsync"
+                OnDelete="OpenDeleteDialogAsync">
         <Columns>
             <PropertyColumn 
                 T="CategoryDto"
@@ -26,68 +28,40 @@
 </MudPaper>
 
 @code {
+    [Inject] protected ICatalogApiClient CatalogApiClient { get; set; } = null!;
+
     private GenericGrid<CategoryDto>? _grid;
 
     private async Task<GridData<CategoryDto>> LoadCategoryAsync(GridState<CategoryDto> state, string? searchText)
-    {
-        var sortBy = "Name";
-        var sortDirection = "asc";
-        var currentPage = state.Page;
-        var pageSize = state.PageSize;
-
-        var sortDefinition = state.SortDefinitions.FirstOrDefault();
-        if (sortDefinition != null)
-        {
-            sortBy = sortDefinition.SortBy;
-            sortDirection = sortDefinition.Descending ? "desc" : "asc";
-        }
-
-        var page = currentPage + 1;
-
-        try
-        {
-            var pagedData = await CategoryApiClient.GetPagedCategoriesAsync(page, pageSize, sortBy, sortDirection, searchText, CancellationToken.None);
-
-            return new GridData<CategoryDto>
-            {
-                TotalItems = pagedData!.Total,
-                Items = pagedData.Items
-            };
-        }
-        catch (ApiException ex)
-        {
-            Snackbar.Add(ex.FriendlyMessage!, Severity.Error);
-        }
-        catch (Exception)
-        {
-            Snackbar.Add("Unexpected error.", Severity.Error);
-        }
-
-        return new GridData<CategoryDto>
-        {
-            TotalItems = 0,
-            Items = new List<CategoryDto>()
-        };
-    }
+        => await LoadGridAsync(
+            state,
+            searchText,
+            defaultSortBy: "Name",
+            loadPage: (page, pageSize, sortBy, sortDir, search, ct) =>
+                CatalogApiClient.GetPagedCategoriesAsync(page, pageSize, sortBy, sortDir, search, ct),
+            cancellationToken: CancellationToken.None);
 
     private async Task OpenCreateDialogAsync()
     {
         var createCategoryDto = new CreateCategoryDto { Name = string.Empty };
-
-        var parameters = new DialogParameters
+        var dialogParameters = new DialogParameters
         {
             ["Category"] = createCategoryDto
         };
 
-        var saved = await ConfirmUpsertAsync<CategoryUpsertDialog, CreateCategoryDto>(
-           title: "Create Category",
-           parameters: parameters,
-           saveAction: model => CategoryApiClient.CreateCategoryAsync(model, CancellationToken.None),
-           successMessage: $"Category '{createCategoryDto.Name}' successfully created");
+        var (saved, returned) = await ShowUpsertDialogAsync<CategoryUpsertDialog, CreateCategoryDto>(
+            title: "Create Category",
+            parameters: dialogParameters);
 
+        if (!saved || returned is null || _grid is null) return;
 
-        if (saved && _grid is not null)
-            await _grid.ReloadAsync();
+        var ok = await SaveWithFeedbackAsync(
+            returned,
+            saveAction: (m, ct) => 
+            CatalogApiClient.CreateCategoryAsync(new CreateCategoryDto { Name = m.Name }, ct),
+            successMessageFactory: m => $"Category '{m.Name}' successfully created.");
+
+        if (ok) await _grid.ReloadAsync();
     }
 
     private async Task OpenEditDialogAsync(CategoryDto existing)
@@ -98,27 +72,34 @@
         {
             ["Category"] = updateCategoryDto
         };
-        var saved = await ConfirmUpsertAsync<CategoryUpsertDialog, UpdateCategoryDto>(
-           title: "Update Category",
-           parameters: parameters,
-           saveAction: model => CategoryApiClient.UpdateCategoryAsync(existing.Id, model, CancellationToken.None),
-           successMessage: $"Category '{updateCategoryDto.Name}' successfully updated");
 
-        if (saved && _grid is not null)
-            await _grid.ReloadAsync();
+        var (saved, returned) = await ShowUpsertDialogAsync<CategoryUpsertDialog, UpdateCategoryDto>(
+            title: "Update Category",
+            parameters: parameters);
 
+        if (!saved || returned is null || _grid is null) return;
+
+        var ok = await SaveWithFeedbackAsync(
+            returned,
+            saveAction: (m, ct) => 
+            CatalogApiClient.UpdateCategoryAsync(
+                existing.Id,
+                new UpdateCategoryDto { Name = m.Name, },
+                ct),
+            successMessageFactory: m => $"Category '{m.Name}' successfully updated.");
+
+        if (ok) await _grid.ReloadAsync();
     }
 
     private async Task OpenDeleteDialogAsync(CategoryDto item)
     {
-        var deleted = await ConfirmDeleteAsync<CategoryDto>(
-            item,
-            title: "Delete category",
-            message: $"Are you sure you want to delete category '{item.Name}'?",
-            deleteAction: action => CategoryApiClient.DeleteCategoryAsync(item.Id)
-        );
+        var deleted = await ConfirmDeleteAsync(
+            title: "Delete Category",
+            message: $"Are you sure you want to delete the category '{item.Name}'?",
+            deleteAction: ct => CatalogApiClient.DeleteCategoryAsync(item.Id, ct),
+            successMessage: $"Category '{item.Name}' deleted successfully.");
 
         if (deleted && _grid is not null)
-                 await _grid.ReloadAsync();
+            await _grid.ReloadAsync();
     }
 }

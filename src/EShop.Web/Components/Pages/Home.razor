@@ -1,59 +1,160 @@
 ﻿@page "/"
+@using EShop.Shared.Domain
+@using EShop.Web.Components.Pages.Categories
+@using EShop.Web.Exceptions
+@using EShop.Web.Components.Pages.Shared
+@using EShop.Web.Models
+@inherits CrudPageBase
 
-<PageTitle>Home</PageTitle>
+<MudPaper Class="pa-4">
 
-<MudText Typo="Typo.h3" GutterBottom="true">Hello, world!</MudText>
-<MudText Class="mb-8">Welcome to your new app, powered by MudBlazor and the .NET 9 Template!</MudText>
+    <MudStack Row="true" AlignItems="AlignItems.Center">
+        <MudText Typo="Typo.h6">Shop</MudText>
+        <MudSpacer />
+        <MudButton Variant="Variant.Outlined"
+                   StartIcon="@Icons.Material.Filled.Login"
+                   OnClick="@(() => NavigationManager.NavigateTo("/login"))">
+            Login
+        </MudButton>
+    </MudStack>
 
-<MudAlert Severity="Severity.Normal" ContentAlignment="HorizontalAlignment.Start">
-    You can find documentation and examples on our website here:
-    <MudLink Href="https://mudblazor.com" Target="_blank" Typo="Typo.body2" Color="Color.Primary">
-        <b>www.mudblazor.com</b>
-    </MudLink>
-</MudAlert>
+    <MudDivider Class="my-3" />
 
-<br />
-<MudText Typo="Typo.h5" GutterBottom="true">Interactivity in this Template</MudText>
-<br />
-<MudText Typo="Typo.body2">
-    When you opt for the "Global" Interactivity Location, <br />
-    the render modes are defined in App.razor and consequently apply to all child components.<br />
-    In this case, providers are globally set in the MainLayout.<br />
-    <br />
-    On the other hand, if you choose the "Per page/component" Interactivity Location,<br />
-    it is necessary to include the <br />
-    <br />
-    &lt;MudPopoverProvider /&gt; <br />
-    &lt;MudDialogProvider /&gt; <br />
-    &lt;MudSnackbarProvider /&gt; <br />
-    <br />
-    components on every interactive page.<br />
-    <br />
-    If a render mode is not specified for a page, it defaults to Server-Side Rendering (SSR),<br />
-    similar to this page. While MudBlazor allows pages to be rendered in SSR,<br />
-    please note that interactive features, such as buttons and dropdown menus, will not be functional.
-</MudText>
+    <GenericGrid TItem="ProductDto"
+                 @ref="_grid"
+                 ServerData="LoadProductAsync"
+                 DefaultPageSize="10"
+                 PageSizeOptions="new[] {5, 10, 25, 50 }"
+                 SearchPlaceholder="Search..."
+                >
+        <Columns>
+            <PropertyColumn T="ProductDto"
+                TProperty="string"
+                Property="x => x.Name" 
+                Sortable="true" Filterable="false"
+                             >
+                <CellTemplate Context="cellContext">
+                    @{
 
-<br />
-<MudText Typo="Typo.h5" GutterBottom="true">What's New in Blazor with the Release of .NET 9</MudText>
-<br />
+                        var editProductUrl = $"/products/{cellContext.Item.Id}/edit";
+                    }
+                    <MudLink Href=@editProductUrl>
+                        @cellContext.Item.Name
+                    </MudLink>
+                </CellTemplate>
+            </PropertyColumn>
 
-<MudText Typo="Typo.h6" GutterBottom="true">Prerendering</MudText>
-<MudText Typo="Typo.body2" GutterBottom="true">
-    If you're exploring the features of .NET 9 Blazor,<br /> you might be pleasantly surprised to learn that each page is prerendered on the server,<br /> regardless of the selected render mode.<br /><br />
-    This means that you'll need to inject all necessary services on the server,<br /> even when opting for the wasm (WebAssembly) render mode.<br /><br />
-    This prerendering functionality is crucial to ensuring that WebAssembly mode feels fast and responsive,<br /> especially when it comes to initial page load times.<br /><br />
-    For more information on how to detect prerendering and leverage the RenderContext, you can refer to the following link:
-    <MudLink Href="https://github.com/dotnet/aspnetcore/issues/51468#issuecomment-1783568121" Target="_blank" Typo="Typo.body2" Color="Color.Primary">
-        More details
-    </MudLink>
-</MudText>
+            <PropertyColumn T="ProductDto"
+                            TProperty="decimal"
+                            Property="x => x.Price"
+                            Sortable="true" 
+                            Filterable="false"  />
 
-<br />
-<MudText Typo="Typo.h6" GutterBottom="true">InteractiveAuto</MudText>
-<MudText Typo="Typo.body2">
-    A discussion on how to achieve this can be found here:
-    <MudLink Href="https://github.com/dotnet/aspnetcore/issues/51468#issue-1950424116" Target="_blank" Typo="Typo.body2" Color="Color.Primary">
-        More details
-    </MudLink>
-</MudText>
+            <PropertyColumn T="ProductDto"
+                            TProperty="int"
+                            Property="x => x.Stock"
+                            Sortable="true" 
+                            Filterable="false" />
+
+            <PropertyColumn T="ProductDto"
+                            TProperty="string"
+                            Property="x => x.CategoryName"
+                            Title="Category"
+                            Sortable="true"
+                            Filterable="false" />
+
+            <PropertyColumn T="ProductDto"
+                            TProperty="string"
+                            Property="x => x.Status.ToString()"
+                            Title="Status"
+                            Sortable="true"
+                            Filterable="false" />
+            <TemplateColumn T="ProductDto">
+                <HeaderTemplate>Image</HeaderTemplate>
+                 <CellTemplate Context="cellContext">
+                    @{
+                        var img = GetPrimaryOrFirstImage(cellContext.Item);
+                        var editProductUrl = $"/products/{cellContext.Item.Id}/edit";
+                    }
+                    <div class="img-frame img-frame--thumb">
+                        <MudLink Href="@editProductUrl">
+                            <div class="img-frame img-frame--thumb">
+                                @if (img is not null)
+                                {
+                                    <img src="@GetImageUrl(img.Url)" alt="@img.AltText" class="img-cover" />
+                                }
+                                else
+                                {
+                                    <div class="img-placeholder">No image</div>
+                                }
+                            </div>
+                        </MudLink>
+                    </div>
+                </CellTemplate>
+
+            </TemplateColumn>
+        </Columns>
+    </GenericGrid>
+</MudPaper>
+
+@code {
+    [Inject] protected ICatalogApiClient CatalogApiClient { get; set; } = null!;
+
+    private GenericGrid<ProductDto>? _grid;
+
+    [Inject] protected ApiClientConfig ApiClientConfig { get; set; } = null!;
+
+    protected override Task OnInitializedAsync()
+    {
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        var toast = query["error"];
+
+        if (toast == "notfound")
+            Snackbar.Add("Product not found.", Severity.Warning);
+        else if (toast == "failed")
+            Snackbar.Add("Failed to load product.", Severity.Error);
+        else if (toast == "catagories")
+            Snackbar.Add("Failed to load the categories.", Severity.Error);
+
+        return Task.CompletedTask;
+    }
+
+    private async Task<GridData<ProductDto>> LoadProductAsync(GridState<ProductDto> state, string? searchText)
+      => await LoadGridAsync(
+          state,
+          searchText,
+          defaultSortBy: "Name",
+          loadPage: (page, pageSize, sortBy, sortDir, search, ct) =>
+              CatalogApiClient.GetPagedProductsAsync(page, pageSize, sortBy, sortDir, search, ct),
+          cancellationToken: CancellationToken.None);
+
+    private void NavigateToCreateProduct() =>
+        NavigationManager.NavigateTo("/products/create");
+
+    private void NavigateToEditProduct(ProductDto existing) =>
+        NavigationManager.NavigateTo($"/products/{existing.Id}/edit");
+
+    private async Task OpenDeleteDialogAsync(ProductDto item)
+    {
+        var deleted = await ConfirmDeleteAsync(
+            title: "Delete Product",
+            message: $"Are you sure you want to delete the product '{item.Name}'?",
+            deleteAction: ct => CatalogApiClient.DeleteProductAsync(item.Id, ct),
+            successMessage: $"Product '{item.Name}' deleted successfully.");
+
+        if (deleted && _grid is not null)
+            await _grid.ReloadAsync();
+    }
+
+    private static ProductImageDto? GetPrimaryOrFirstImage(ProductDto product)
+    {
+        if (product.Images is null || product.Images.Count == 0)
+            return null;
+
+        return product.Images.FirstOrDefault(i => i.IsPrimary)
+            ?? product.Images.OrderBy(i => i.SortOrder).First();
+    }
+
+    private string GetImageUrl(string url) => $"{ApiClientConfig.BaseUrl}/api/images/{url}";
+}

@@ -30,7 +30,7 @@ builder.Services.AddHttpClient<ICatalogApiClient, CatalogApiClient>(client =>
 {
     pipeline.AddTimeout(new HttpTimeoutStrategyOptions
     {
-        Timeout = TimeSpan.FromSeconds(3)
+        Timeout = TimeSpan.FromSeconds(30)
     });
 
     pipeline.AddRetry(new HttpRetryStrategyOptions
