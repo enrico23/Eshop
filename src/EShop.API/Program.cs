@@ -60,7 +60,7 @@ builder.Services.AddSingleton(sp =>
 builder.Services.AddSingleton<IBlobFileStorageService, BlobFileStorageService>();
 
 // Service Bus Client
-builder.AddAzureServiceBusClient("messaging");
+builder.AddAzureServiceBusClient("images-queue");
 
 // // Mapster DI registration
 builder.Services.AddMapster();
