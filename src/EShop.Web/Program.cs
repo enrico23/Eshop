@@ -30,7 +30,7 @@ builder.Services.AddHttpClient<ICatalogApiClient, CatalogApiClient>(client =>
     client.BaseAddress = new Uri(catalogApiBase, UriKind.Absolute);
     client.Timeout = Timeout.InfiniteTimeSpan;
 })
-    .AddHttpMessageHandler<CorrelationIdDelegatingHandler>()
+    // .AddHttpMessageHandler<CorrelationIdDelegatingHandler>()
     .AddResilienceHandler("catalog-api", static pipeline =>
 {
     pipeline.AddTimeout(new HttpTimeoutStrategyOptions
@@ -58,6 +58,8 @@ builder.Services.AddHttpClient<ICatalogApiClient, CatalogApiClient>(client =>
 
 var app = builder.Build();
 
+// app.UseMiddleware<CorrelationIdMiddleware>();
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -69,9 +71,6 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAntiforgery();
-
-app.UseMiddleware<CorrelationIdMiddleware>();
-
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

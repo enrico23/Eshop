@@ -3,6 +3,7 @@ using EShop.API.Exceptions;
 using EShop.API.Models;
 using EShop.API.Services;
 using EShop.Data;
+using EShop.Shared.MIddlewares;
 using Mapster;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
@@ -73,6 +74,8 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
 var app = builder.Build();
+
+app.UseMiddleware<CorrelationIdMiddleware>();
 
 // Converts unhandled exceptions into Problem Details responses
 app.UseExceptionHandler(
