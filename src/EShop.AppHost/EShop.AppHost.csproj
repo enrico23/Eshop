@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.0.2">
+<Project Sdk="Aspire.AppHost.Sdk/13.1.0">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -11,13 +11,15 @@
   <ItemGroup>
     <ProjectReference Include="..\EShop.API\EShop.API.csproj" />
     <ProjectReference Include="..\EShop.BlobStorageInitializer\EShop.BlobStorageInitializer.csproj" />
+    <ProjectReference Include="..\EShop.ImagesQueueWorker\EShop.ImagesQueueWorker.csproj" />
     <ProjectReference Include="..\EShop.MigrationService\EShop.MigrationService.csproj" />
     <ProjectReference Include="..\EShop.Web\EShop.Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.Azure.Storage" Version="13.0.2" />
-    <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.0.2" />
+    <PackageReference Include="Aspire.Hosting.Azure.ServiceBus" Version="13.1.0" />
+    <PackageReference Include="Aspire.Hosting.Azure.Storage" Version="13.1.0" />
+    <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.1.0" />
   </ItemGroup>
 
 </Project>

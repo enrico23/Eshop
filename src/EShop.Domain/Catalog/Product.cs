@@ -18,7 +18,7 @@ public sealed class Product : AuditableEntity
 
     public ProductStatus Status { get; private set; }
 
-    public Sku Sku { get; private set; }
+    public Sku Sku { get; private set; } = null!;
 
     public Guid CategoryId { get; private set; }
 

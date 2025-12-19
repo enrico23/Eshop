@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-EShop.ImagesQueueWorker-1ae0c3f5-5a97-4778-8523-16e5bc79b312</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Azure.Messaging.ServiceBus" Version="13.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EShop.ServiceDefaults\EShop.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\EShop.Shared\EShop.Shared.csproj" />
+  </ItemGroup>
+</Project>
