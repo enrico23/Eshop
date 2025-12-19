@@ -46,7 +46,7 @@ This aligns with common enterprise and platform engineering practices.
 
 | Aspect | Value |
 |------|------|
-| Header name | `X-Correlation-Id` |
+| Header name | `X-Correlation-ID` |
 | Format | Opaque GUID (`Guid.NewGuid().ToString("N")`) |
 | Length | 32–64 characters |
 | PII | **Not allowed** |
