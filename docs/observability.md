@@ -51,3 +51,85 @@ This aligns with common enterprise and platform engineering practices.
 | Length | 32–64 characters |
 | PII | **Not allowed** |
 | Cardinality | High (acceptable, but controlled)
+
+---
+
+## HTTP Flow (Blazor ==> API)
+
+1. Blazor host receives an inbound request / UI interaction
+2. If no correlation ID exists:
+   - Generate a new one
+3. Attach correlation ID to outbound API call:
+4. API middleware:
+- Reads and validates the header
+- Generates one if missing/invalid
+- Adds it to:
+  - response headers
+  - logging scope
+  - OpenTelemetry `Activity` as a tag
+
+---
+
+## OpenTelemetry Integration
+
+The business correlation ID is **not** used for span parenting.
+
+Instead, it is attached as an **Activity tag**:
+
+
+This ensures:
+- It is searchable in tracing backends
+- It does not interfere with TraceId/SpanId semantics
+- Trace structure remains standards-compliant
+
+---
+
+## Logging Strategy
+
+Every log entry emitted during request processing includes:
+
+- `trace_id`
+- `span_id`
+- `business.correlation_id`
+
+This allows:
+- Navigating from logs ==> traces
+- Navigating from traces ==> logs
+- Cross-service log correlation using a stable identifier
+
+---
+
+## Response Behavior
+
+The API always echoes the correlation ID back to the caller:
+
+
+This enables:
+- Client-side debugging
+- Support ticket correlation
+- Easy reproduction of issues
+
+---
+
+## Downstream Integrations (Future Scope)
+
+For async or messaging-based integrations (e.g. Service Bus):
+
+- The correlation ID should be propagated as:
+  - Message application property (`correlation_id`)
+  - Or native broker correlation field where supported
+- Consumers should extract and apply it to:
+  - logging scope
+  - Activity tags
+
+This allows correlation across **multiple traces and async boundaries**.
+
+---
+
+## Summary
+
+- **TraceId** = technical correlation (automatic, OpenTelemetry)
+- **Correlation ID** = business/operational correlation (explicit, controlled)
+- Generated at the **edge**
+- Propagated downstream
+- Visible in **logs, traces, headers, and integrations**
