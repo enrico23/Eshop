@@ -3,6 +3,7 @@ using EShop.API.Exceptions;
 using EShop.API.Models;
 using EShop.API.Services;
 using EShop.Data;
+using EShop.Shared.Observability.Correlation;
 using Mapster;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
@@ -72,7 +73,16 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
+// API Correlation Id options
+builder.Services.Configure<CorrelationIdOptions>(options =>
+{
+    options.Policy = CorrelationIdPolicy.PreserveIncoming;
+    options.HeaderName = "X-Request-Id";
+});
+
 var app = builder.Build();
+
+app.UseMiddleware<CorrelationIdMiddleware>();
 
 // Converts unhandled exceptions into Problem Details responses
 app.UseExceptionHandler(

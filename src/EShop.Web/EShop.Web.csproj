@@ -7,6 +7,13 @@
     <UserSecretsId>de57de9c-fff9-41d5-8606-49551580b563</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Middlewares\**" />
+    <Content Remove="Middlewares\**" />
+    <EmbeddedResource Remove="Middlewares\**" />
+    <None Remove="Middlewares\**" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="MudBlazor" Version="8.*" />
