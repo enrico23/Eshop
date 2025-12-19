@@ -18,6 +18,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // Add CatalogApi Http Client
+
 builder.AddCatalogApiClient();
 
 var app = builder.Build();

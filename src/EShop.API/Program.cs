@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
-// API //
 var builder = WebApplication.CreateBuilder(args);
 
 if (builder.Environment.IsDevelopment())
@@ -74,6 +73,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
+// API Correlation Id options
 builder.Services.Configure<CorrelationIdOptions>(options =>
 {
     options.Policy = CorrelationIdPolicy.PreserveIncoming;

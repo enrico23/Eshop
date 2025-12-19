@@ -1,5 +1,4 @@
-﻿using EShop.Shared.Observability.Correlation;
-using EShop.Web.Clients;
+﻿using EShop.Web.Clients;
 using Microsoft.Extensions.Http.Resilience;
 using Polly;
 
@@ -9,15 +8,6 @@ public static class HttpClientExtension
 {
     public static WebApplicationBuilder AddCatalogApiClient(this WebApplicationBuilder builder)
     {
-        builder.Services.Configure<CorrelationIdOptions>(options =>
-        {
-            options.Policy = CorrelationIdPolicy.GenerateAlways;
-            options.HeaderName = "X-Request-Id";
-        }); 
-
-        builder.Services.AddHttpContextAccessor();
-        builder.Services.AddTransient<CorrelationIdDelegatingHandler>();
-
         var catalogApiBase = builder.Configuration.GetValue("services:CatalogApi:https:0", "http://localhost:5002");
         builder.Services.AddSingleton(new ApiClientConfig { BaseUrl = catalogApiBase });
         builder.Services.AddHttpClient<ICatalogApiClient, CatalogApiClient>(client =>
@@ -25,7 +15,6 @@ public static class HttpClientExtension
             client.BaseAddress = new Uri(catalogApiBase, UriKind.Absolute);
             client.Timeout = Timeout.InfiniteTimeSpan;
         })
-            .AddHttpMessageHandler<CorrelationIdDelegatingHandler>()
             .AddResilienceHandler("catalog-api", static pipeline =>
             {
                 pipeline.AddTimeout(new HttpTimeoutStrategyOptions
