@@ -1,11 +1,7 @@
-using EShop.Shared.Handlers;
-using EShop.Shared.MIddlewares;
-using EShop.Web.Clients;
+using EShop.Shared.Observability.Correlation;
 using EShop.Web.Components;
 using EShop.Web.Extensions;
-using Microsoft.Extensions.Http.Resilience;
 using MudBlazor.Services;
-using Polly;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +21,7 @@ builder.AddCatalogApiClient();
 
 var app = builder.Build();
 
-// app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<CorrelationIdMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

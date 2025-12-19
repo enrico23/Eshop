@@ -3,12 +3,13 @@ using EShop.API.Exceptions;
 using EShop.API.Models;
 using EShop.API.Services;
 using EShop.Data;
-using EShop.Shared.MIddlewares;
+using EShop.Shared.Observability.Correlation;
 using Mapster;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
+// API //
 var builder = WebApplication.CreateBuilder(args);
 
 if (builder.Environment.IsDevelopment())

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace EShop.Shared.Handlers;
+namespace EShop.Shared.Observability.Correlation;
 
 public sealed class CorrelationIdDelegatingHandler(IHttpContextAccessor httpContextAccessor) 
     : DelegatingHandler

@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Handlers;
+﻿using EShop.Shared.Observability.Correlation;
 using EShop.Web.Clients;
 using Microsoft.Extensions.Http.Resilience;
 using Polly;
@@ -19,7 +19,7 @@ public static class HttpClientExtension
             client.BaseAddress = new Uri(catalogApiBase, UriKind.Absolute);
             client.Timeout = Timeout.InfiniteTimeSpan;
         })
-            // .AddHttpMessageHandler<CorrelationIdDelegatingHandler>()
+            .AddHttpMessageHandler<CorrelationIdDelegatingHandler>()
             .AddResilienceHandler("catalog-api", static pipeline =>
             {
                 pipeline.AddTimeout(new HttpTimeoutStrategyOptions
