@@ -17,4 +17,9 @@
     <ProjectReference Include="..\EShop.ServiceDefaults\EShop.ServiceDefaults.csproj" />
     <ProjectReference Include="..\EShop.Shared\EShop.Shared.csproj" />
   </ItemGroup>
+
+
+  <ItemGroup>
+    <Folder Include="Middlewares\" />
+  </ItemGroup>
 </Project>

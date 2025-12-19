@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using System.Text.Json.Nodes;
 
 var builder = DistributedApplication.CreateBuilder(args);
 var disableFrontend = builder.Configuration.GetValue("DisableFrontend", false);

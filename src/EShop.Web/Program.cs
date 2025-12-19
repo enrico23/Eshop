@@ -1,7 +1,8 @@
+using EShop.Shared.Handlers;
+using EShop.Shared.MIddlewares;
 using EShop.Web.Clients;
 using EShop.Web.Components;
 using Microsoft.Extensions.Http.Resilience;
-using Microsoft.Extensions.ServiceDiscovery;
 using MudBlazor.Services;
 using Polly;
 
@@ -19,14 +20,18 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // CATALOG API HTTP CLIENT
-var catalogApiBase = builder.Configuration.GetValue("services:CatalogApi:https:0", "http://localhost:5002");
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<CorrelationIdDelegatingHandler>();
 
+var catalogApiBase = builder.Configuration.GetValue("services:CatalogApi:https:0", "http://localhost:5002");
 builder.Services.AddSingleton(new ApiClientConfig { BaseUrl = catalogApiBase });
 builder.Services.AddHttpClient<ICatalogApiClient, CatalogApiClient>(client =>
 {
     client.BaseAddress = new Uri(catalogApiBase, UriKind.Absolute);
     client.Timeout = Timeout.InfiniteTimeSpan;
-}).AddResilienceHandler("catalog-api", static pipeline =>
+})
+    .AddHttpMessageHandler<CorrelationIdDelegatingHandler>()
+    .AddResilienceHandler("catalog-api", static pipeline =>
 {
     pipeline.AddTimeout(new HttpTimeoutStrategyOptions
     {
@@ -63,8 +68,10 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-
 app.UseAntiforgery();
+
+app.UseMiddleware<CorrelationIdMiddleware>();
+
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
