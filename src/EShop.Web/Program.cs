@@ -3,6 +3,7 @@ using EShop.Web.Components;
 using EShop.Web.Extensions;
 using MudBlazor.Services;
 
+// Web //
 var builder = WebApplication.CreateBuilder(args);
 
 builder.ConfigureOpenTelemetry();

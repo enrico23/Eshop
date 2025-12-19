@@ -74,6 +74,12 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
+builder.Services.Configure<CorrelationIdOptions>(options =>
+{
+    options.Policy = CorrelationIdPolicy.PreserveIncoming;
+    options.HeaderName = "X-Request-Id";
+});
+
 var app = builder.Build();
 
 app.UseMiddleware<CorrelationIdMiddleware>();

@@ -9,6 +9,12 @@ public static class HttpClientExtension
 {
     public static WebApplicationBuilder AddCatalogApiClient(this WebApplicationBuilder builder)
     {
+        builder.Services.Configure<CorrelationIdOptions>(options =>
+        {
+            options.Policy = CorrelationIdPolicy.GenerateAlways;
+            options.HeaderName = "X-Request-Id";
+        }); 
+
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddTransient<CorrelationIdDelegatingHandler>();
 
