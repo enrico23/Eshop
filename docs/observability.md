@@ -1,7 +1,7 @@
 ﻿# Correlation ID Strategy
 
-This demo showcases **enterprise-grade request correlation** across 
-a Blazor client and a downstream API using:
+This demo showcases request correlation across a Blazor client and a downstream
+API using:
 
 - **OpenTelemetry distributed tracing** (technical correlation)
 - A **business correlation ID** (operational/workflow correlation)
@@ -84,12 +84,13 @@ This ensures:
 - It is searchable in tracing backends
 - It does not interfere with TraceId/SpanId semantics
 - Trace structure remains standards-compliant
+- It is attached only when Activity is recording to reduce cardinality impact
 
 ---
 
 ## Logging Strategy
 
-Every log entry emitted during request processing includes:
+Logs emitted during request processing include:
 
 - `trace_id`
 - `span_id`
@@ -99,6 +100,11 @@ This allows:
 - Navigating from logs ==> traces
 - Navigating from traces ==> logs
 - Cross-service log correlation using a stable identifier
+
+## Validation
+
+Both Gateway and API validate the incoming header before accepting it. Invalid
+or missing values result in a new GUID-based correlation ID.
 
 ---
 

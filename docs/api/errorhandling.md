@@ -1,10 +1,10 @@
-﻿# Error Handling
+# Error Handling
 
-The API uses ASP.NET Core’s built-in ProblemDetails format for all errors.
+The API returns errors using ASP.NET Core ProblemDetails responses.
 
-## Exception → HTTP Status Mapping
+## Exception to status mapping
 
-The application maps exception types to HTTP status codes using .NET 9’s StatusCodeSelector:
+Unhandled exceptions are mapped to HTTP status codes via `UseExceptionHandler`:
 
 ```csharp
 app.UseExceptionHandler(new ExceptionHandlerOptions
@@ -12,35 +12,31 @@ app.UseExceptionHandler(new ExceptionHandlerOptions
     StatusCodeSelector = ex => ex switch
     {
         ArgumentException => StatusCodes.Status400BadRequest,
-        DomainException => StatusCodes.Status409Conflict,
         _ => StatusCodes.Status500InternalServerError
     }
 });
 ```
 
-## DomainException
+## DomainException handling
 
-A DomainException is thrown when an entity already exists in the database.
-It is translated into a 409 Conflict response.
+`DomainException` is handled by a dedicated exception handler and returned as
+`409 Conflict`:
 
 ```json
 {
   "status": 409,
-  "title": "Conflict",
+  "title": "Business rule violation.",
   "detail": "Entity already exists.",
-  "instance": "POST /api/products",
-  "traceId": "00-...-..."
+  "type": "https://httpstatuses.com/409"
 }
 ```
 
-## ProblemDetails Enrichment
+## ProblemDetails enrichment
 
-The service also enriches error responses with:
+The API enriches ProblemDetails responses with:
 
-- requestId
-
-- traceId
-
-- instance (HTTP method + route)
+- `requestId`
+- `traceId`
+- `instance` (HTTP method + route)
 
 These values help with troubleshooting and observability.

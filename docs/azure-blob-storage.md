@@ -32,6 +32,11 @@
 - Production: supply a real `Blobs` connection string; the initializer will create the container if missing.
 - Troubleshooting: if image requests 404, check the container exists and the `Blobs` connection string matches your target storage/emulator.
 
+## Local test
+1. Start the AppHost so Azurite and the initializer run.
+2. Upload an image via the Products API.
+3. Fetch it back with `GET /api/images/{imageId}` and verify the content type.
+
 
 ## TODO / Improvements
 
