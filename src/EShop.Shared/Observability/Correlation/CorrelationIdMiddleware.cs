@@ -30,7 +30,7 @@ public sealed class CorrelationIdMiddleware(
 
         using (_logger.BeginScope(new Dictionary<string, object>
                {
-                   { "CorrelationId", id }
+                   {_options.LogFieldName, id }
                }))
         {
             context.Response.OnStarting(() =>
@@ -43,10 +43,7 @@ public sealed class CorrelationIdMiddleware(
         }
     }
 
-    private string CreateId()
-    {
-        return Guid.NewGuid().ToString("N");
-    }
+    private string CreateId() => Guid.NewGuid().ToString("N");
 
     private string GetOrSetCorrelationId(HttpContext context)
     {
@@ -60,12 +57,12 @@ public sealed class CorrelationIdMiddleware(
         return CreateId();
     }
 
-    private static bool IsValid(string? value)
+    private bool IsValid(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return false;
 
-        if (value.Length is < 8 or > 64)
+        if (value.Length < _options.MinLength || value.Length > _options.MaxLength)
             return false;
 
         foreach (var c in value)

@@ -1,4 +1,4 @@
-# Correlation ID Strategy
+ï»¿# Correlation ID Strategy
 
 This demo showcases **enterprise-grade request correlation** across 
 a Blazor client and a downstream API using:
@@ -27,10 +27,10 @@ This provides **end-to-end trace visibility** and parent/child span relationship
 
 ## Correlation ID Ownership Model
 
-### Blazor Client (Edge)
+### Gateway (Edge, YARP)
 - Acts as the **entry point** for user-driven interactions
 - Responsible for **generating the business correlation ID** if none exists
-- Sends it to downstream APIs via HTTP headers
+- Forwards it to downstream APIs via HTTP headers
 
 ### API
 - Treats the correlation ID as **caller-owned**
@@ -47,26 +47,28 @@ This aligns with common enterprise and platform engineering practices.
 | Aspect | Value |
 |------|------|
 | Header name | `X-Correlation-ID` |
-| Format | Opaque GUID (`Guid.NewGuid().ToString("N")`) |
-| Length | 32–64 characters |
+| Format | Opaque ID (`Activity.TraceId` or `Guid.NewGuid().ToString("N")`) |
+| Length | 8-64 characters |
 | PII | **Not allowed** |
 | Cardinality | High (acceptable, but controlled)
 
 ---
 
-## HTTP Flow (Blazor ==> API)
+## HTTP Flow (Web ==> Gateway ==> API)
 
-1. Blazor host receives an inbound request / UI interaction
-2. If no correlation ID exists:
-   - Generate a new one
-3. Attach correlation ID to outbound API call:
-4. API middleware:
-- Reads and validates the header
-- Generates one if missing/invalid
-- Adds it to:
-  - response headers
-  - logging scope
-  - OpenTelemetry `Activity` as a tag
+1. EShop.Web issues a call to the Catalog API via the Gateway.
+2. Gateway middleware:
+   - Reads `X-Correlation-ID` if present
+   - Otherwise generates one (`Activity.TraceId` or a new GUID)
+   - Adds it to the inbound request headers forwarded by YARP
+   - Echoes it on the Gateway response
+3. API middleware:
+   - Reads and validates the header
+   - Generates one if missing/invalid
+   - Adds it to:
+     - response headers
+     - logging scope
+     - OpenTelemetry `Activity` as a tag
 
 ---
 
@@ -76,6 +78,7 @@ The business correlation ID is **not** used for span parenting.
 
 Instead, it is attached as an **Activity tag**:
 
+`business.request_id`
 
 This ensures:
 - It is searchable in tracing backends
@@ -90,7 +93,7 @@ Every log entry emitted during request processing includes:
 
 - `trace_id`
 - `span_id`
-- `business.correlation_id`
+- `request_id`
 
 This allows:
 - Navigating from logs ==> traces
@@ -101,8 +104,9 @@ This allows:
 
 ## Response Behavior
 
-The API always echoes the correlation ID back to the caller:
+The Gateway and API always echo the correlation ID back to the caller:
 
+`X-Correlation-ID: {value}`
 
 This enables:
 - Client-side debugging

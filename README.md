@@ -1,4 +1,4 @@
-# 📦 EShop — Full-Stack .NET E-Commerce Demo
+﻿# 📦 EShop — Full-Stack .NET E-Commerce Demo
 
 A clean, modern, full-stack e-commerce application showcasing backend engineering, frontend development, 
 loud-native architecture, DevOps, and developer experience.
@@ -63,3 +63,4 @@ the migrations alongside the data layer.
 Additional docs:
 
 - [Azure Blob Storage](docs/azure-blob-storage.md)
+- [Observability](docs/observability.md)

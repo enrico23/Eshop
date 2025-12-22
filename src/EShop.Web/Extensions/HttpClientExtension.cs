@@ -8,11 +8,11 @@ public static class HttpClientExtension
 {
     public static WebApplicationBuilder AddCatalogApiClient(this WebApplicationBuilder builder)
     {
-        var catalogApiBase = builder.Configuration.GetValue("services:CatalogApi:https:0", "http://localhost:5002");
-        builder.Services.AddSingleton(new ApiClientConfig { BaseUrl = catalogApiBase });
+        var gateway = builder.Configuration.GetValue("services:Gateway:https:0", "http://localhost:5261");
+        builder.Services.AddSingleton(new ApiClientConfig { BaseUrl = gateway });
         builder.Services.AddHttpClient<ICatalogApiClient, CatalogApiClient>(client =>
         {
-            client.BaseAddress = new Uri(catalogApiBase, UriKind.Absolute);
+            client.BaseAddress = new Uri(gateway, UriKind.Absolute);
             client.Timeout = Timeout.InfiniteTimeSpan;
         })
             .AddResilienceHandler("catalog-api", static pipeline =>

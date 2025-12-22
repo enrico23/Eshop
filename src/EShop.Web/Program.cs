@@ -1,14 +1,10 @@
-using EShop.Shared.Observability.Correlation;
 using EShop.Web.Components;
 using EShop.Web.Extensions;
 using MudBlazor.Services;
 
 // Web //
 var builder = WebApplication.CreateBuilder(args);
-
-builder.ConfigureOpenTelemetry();
-builder.AddDefaultHealthChecks();
-builder.Services.AddServiceDiscovery();
+builder.AddServiceDefaults();
 
 // Add MudBlazor services
 builder.Services.AddMudServices();
@@ -18,12 +14,9 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // Add CatalogApi Http Client
-
 builder.AddCatalogApiClient();
 
 var app = builder.Build();
-
-app.UseMiddleware<CorrelationIdMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -31,8 +31,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{695ED087-1
 	ProjectSection(SolutionItems) = preProject
 		..\docs\azure-blob-storage.md = ..\docs\azure-blob-storage.md
 		..\docs\demo-features.md = ..\docs\demo-features.md
-		..\docs\quickstart.md = ..\docs\quickstart.md
 		..\docs\observability.md = ..\docs\observability.md
+		..\docs\quickstart.md = ..\docs\quickstart.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{1CFF8CA6-A149-4AA5-BFC2-2E2897B4EFAE}"
@@ -52,6 +52,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.ImagesQueueWorker", "EShop.ImagesQueueWorker\EShop.ImagesQueueWorker.csproj", "{EB4C3C0E-D0EE-4D3D-97C7-C9B7FA4A6FE0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Gateway", "EShop.Gateway\EShop.Gateway.csproj", "{171B1ADF-2FE9-A394-B526-A96E433A5241}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -195,6 +197,18 @@ Global
 		{EB4C3C0E-D0EE-4D3D-97C7-C9B7FA4A6FE0}.Release|x64.Build.0 = Release|Any CPU
 		{EB4C3C0E-D0EE-4D3D-97C7-C9B7FA4A6FE0}.Release|x86.ActiveCfg = Release|Any CPU
 		{EB4C3C0E-D0EE-4D3D-97C7-C9B7FA4A6FE0}.Release|x86.Build.0 = Release|Any CPU
+		{171B1ADF-2FE9-A394-B526-A96E433A5241}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{171B1ADF-2FE9-A394-B526-A96E433A5241}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{171B1ADF-2FE9-A394-B526-A96E433A5241}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{171B1ADF-2FE9-A394-B526-A96E433A5241}.Debug|x64.Build.0 = Debug|Any CPU
+		{171B1ADF-2FE9-A394-B526-A96E433A5241}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{171B1ADF-2FE9-A394-B526-A96E433A5241}.Debug|x86.Build.0 = Debug|Any CPU
+		{171B1ADF-2FE9-A394-B526-A96E433A5241}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{171B1ADF-2FE9-A394-B526-A96E433A5241}.Release|Any CPU.Build.0 = Release|Any CPU
+		{171B1ADF-2FE9-A394-B526-A96E433A5241}.Release|x64.ActiveCfg = Release|Any CPU
+		{171B1ADF-2FE9-A394-B526-A96E433A5241}.Release|x64.Build.0 = Release|Any CPU
+		{171B1ADF-2FE9-A394-B526-A96E433A5241}.Release|x86.ActiveCfg = Release|Any CPU
+		{171B1ADF-2FE9-A394-B526-A96E433A5241}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
