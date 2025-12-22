@@ -69,3 +69,9 @@ the migrations alongside the data layer.
 - [Error Handling](docs/api/errorhandling.md)
 - [Azure Blob Storage](docs/azure-blob-storage.md)
 - [Observability](docs/observability.md)
+
+## Docs
+
+- [Documentation Index](docs/README.md)
+- [Architecture Overview](docs/architecture.md)
+- [Roadmap](docs/roadmap.md)

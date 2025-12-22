@@ -6,6 +6,8 @@
 - [.NET Aspire](https://aspire.dev/get-started/prerequisites/)
 - Container runtime: [Docker Desktop](https://www.docker.com/products/docker-desktop/) **or** [Rancher Desktop](https://rancherdesktop.io/)
 
+The AppHost provisions local dependencies (SQL Server, Azurite, and Service Bus) automatically.
+
 ### Full stack (API + frontend + database)
 
 The default configuration starts all services via the Aspire AppHost.
@@ -19,17 +21,20 @@ dotnet run
 This will start:
 - Start SQL Server + CatalogDb
 - Run the migration service
+- Initialize Blob Storage containers
 - Start the Catalog API
+- Start the Gateway (YARP)
 - Start the Blazor frontend (EShop.Web)
+- Start the images queue worker
 
-Expose endpoints in the Aspire dashboard
+Use the Aspire dashboard to inspect endpoints and traces.
 
 ### Dependencies only
 
 When working on the API, it's often useful to run it directly from your IDE
 while Aspire only runs the dependencies.
 
-You can run only the dependecies in the AppHost using the `DependenciesOnly` flag:
+You can run only the dependencies in the AppHost using the `DependenciesOnly` flag:
 
 ```
 cd src/EShop.AppHost
@@ -40,6 +45,8 @@ dotnet run -- DependenciesOnly=true
 This will start:
 - Start SQL Server + CatalogDb
 - Run the migration service
+- Initialize Blob Storage containers
+- Start the Service Bus emulator
 
 
 ### Backend only (API + database, no frontend)
@@ -59,3 +66,4 @@ This will start:
 - Start SQL Server + CatalogDb
 - Run the migration service
 - Start the Catalog API
+- Start the Gateway (YARP)

@@ -1,7 +1,7 @@
-﻿# EShop Demo — Feature Backlog
+# EShop Demo - Feature Backlog
 
-This document tracks the features I plan to implement for this EShop demo.
-It’s organized to keep the scope realistic while still reflecting common enterprise job requirements.
+This document tracks the features planned for the EShop demo. It keeps the
+scope realistic while reflecting common enterprise requirements.
 
 ## Current baseline (already in repo)
 - [x] Aspire AppHost orchestration (API + Web + DB)
@@ -28,7 +28,7 @@ It’s organized to keep the scope realistic while still reflecting common enter
   - [ ] Authenticated: server-side cart (optional)
 - [ ] Checkout (demo)
   - [ ] Address + contact form
-  - [ ] “Place order” using a fake payment step
+  - [ ] "Place order" using a fake payment step
 - [ ] Order confirmation screen
 
 ## Identity & authorization
@@ -49,7 +49,7 @@ It’s organized to keep the scope realistic while still reflecting common enter
 ## GraphQL (job-spec aligned)
 Goal: make filtering and data shaping more elastic for UI screens.
 
-### Option A — GraphQL as a BFF (recommended for demos)
+### Option A - GraphQL as a BFF (recommended for demos)
 - [ ] Add a GraphQL endpoint in `EShop.API` (HotChocolate)
 - [ ] Query: `products(page, sort, filter)` returning `{ total, items }`
 - [ ] Query: `categories` for navigation/filter strip
@@ -57,7 +57,7 @@ Goal: make filtering and data shaping more elastic for UI screens.
 - [ ] Add DataLoader/batching to avoid N+1
 - [ ] Add auth rules: customer-safe fields vs admin fields
 
-### Production guardrails (required for “enterprise” credibility)
+### Production guardrails (required for "enterprise" credibility)
 - [ ] Request timeout limits
 - [ ] Depth/complexity limits (cost analysis)
 - [ ] Persisted queries (or at least operation allowlist)
