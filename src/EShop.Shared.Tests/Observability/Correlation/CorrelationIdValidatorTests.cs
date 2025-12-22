@@ -1,5 +1,3 @@
-﻿using EShop.Shared.Observability.Correlation;
-
 namespace EShop.Shared.Tests.Observability.Correlation;
 
 public sealed class CorrelationIdValidatorTests

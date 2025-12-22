@@ -1,4 +1,3 @@
-using EShop.Shared.Observability.Correlation;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Hosting;
 

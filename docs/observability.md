@@ -47,7 +47,7 @@ This aligns with common enterprise and platform engineering practices.
 | Aspect | Value |
 |------|------|
 | Header name | `X-Correlation-ID` |
-| Format | Opaque ID (`Activity.TraceId` or `Guid.NewGuid().ToString("N")`) |
+| Format | Opaque GUID (`Guid.NewGuid().ToString("N")`) |
 | Length | 8-64 characters |
 | PII | **Not allowed** |
 | Cardinality | High (acceptable, but controlled)
@@ -59,7 +59,7 @@ This aligns with common enterprise and platform engineering practices.
 1. EShop.Web issues a call to the Catalog API via the Gateway.
 2. Gateway middleware:
    - Reads `X-Correlation-ID` if present
-   - Otherwise generates one (`Activity.TraceId` or a new GUID)
+   - Otherwise generates one (`Guid.NewGuid().ToString("N")`)
    - Adds it to the inbound request headers forwarded by YARP
    - Echoes it on the Gateway response
 3. API middleware:
