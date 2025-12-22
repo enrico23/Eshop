@@ -1,3 +1,4 @@
+using EShop.Shared.Observability.Correlation;
 using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,20 +9,26 @@ builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 var app = builder.Build();
 
+var correlationOptions = new CorrelationIdOptions { HeaderName = "X-Correlation-ID" };
+
 app.Use(async (context, next) =>
 {
-    const string HeaderName = "X-Correlation-ID";
+    string? incoming = null;
+    if (context.Request.Headers.TryGetValue(correlationOptions.HeaderName, out var existing))
+        incoming = existing.ToString();
 
-    var cid = context.Request.Headers.TryGetValue(HeaderName, out var existing)
-        && !string.IsNullOrWhiteSpace(existing)
-            ? existing.ToString()
-            : (Activity.Current?.TraceId.ToString() ?? Guid.NewGuid().ToString("N"));
+    var cid = CorrelationIdValidator.IsValid(incoming, correlationOptions)
+        ? incoming!
+        : CorrelationIdGenerator.CreateId();
 
-    context.Request.Headers[HeaderName] = cid;
+    if (Activity.Current?.IsAllDataRequested == true)
+        Activity.Current.SetTag(correlationOptions.ActivityTagName, cid);
+
+    context.Request.Headers[correlationOptions.HeaderName] = cid;
 
     context.Response.OnStarting(() =>
     {
-        context.Response.Headers[HeaderName] = cid;
+        context.Response.Headers[correlationOptions.HeaderName] = cid;
         return Task.CompletedTask;
     });
 

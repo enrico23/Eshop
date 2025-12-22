@@ -21,7 +21,7 @@ public sealed class CorrelationIdMiddleware(
         {
            CorrelationIdPolicy.PreserveIncoming =>
                 GetOrSetCorrelationId(context),
-            _ => CreateId()
+            _ => CorrelationIdGenerator.CreateId()
         };
 
         context.Items[_options.ContextItemKey] = id;
@@ -43,34 +43,15 @@ public sealed class CorrelationIdMiddleware(
         }
     }
 
-    private string CreateId() => Guid.NewGuid().ToString("N");
-
     private string GetOrSetCorrelationId(HttpContext context)
     {
         if (context.Request.Headers.TryGetValue(_options.HeaderName, out var correlationIdValues))
         {
             var incoming = correlationIdValues.FirstOrDefault();
-            if (IsValid(incoming))
+            if (CorrelationIdValidator.IsValid(incoming, _options))
                 return incoming!;
         }
 
-        return CreateId();
-    }
-
-    private bool IsValid(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return false;
-
-        if (value.Length < _options.MinLength || value.Length > _options.MaxLength)
-            return false;
-
-        foreach (var c in value)
-        {
-            if (!char.IsLetterOrDigit(c) && c is not '-' and not '_' and not '.')
-                return false;
-        }
-
-        return true;
+        return CorrelationIdGenerator.CreateId();
     }
 }
