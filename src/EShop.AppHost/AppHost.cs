@@ -59,14 +59,18 @@ if (!dependenciesOnly)
            .WaitFor(serviceBusQueue)
            .WithReference(serviceBusQueue);
 
+    var gateway = builder.AddProject<Projects.EShop_Gateway>("Gateway")
+        .WaitFor(catalogApi)
+        .WithReference(catalogApi);
+
     // FRONTEND
     if (!disableFrontend)
     {
         var frontend = builder.AddProject<Projects.EShop_Web>("Eshop")
             .WithExternalHttpEndpoints();
         frontend = frontend
-            .WithReference(catalogApi)
-            .WaitFor(catalogApi);
+            .WaitFor(gateway)
+            .WithReference(gateway);
     }
 }
 

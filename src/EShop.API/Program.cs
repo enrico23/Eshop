@@ -77,7 +77,7 @@ builder.Services.AddControllers();
 builder.Services.Configure<CorrelationIdOptions>(options =>
 {
     options.Policy = CorrelationIdPolicy.PreserveIncoming;
-    options.HeaderName = "X-Request-Id";
+    options.HeaderName = "X-Correlation-ID";
 });
 
 var app = builder.Build();
