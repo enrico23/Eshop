@@ -4,9 +4,9 @@
 
 ```mermaid
 flowchart LR
-    Browser[Browser] --> Web[EShop.Web]
-    Web --> Gateway[EShop.Gateway (YARP)]
-    Gateway --> Api[EShop.API]
+    Browser[Browser] --> Web["EShop.Web"]
+    Web --> Gateway["EShop.Gateway (YARP)"]
+    Gateway --> Api["EShop.API"]
     Api --> Db[(SQL Server)]
     Api --> Blob[(Azure Blob Storage)]
     Api --> Bus[(Azure Service Bus)]
