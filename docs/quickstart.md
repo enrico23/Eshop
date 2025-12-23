@@ -2,6 +2,10 @@
 
 ### Prerequisites
 
+- Windows 11 only: install WSL before installing Docker Desktop or Rancher Desktop.
+  - Command: `wsl --install` (see [WSL install docs](https://learn.microsoft.com/windows/wsl/install)).
+  - Reboot after the install if prompted.
+  - If WSL reports virtualization is disabled, enable it in BIOS/UEFI.
 - [.NET SDK 10.0](https://dotnet.microsoft.com/download)
 - [.NET Aspire](https://aspire.dev/get-started/prerequisites/)
 - Container runtime: [Docker Desktop](https://www.docker.com/products/docker-desktop/) **or** [Rancher Desktop](https://rancherdesktop.io/)
