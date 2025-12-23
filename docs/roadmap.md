@@ -4,7 +4,7 @@ This document tracks the features planned for the EShop demo. It keeps the
 scope realistic while reflecting common enterprise requirements.
 
 ## Current baseline (already in repo)
-- [x] Aspire AppHost orchestration (API + Web + DB)
+- [x] Aspire AppHost orchestration (API + Web + DB + YARP)
 - [x] Catalog API (Products/Categories) with paging/sorting and basic filtering
 - [x] Admin screens for Products/Categories (MudBlazor + server-side grids)
 - [x] Product image upload + Azure Blob Storage (Azurite local)
