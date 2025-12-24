@@ -1,5 +1,4 @@
-﻿using Azure.Messaging.ServiceBus;
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using EShop.Shared.Exceptions;
 using Microsoft.AspNetCore.Http;
@@ -19,15 +18,12 @@ public sealed class ImageStorageService : IImageStorageService
 {
     private readonly BlobContainerClient _container;
     private readonly long _maxUploadSizeBytes;
-    private readonly ServiceBusClient _serviceBusClient;
-
+    
     public ImageStorageService(
-        BlobContainerClient container, 
-        ServiceBusClient serviceBusClient,
+        BlobContainerClient container,
         ImageStorageServiceOptions imageStorageServiceOptions)
     {
         _container = container;
-        _serviceBusClient = serviceBusClient;
         _maxUploadSizeBytes = imageStorageServiceOptions.MaxUploadSizeBytes ?? 52428800;
     }
 
@@ -65,7 +61,7 @@ public sealed class ImageStorageService : IImageStorageService
 
         var response = await blobClient.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots, cancellationToken: ct);
 
-        await SendDeleteImageMessageAsync(imageId, ct);
+        // await SendDeleteImageMessageAsync(imageId, ct);
 
         return response.Value;
     }
@@ -88,20 +84,20 @@ public sealed class ImageStorageService : IImageStorageService
         return (response.Value.Content, contentType);
     }
 
-    private async Task<bool> SendDeleteImageMessageAsync(
-       string imageName,
-       CancellationToken cancellationToken)
-    {
-        var sender = _serviceBusClient.CreateSender("images-queue");
+    //private async Task<bool> SendDeleteImageMessageAsync(
+    //   string imageName,
+    //   CancellationToken cancellationToken)
+    //{
+    //    var sender = _serviceBusClient.CreateSender("images-queue");
 
-        var message = new ServiceBusMessage(imageName)
-        {
-            MessageId = Guid.NewGuid().ToString(),
-            Subject = "image.deleted"
-        };
+    //    var message = new ServiceBusMessage(imageName)
+    //    {
+    //        MessageId = Guid.NewGuid().ToString(),
+    //        Subject = "image.deleted"
+    //    };
 
-        await sender.SendMessageAsync(message, cancellationToken);
+    //    await sender.SendMessageAsync(message, cancellationToken);
 
-        return true;
-    }
+    //    return true;
+    //}
 }

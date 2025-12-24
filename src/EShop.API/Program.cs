@@ -59,7 +59,6 @@ builder.Services.AddSingleton(sp =>
     var serviceClient = sp.GetRequiredService<BlobServiceClient>();
     return serviceClient.GetBlobContainerClient("product-images");
 });
-builder.Services.AddSingleton<IBlobFileStorageService, BlobFileStorageService>();
 builder.Services.AddSingleton<IImageStorageService, ImageStorageService>();
 
 // Service Bus Client

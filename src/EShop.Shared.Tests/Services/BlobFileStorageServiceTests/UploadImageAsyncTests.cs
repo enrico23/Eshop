@@ -1,6 +1,8 @@
-﻿namespace EShop.API.Tests.Services.BlobFileStorageServiceTests;
+﻿using Microsoft.AspNetCore.Http;
 
-public sealed class UploadImageAsyncTests : BlobFileStorageTestBase
+namespace EShop.Shared.Tests.Services.BlobFileStorageServiceTests;
+
+public sealed class UploadImageAsyncTests : ImageStorageServiceTestBase
 {
     [Fact]
     public async Task When_File_Null_ThrowsBadHttpRequestException()
@@ -8,7 +10,7 @@ public sealed class UploadImageAsyncTests : BlobFileStorageTestBase
         // Act & Assert
         var blobFileStorage = CreateSut();
 
-        var ex = await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
+        var ex = await Assert.ThrowsAsync<BadRequestException>(async () =>
               await blobFileStorage.UploadImageAsync(null!, CancellationToken.None));
 
         Assert.NotNull(ex);
@@ -23,7 +25,7 @@ public sealed class UploadImageAsyncTests : BlobFileStorageTestBase
 
         // Act & Assert
         var blobFileStorage = CreateSut();
-        var ex = await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
+        var ex = await Assert.ThrowsAsync<BadRequestException>(async () =>
               await blobFileStorage.UploadImageAsync(emptyFile, CancellationToken.None));
 
         Assert.NotNull(ex);
@@ -44,7 +46,7 @@ public sealed class UploadImageAsyncTests : BlobFileStorageTestBase
 
         // Act & Assert
         var blobFileStorage = CreateSut();
-        var ex = await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
+        var ex = await Assert.ThrowsAsync<BadRequestException>(async () =>
               await blobFileStorage.UploadImageAsync(tooLargeFile, CancellationToken.None));
 
         Assert.NotNull(ex);
@@ -59,7 +61,7 @@ public sealed class UploadImageAsyncTests : BlobFileStorageTestBase
 
         // Act
         var blobFileStorage = CreateSut();
-        var ex = await Assert.ThrowsAsync<BadHttpRequestException>(() => 
+        var ex = await Assert.ThrowsAsync<BadRequestException>(() => 
             blobFileStorage.UploadImageAsync(file));
 
         // Assert
@@ -80,7 +82,7 @@ public sealed class UploadImageAsyncTests : BlobFileStorageTestBase
 
         // Act
         var blobFileStorage = CreateSut();
-        var ex = await Assert.ThrowsAsync<BadHttpRequestException>(() 
+        var ex = await Assert.ThrowsAsync<BadRequestException>(() 
             => blobFileStorage.UploadImageAsync(file));
 
         // Assert

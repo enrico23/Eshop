@@ -1,10 +1,12 @@
-﻿using EShop.API.Models;
+﻿using Azure.Storage.Blobs;
+using EShop.Shared.Services;
+using Microsoft.AspNetCore.Http;
 
-namespace EShop.API.Tests.Services.BlobFileStorageServiceTests;
+namespace EShop.Shared.Tests.Services.BlobFileStorageServiceTests;
 
-public abstract class BlobFileStorageTestBase 
+public abstract class ImageStorageServiceTestBase 
 {
-    protected BlobFileStorageServiceOptions Options = new () { 
+    protected ImageStorageServiceOptions Options = new () { 
         MaxUploadSizeBytes = 5242880 
     };
 
@@ -12,10 +14,10 @@ public abstract class BlobFileStorageTestBase
 
     protected BlobClient BlobClient = Substitute.For<BlobClient>();
 
-    protected BlobFileStorageService CreateSut()
+    protected ImageStorageService CreateSut()
     {
         Container.GetBlobClient(Arg.Any<string>()).Returns(BlobClient);
-        return new BlobFileStorageService(Container, Options);
+        return new ImageStorageService(Container, Options);
     }
 
     protected static IFormFile FakeImage(
