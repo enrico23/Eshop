@@ -6,6 +6,7 @@ using EShop.Domain.Exceptions;
 using EShop.Domain.Products;
 using EShop.Shared.Domain;
 using EShop.Shared.Representations.Product;
+using EShop.Shared.Services;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
@@ -14,14 +15,17 @@ using System.Linq.Dynamic.Core;
 
 namespace EShop.API.Services;
 
-public class ProductService(CatalogDbContext context, IMapper mapper, IBlobFileStorageService blobFileStorageService) 
+public class ProductService(
+    CatalogDbContext context, 
+    IMapper mapper, 
+    IBlobFileStorageService blobFileStorageService,
+    IImageStorageService imageStorageService) 
     : IProductService
 {
     private readonly CatalogDbContext _context = context;
-
     private readonly IMapper _mapper = mapper;
-
     private readonly IBlobFileStorageService _blobFileStorageService = blobFileStorageService;
+    private readonly IImageStorageService _imageStorageService = imageStorageService;
 
     public async Task<Shared.Representations.PagedResult<ProductDto>> GetPagedAsync(
         int page, int pageSize, 
@@ -157,7 +161,7 @@ public class ProductService(CatalogDbContext context, IMapper mapper, IBlobFileS
         {
             foreach (var image in product.Images)
             {
-                await _blobFileStorageService.DeleteImageAsync(image.Url);
+                await _imageStorageService.DeleteImageAsync(image.Url, ct);
             }
 
             var newUrl = await _blobFileStorageService.UploadImageAsync(productFormDto.File, ct);
@@ -186,7 +190,7 @@ public class ProductService(CatalogDbContext context, IMapper mapper, IBlobFileS
         {
             foreach (var image in entity.Images)
             {
-                await _blobFileStorageService.DeleteImageAsync(image.Url, ct);
+                await _imageStorageService.DeleteImageAsync(image.Url, ct);
             }
         }
 
@@ -196,4 +200,3 @@ public class ProductService(CatalogDbContext context, IMapper mapper, IBlobFileS
         return true;
     }
 }
-

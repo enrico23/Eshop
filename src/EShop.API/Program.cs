@@ -4,6 +4,7 @@ using EShop.API.Models;
 using EShop.API.Services;
 using EShop.Data;
 using EShop.Shared.Observability.Correlation;
+using EShop.Shared.Services;
 using Mapster;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
@@ -59,6 +60,7 @@ builder.Services.AddSingleton(sp =>
     return serviceClient.GetBlobContainerClient("product-images");
 });
 builder.Services.AddSingleton<IBlobFileStorageService, BlobFileStorageService>();
+builder.Services.AddSingleton<IImageStorageService, ImageStorageService>();
 
 // Service Bus Client
 builder.AddAzureServiceBusClient("images-queue");
