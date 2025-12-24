@@ -47,11 +47,11 @@ builder.Services.AddSingleton(sp =>
     var configuration = sp.GetRequiredService<IConfiguration>();
     var options = configuration
         .GetSection("AzureBlobStorage")
-        .Get<BlobFileStorageServiceOptions>();
+        .Get<ImageStorageServiceOptions>();
 
     return options is null
         ? throw new InvalidOperationException(
-            "BlobFileStorageServiceOptions configuration section is missing or invalid.")
+            "ImageStorageServiceOptions configuration section is missing or invalid.")
         : options;
 });
 builder.Services.AddSingleton(sp =>

@@ -17,14 +17,12 @@ namespace EShop.API.Services;
 
 public class ProductService(
     CatalogDbContext context, 
-    IMapper mapper, 
-    IBlobFileStorageService blobFileStorageService,
+    IMapper mapper,
     IImageStorageService imageStorageService) 
     : IProductService
 {
     private readonly CatalogDbContext _context = context;
     private readonly IMapper _mapper = mapper;
-    private readonly IBlobFileStorageService _blobFileStorageService = blobFileStorageService;
     private readonly IImageStorageService _imageStorageService = imageStorageService;
 
     public async Task<Shared.Representations.PagedResult<ProductDto>> GetPagedAsync(
@@ -100,7 +98,7 @@ public class ProductService(
 
         if(productFormDto.File is not null)
         {
-            var newUrl = await _blobFileStorageService.UploadImageAsync(productFormDto.File, ct);
+            var newUrl = await _imageStorageService.UploadImageAsync(productFormDto.File, ct);
             product.AddImage(newUrl);
         }
 
@@ -164,7 +162,7 @@ public class ProductService(
                 await _imageStorageService.DeleteImageAsync(image.Url, ct);
             }
 
-            var newUrl = await _blobFileStorageService.UploadImageAsync(productFormDto.File, ct);
+            var newUrl = await _imageStorageService.UploadImageAsync(productFormDto.File, ct);
             product.AddImage(newUrl);
 
             var newImages = new List<ProductImageSpec> {

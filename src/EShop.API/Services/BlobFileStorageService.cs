@@ -1,6 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using EShop.API.Models;
+using EShop.Shared.Services;
 
 namespace EShop.API.Services;
 
@@ -16,12 +16,12 @@ public interface IBlobFileStorageService
 public class BlobFileStorageService : IBlobFileStorageService
 {
     private readonly BlobContainerClient container;
-    private readonly BlobFileStorageServiceOptions blobFileStorageServiceOptions;
+    private readonly ImageStorageServiceOptions blobFileStorageServiceOptions;
     private readonly long _maxUploadSizeBytes;
 
     public BlobFileStorageService(
-        BlobContainerClient container, 
-        BlobFileStorageServiceOptions blobFileStorageServiceOptions)
+        BlobContainerClient container,
+        ImageStorageServiceOptions blobFileStorageServiceOptions)
     {
         this.container = container;
         this.blobFileStorageServiceOptions = blobFileStorageServiceOptions;
