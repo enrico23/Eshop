@@ -1,4 +1,6 @@
-﻿namespace EShop.Domain.Catalog;
+﻿using EShop.Domain.Validation;
+
+namespace EShop.Domain.Catalog;
 
 public sealed class Category : AuditableEntity
 {
@@ -6,34 +8,21 @@ public sealed class Category : AuditableEntity
 
     public string Name { get; private set; } = default!;
 
-    public ICollection<Product> Products { get; private set; } = new List<Product>();
+    public ICollection<Product> Products { get; private set; } = [];
 
-    public Category()
-    {
-    }
+    public Category() {}
 
     public Category(string name)
     {
         Id = Guid.NewGuid();
-        Name = ValidateName(name);
+        Name = NameValidation.Validate(name, 200, "Category name");
     }
 
     public Category(Guid id, string name)
     {
         Id = id;
-        Name = ValidateName(name);
+        Name = NameValidation.Validate(name, 200, "Category name");
     }
 
-    public void ChangeName(string newName)
-    {
-        Name = ValidateName(newName);
-    }
-
-    private static string ValidateName(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Product name is required.", nameof(name));
-
-        return name.Trim();
-    }
+    public void ChangeName(string newName) => Name = NameValidation.Validate(newName, 200, "Category name");
 }
