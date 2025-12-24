@@ -59,6 +59,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Gateway", "EShop.Gate
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Shared.Tests", "EShop.Shared.Tests\EShop.Shared.Tests.csproj", "{83618D12-72A6-4D8B-B59C-CA6A6CE116A2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Domain.Tests", "EShop.Domain.Tests\EShop.Domain.Tests.csproj", "{8B7380F9-3341-9FEC-7B6C-3CA9A172741E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -225,6 +227,18 @@ Global
 		{83618D12-72A6-4D8B-B59C-CA6A6CE116A2}.Release|x64.Build.0 = Release|Any CPU
 		{83618D12-72A6-4D8B-B59C-CA6A6CE116A2}.Release|x86.ActiveCfg = Release|Any CPU
 		{83618D12-72A6-4D8B-B59C-CA6A6CE116A2}.Release|x86.Build.0 = Release|Any CPU
+		{8B7380F9-3341-9FEC-7B6C-3CA9A172741E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B7380F9-3341-9FEC-7B6C-3CA9A172741E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B7380F9-3341-9FEC-7B6C-3CA9A172741E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8B7380F9-3341-9FEC-7B6C-3CA9A172741E}.Debug|x64.Build.0 = Debug|Any CPU
+		{8B7380F9-3341-9FEC-7B6C-3CA9A172741E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8B7380F9-3341-9FEC-7B6C-3CA9A172741E}.Debug|x86.Build.0 = Debug|Any CPU
+		{8B7380F9-3341-9FEC-7B6C-3CA9A172741E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B7380F9-3341-9FEC-7B6C-3CA9A172741E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B7380F9-3341-9FEC-7B6C-3CA9A172741E}.Release|x64.ActiveCfg = Release|Any CPU
+		{8B7380F9-3341-9FEC-7B6C-3CA9A172741E}.Release|x64.Build.0 = Release|Any CPU
+		{8B7380F9-3341-9FEC-7B6C-3CA9A172741E}.Release|x86.ActiveCfg = Release|Any CPU
+		{8B7380F9-3341-9FEC-7B6C-3CA9A172741E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
