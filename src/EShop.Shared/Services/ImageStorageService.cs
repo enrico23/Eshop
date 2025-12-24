@@ -1,6 +1,8 @@
 ﻿using Azure.Messaging.ServiceBus;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using EShop.Shared.Exceptions;
+using Microsoft.AspNetCore.Http;
 
 namespace EShop.Shared.Services;
 
@@ -29,8 +31,7 @@ public sealed class ImageStorageService : IImageStorageService
     public async Task<bool> DeleteImageAsync(string imageId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(imageId))
-            //  throw new BadHttpRequestException("Image ID is required.", StatusCodes.Status400BadRequest);
-            throw new InvalidOperationException("Image ID is required.");
+            throw new BadRequestException("Image ID is required.", StatusCodes.Status400BadRequest);
 
         var blobClient = _container.GetBlobClient(imageId);
 
