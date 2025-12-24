@@ -2,6 +2,7 @@
 using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;
 using EShop.Domain.Products;
+using EShop.Domain.Validation;
 using EShop.Shared.Domain;
 
 public sealed class Product : AuditableEntity
@@ -48,64 +49,42 @@ public sealed class Product : AuditableEntity
 
     #region Name
 
-    public void ChangeName(string newName)
-    {
-        Name = ValidateName(newName);
-    }
+    public void ChangeName(string newName) => Name = ValidateName(newName);
 
-    public static string ValidateName(string value)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(value));
-
-        _ = value.Trim();
-
-        if (value.Length > 200)
-            throw new ArgumentException("Product name is limited to 200 characters", nameof(value));
-
-        return value;
-    }
+    public static string ValidateName(string value) =>
+         NameValidation.Validate(value, 200, "Product name");
 
     #endregion
 
     #region Description
 
-    public void ChangeDescription(ProductDescription newDescription)
-    {
+    public void ChangeDescription(ProductDescription newDescription) =>
         Description = newDescription ?? throw new ArgumentNullException(nameof(newDescription));
-    }
 
     #endregion
 
     #region Price
 
-    public void ChangePrice(Money newPrice)
-    {
+    public void ChangePrice(Money newPrice) => 
         Price = newPrice ?? throw new ArgumentNullException(nameof(newPrice));
-    }
 
     #endregion 
 
     #region Product Stock
 
-    public void IncreaseStock(int amount)
-    {
+    public void IncreaseStock(int amount) =>
         Stock = Stock.Increase(amount);
-    }
-
-    public void DecreaseStock(int amount)
-    {
+    
+    public void DecreaseStock(int amount) => 
         Stock = Stock.Decrease(amount);
-    }
 
-
-    public void ChangeStock(StockQuantity productQuantity)
-    {
+    public void ChangeStock(StockQuantity productQuantity) =>
         Stock = productQuantity;
-    }
 
     #endregion
 
     #region Product Status
+
     public void Publish()
     {
         if (Status == ProductStatus.Archived)
@@ -134,23 +113,20 @@ public sealed class Product : AuditableEntity
 
         Status = ProductStatus.Draft;
     }
+
     #endregion
 
     #region Product Sku
 
-    public void ChangeSku(Sku newSku)
-    {
+    public void ChangeSku(Sku newSku) =>
         Sku = newSku ?? throw new ArgumentNullException(nameof(newSku));
-    }
-
+    
     #endregion
 
     #region category
 
-    public void ChangeCategory(Guid categoryId)
-    {
+    public void ChangeCategory(Guid categoryId) =>
         CategoryId = ValidateCategoryId(categoryId);
-    }
 
     private static Guid ValidateCategoryId(Guid categoryId)
     {
@@ -252,9 +228,7 @@ public sealed class Product : AuditableEntity
         }
 
         if (requestedPrimary is not null)
-        {
             SetPrimaryImage(requestedPrimary.Id);
-        }
     }
 
     #endregion
