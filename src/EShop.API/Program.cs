@@ -58,6 +58,7 @@ public partial class Program
 
         // Service Bus Client
         builder.AddAzureServiceBusClient("images-queue");
+        builder.Services.AddSingleton<IQueueEventPublisherService, QueueEventPublisherService>();
 
         // // Mapster DI registration
         builder.Services.AddMapster();

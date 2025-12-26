@@ -20,13 +20,13 @@ public class ProductService(
     CatalogDbContext context, 
     IMapper mapper,
     IImageStorageService imageStorageService,
-     ServiceBusClient serviceBusClient) 
+    IQueueEventPublisherService queueEventPublisherService) 
     : IProductService
 {
     private readonly CatalogDbContext _context = context;
     private readonly IMapper _mapper = mapper;
     private readonly IImageStorageService _imageStorageService = imageStorageService;
-    private readonly ServiceBusClient _serviceBusClient = serviceBusClient;
+    private readonly IQueueEventPublisherService _queueEventPublisherService = queueEventPublisherService;
 
     public async Task<Shared.Representations.PagedResult<ProductDto>> GetPagedAsync(
         int page, int pageSize, 
@@ -162,7 +162,7 @@ public class ProductService(
         {
             foreach (var image in product.Images)
             {
-                await SendDeleteImageMessageAsync(image.Url, ct);
+                await _queueEventPublisherService.SendDeleteImageMessageAsync(image.Url, ct);
             }
 
             var newUrl = await _imageStorageService.UploadImageAsync(productFormDto.File, ct);
@@ -191,29 +191,12 @@ public class ProductService(
         {
             foreach (var image in entity.Images)
             {
-                await SendDeleteImageMessageAsync(image.Url, ct);
+                await _queueEventPublisherService.SendDeleteImageMessageAsync(image.Url, ct);
             }
         }
 
         _context.Products.Remove(entity);
         await _context.SaveChangesAsync(ct);
-
-        return true;
-    }
-
-    private async Task<bool> SendDeleteImageMessageAsync(
-       string imageName,
-       CancellationToken cancellationToken)
-    {
-        var sender = _serviceBusClient.CreateSender("images-queue");
-
-        var message = new ServiceBusMessage(imageName)
-        {
-            MessageId = Guid.NewGuid().ToString(),
-            Subject = "image.deleted"
-        };
-
-        await sender.SendMessageAsync(message, cancellationToken);
 
         return true;
     }

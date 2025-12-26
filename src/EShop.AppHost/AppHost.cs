@@ -67,7 +67,7 @@ if (!dependenciesOnly)
     // FRONTEND
     if (!disableFrontend)
     {
-        var frontend = builder.AddProject<Projects.EShop_Web>("Eshop")
+        var frontend = builder.AddProject<Projects.EShop_Web>("Web")
             .WithExternalHttpEndpoints();
         frontend = frontend
             .WaitFor(gateway)
