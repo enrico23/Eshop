@@ -1,4 +1,5 @@
-﻿using EShop.API.Models;
+﻿using Azure.Messaging.ServiceBus;
+using EShop.API.Models;
 using EShop.Data;
 using EShop.Domain;
 using EShop.Domain.Catalog;
@@ -18,12 +19,14 @@ namespace EShop.API.Services;
 public class ProductService(
     CatalogDbContext context, 
     IMapper mapper,
-    IImageStorageService imageStorageService) 
+    IImageStorageService imageStorageService,
+     ServiceBusClient serviceBusClient) 
     : IProductService
 {
     private readonly CatalogDbContext _context = context;
     private readonly IMapper _mapper = mapper;
     private readonly IImageStorageService _imageStorageService = imageStorageService;
+    private readonly ServiceBusClient _serviceBusClient = serviceBusClient;
 
     public async Task<Shared.Representations.PagedResult<ProductDto>> GetPagedAsync(
         int page, int pageSize, 
@@ -159,7 +162,7 @@ public class ProductService(
         {
             foreach (var image in product.Images)
             {
-                await _imageStorageService.DeleteImageAsync(image.Url, ct);
+                await SendDeleteImageMessageAsync(image.Url, ct);
             }
 
             var newUrl = await _imageStorageService.UploadImageAsync(productFormDto.File, ct);
@@ -188,12 +191,29 @@ public class ProductService(
         {
             foreach (var image in entity.Images)
             {
-                await _imageStorageService.DeleteImageAsync(image.Url, ct);
+                await SendDeleteImageMessageAsync(image.Url, ct);
             }
         }
 
         _context.Products.Remove(entity);
         await _context.SaveChangesAsync(ct);
+
+        return true;
+    }
+
+    private async Task<bool> SendDeleteImageMessageAsync(
+       string imageName,
+       CancellationToken cancellationToken)
+    {
+        var sender = _serviceBusClient.CreateSender("images-queue");
+
+        var message = new ServiceBusMessage(imageName)
+        {
+            MessageId = Guid.NewGuid().ToString(),
+            Subject = "image.deleted"
+        };
+
+        await sender.SendMessageAsync(message, cancellationToken);
 
         return true;
     }

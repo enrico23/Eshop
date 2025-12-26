@@ -84,20 +84,5 @@ public sealed class ImageStorageService : IImageStorageService
         return (response.Value.Content, contentType);
     }
 
-    //private async Task<bool> SendDeleteImageMessageAsync(
-    //   string imageName,
-    //   CancellationToken cancellationToken)
-    //{
-    //    var sender = _serviceBusClient.CreateSender("images-queue");
-
-    //    var message = new ServiceBusMessage(imageName)
-    //    {
-    //        MessageId = Guid.NewGuid().ToString(),
-    //        Subject = "image.deleted"
-    //    };
-
-    //    await sender.SendMessageAsync(message, cancellationToken);
-
-    //    return true;
-    //}
+    
 }

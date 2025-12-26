@@ -1,6 +1,5 @@
 using Azure.Storage.Blobs;
 using EShop.API.Exceptions;
-using EShop.API.Models;
 using EShop.API.Services;
 using EShop.Data;
 using EShop.Shared.Observability.Correlation;
