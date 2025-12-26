@@ -61,14 +61,11 @@ public sealed class ImageStorageService : IImageStorageService
 
         var response = await blobClient.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots, cancellationToken: ct);
 
-        // await SendDeleteImageMessageAsync(imageId, ct);
-
         return response.Value;
     }
 
     public async Task<(Stream Stream, string ContentType)> GetImageAsync(string imageId, CancellationToken ct = default)
     {
-
         if (string.IsNullOrWhiteSpace(imageId))
             throw new BadRequestException("Image ID is required.", StatusCodes.Status400BadRequest);
 
@@ -83,6 +80,4 @@ public sealed class ImageStorageService : IImageStorageService
 
         return (response.Value.Content, contentType);
     }
-
-    
 }

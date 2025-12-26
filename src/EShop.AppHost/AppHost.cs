@@ -13,6 +13,7 @@ var azureBlobStorage = builder.AddAzureStorage("AzureBlobStorageEmulator")
       azurite.WithLifetime(ContainerLifetime.Persistent);
       azurite.WithDataVolume();
   }).AddBlobs("Blobs");
+
 var blobStorageInitializer = builder.AddProject<Projects.EShop_BlobStorageInitializer>("BlobStorageInitializer")
     .WithReference(azureBlobStorage)
     .WaitFor(azureBlobStorage);
