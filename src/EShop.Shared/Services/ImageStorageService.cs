@@ -1,10 +1,11 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using EShop.API.Models;
+using EShop.Shared.Exceptions;
+using Microsoft.AspNetCore.Http;
 
-namespace EShop.API.Services;
+namespace EShop.Shared.Services;
 
-public interface IBlobFileStorageService
+public interface IImageStorageService
 {
     Task<string> UploadImageAsync(IFormFile file, CancellationToken ct = default);
 
@@ -13,35 +14,33 @@ public interface IBlobFileStorageService
     Task<(Stream Stream, string ContentType)> GetImageAsync(string imageId, CancellationToken ct = default);
 }
 
-public class BlobFileStorageService : IBlobFileStorageService
+public sealed class ImageStorageService : IImageStorageService
 {
-    private readonly BlobContainerClient container;
-    private readonly BlobFileStorageServiceOptions blobFileStorageServiceOptions;
+    private readonly BlobContainerClient _container;
     private readonly long _maxUploadSizeBytes;
-
-    public BlobFileStorageService(
-        BlobContainerClient container, 
-        BlobFileStorageServiceOptions blobFileStorageServiceOptions)
+    
+    public ImageStorageService(
+        BlobContainerClient container,
+        ImageStorageServiceOptions imageStorageServiceOptions)
     {
-        this.container = container;
-        this.blobFileStorageServiceOptions = blobFileStorageServiceOptions;
-        _maxUploadSizeBytes = blobFileStorageServiceOptions.MaxUploadSizeBytes ?? 52428800;
+        _container = container;
+        _maxUploadSizeBytes = imageStorageServiceOptions.MaxUploadSizeBytes ?? 52428800;
     }
 
     public async Task<string> UploadImageAsync(IFormFile file, CancellationToken ct = default)
     {
         if (file is null || file.Length == 0)
-            throw new BadHttpRequestException("File is required.", StatusCodes.Status400BadRequest);
-       
+            throw new BadRequestException("File is required.", StatusCodes.Status400BadRequest);
+
         if (file.Length > _maxUploadSizeBytes)
-            throw new BadHttpRequestException($"File is too large. Max {_maxUploadSizeBytes / (1024 * 1024)} MB.", StatusCodes.Status413PayloadTooLarge);
+            throw new BadRequestException($"File is too large. Max {_maxUploadSizeBytes / (1024 * 1024)} MB.", StatusCodes.Status413PayloadTooLarge);
 
         if (string.IsNullOrWhiteSpace(file.ContentType) || !file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
-            throw new BadHttpRequestException("Only image files are allowed.", StatusCodes.Status400BadRequest);
+            throw new BadRequestException("Only image files are allowed.", StatusCodes.Status400BadRequest);
 
         var blobName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
 
-        var blob = container.GetBlobClient(blobName);
+        var blob = _container.GetBlobClient(blobName);
 
         await using Stream stream = file.OpenReadStream();
 
@@ -55,10 +54,10 @@ public class BlobFileStorageService : IBlobFileStorageService
 
     public async Task<bool> DeleteImageAsync(string imageId, CancellationToken ct = default)
     {
-        if(string.IsNullOrWhiteSpace(imageId))
-            throw new BadHttpRequestException("Image ID is required.", StatusCodes.Status400BadRequest);
-        
-        var blobClient = container.GetBlobClient(imageId);
+        if (string.IsNullOrWhiteSpace(imageId))
+            throw new BadRequestException("Image ID is required.", StatusCodes.Status400BadRequest);
+
+        var blobClient = _container.GetBlobClient(imageId);
 
         var response = await blobClient.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots, cancellationToken: ct);
 
@@ -67,11 +66,10 @@ public class BlobFileStorageService : IBlobFileStorageService
 
     public async Task<(Stream Stream, string ContentType)> GetImageAsync(string imageId, CancellationToken ct = default)
     {
-
         if (string.IsNullOrWhiteSpace(imageId))
-            throw new BadHttpRequestException("Image ID is required.", StatusCodes.Status400BadRequest);
+            throw new BadRequestException("Image ID is required.", StatusCodes.Status400BadRequest);
 
-        var blobClient = container.GetBlobClient(imageId);
+        var blobClient = _container.GetBlobClient(imageId);
 
         if (!await blobClient.ExistsAsync(ct))
             throw new FileNotFoundException($"Image '{imageId}' not found.");

@@ -1,4 +1,5 @@
-﻿using EShop.API.Models;
+﻿using Azure.Messaging.ServiceBus;
+using EShop.API.Models;
 using EShop.Data;
 using EShop.Domain;
 using EShop.Domain.Catalog;
@@ -6,6 +7,7 @@ using EShop.Domain.Exceptions;
 using EShop.Domain.Products;
 using EShop.Shared.Domain;
 using EShop.Shared.Representations.Product;
+using EShop.Shared.Services;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
@@ -14,14 +16,17 @@ using System.Linq.Dynamic.Core;
 
 namespace EShop.API.Services;
 
-public class ProductService(CatalogDbContext context, IMapper mapper, IBlobFileStorageService blobFileStorageService) 
+public class ProductService(
+    CatalogDbContext context, 
+    IMapper mapper,
+    IImageStorageService imageStorageService,
+    IQueueEventPublisherService queueEventPublisherService) 
     : IProductService
 {
     private readonly CatalogDbContext _context = context;
-
     private readonly IMapper _mapper = mapper;
-
-    private readonly IBlobFileStorageService _blobFileStorageService = blobFileStorageService;
+    private readonly IImageStorageService _imageStorageService = imageStorageService;
+    private readonly IQueueEventPublisherService _queueEventPublisherService = queueEventPublisherService;
 
     public async Task<Shared.Representations.PagedResult<ProductDto>> GetPagedAsync(
         int page, int pageSize, 
@@ -96,7 +101,7 @@ public class ProductService(CatalogDbContext context, IMapper mapper, IBlobFileS
 
         if(productFormDto.File is not null)
         {
-            var newUrl = await _blobFileStorageService.UploadImageAsync(productFormDto.File, ct);
+            var newUrl = await _imageStorageService.UploadImageAsync(productFormDto.File, ct);
             product.AddImage(newUrl);
         }
 
@@ -157,10 +162,10 @@ public class ProductService(CatalogDbContext context, IMapper mapper, IBlobFileS
         {
             foreach (var image in product.Images)
             {
-                await _blobFileStorageService.DeleteImageAsync(image.Url);
+                await _queueEventPublisherService.SendDeleteImageMessageAsync(image.Url, ct);
             }
 
-            var newUrl = await _blobFileStorageService.UploadImageAsync(productFormDto.File, ct);
+            var newUrl = await _imageStorageService.UploadImageAsync(productFormDto.File, ct);
             product.AddImage(newUrl);
 
             var newImages = new List<ProductImageSpec> {
@@ -186,7 +191,7 @@ public class ProductService(CatalogDbContext context, IMapper mapper, IBlobFileS
         {
             foreach (var image in entity.Images)
             {
-                await _blobFileStorageService.DeleteImageAsync(image.Url, ct);
+                await _queueEventPublisherService.SendDeleteImageMessageAsync(image.Url, ct);
             }
         }
 
@@ -196,4 +201,3 @@ public class ProductService(CatalogDbContext context, IMapper mapper, IBlobFileS
         return true;
     }
 }
-

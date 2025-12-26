@@ -1,6 +1,8 @@
-﻿namespace EShop.API.Tests.Services.BlobFileStorageServiceTests;
+﻿using Microsoft.AspNetCore.Http;
 
-public sealed class DeleteImageAsyncTests : BlobFileStorageTestBase
+namespace EShop.Shared.Tests.Services.BlobFileStorageServiceTests;
+
+public sealed class DeleteImageAsyncTests : ImageStorageServiceTestBase
 {
     [Fact]
     public async Task DeleteImageAsync_WhenImageId_IsEmpty_ThrowsBadHttpRequestException()
@@ -9,7 +11,7 @@ public sealed class DeleteImageAsyncTests : BlobFileStorageTestBase
         var blobFileStorageService = CreateSut();
 
         // Act & Assert
-        var ex = await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
+        var ex = await Assert.ThrowsAsync<BadRequestException>(async () =>
             await blobFileStorageService.DeleteImageAsync(string.Empty, CancellationToken.None));
         Assert.NotNull(ex);
         Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);

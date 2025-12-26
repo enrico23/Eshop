@@ -1,8 +1,12 @@
 using Azure.Messaging.ServiceBus;
+using EShop.Shared.Services;
 
 namespace EShop.ImagesQueueWorker;
 
-public class Worker(ILogger<Worker> logger, ServiceBusClient serviceBusClient) : BackgroundService
+public class Worker(
+    ILogger<Worker> logger, 
+    ServiceBusClient serviceBusClient,
+    IImageStorageService imageStorageService) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -16,11 +20,12 @@ public class Worker(ILogger<Worker> logger, ServiceBusClient serviceBusClient) :
 
             processor.ProcessMessageAsync += async args =>
             {
-                var body = args.Message.Body.ToString();
-                logger.LogInformation("Received message: {body}", body);
-                // Simulate image processing
-                await Task.Delay(2000, stoppingToken);
-                logger.LogInformation("Processed message: {body}", body);
+                var imageId = args.Message.Body.ToString();
+                logger.LogInformation("Received message: {body}", imageId);
+       
+                await imageStorageService.DeleteImageAsync(imageId, stoppingToken);
+
+                logger.LogInformation("Processed message: {body}", imageId);
                 await args.CompleteMessageAsync(args.Message, stoppingToken);
             };
 

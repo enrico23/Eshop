@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
 
-namespace EShop.API.Tests;
+namespace EShop.Shared.Tests.Services.BlobFileStorageServiceTests;
 
 public static class FormFileHelpers
 {

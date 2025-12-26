@@ -1,6 +1,6 @@
-﻿namespace EShop.API.Tests.Services.BlobFileStorageServiceTests;
+﻿namespace EShop.Shared.Tests.Services.BlobFileStorageServiceTests;
 
-public sealed class GetImageAsyncTests : BlobFileStorageTestBase
+public sealed class GetImageAsyncTests : ImageStorageServiceTestBase
 {
     [Fact]
     public async Task GetImageAsync_WhenCalled_ThrowsBadHttpRequestException()
@@ -9,7 +9,7 @@ public sealed class GetImageAsyncTests : BlobFileStorageTestBase
         var blobFileStorage = CreateSut();
 
         // Act & Assert
-        await Assert.ThrowsAsync<BadHttpRequestException>(async () =>
+        await Assert.ThrowsAsync<BadRequestException>(async () =>
             await blobFileStorage.GetImageAsync(string.Empty, CancellationToken.None));
     }
 
