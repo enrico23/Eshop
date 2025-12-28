@@ -4,6 +4,7 @@ using EShop.API.Services;
 using EShop.Data;
 using EShop.Shared.Observability.Correlation;
 using EShop.Shared.Services;
+using EShop.Shared.Services.Eventing;
 using Mapster;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
@@ -58,7 +59,11 @@ public partial class Program
 
         // Service Bus Client
         builder.AddAzureServiceBusClient("images-queue");
-        builder.Services.AddSingleton<IQueueEventPublisherService, QueueEventPublisherService>();
+        builder.Services.Configure<ServiceBusPublisherOptions>(options =>
+        {
+            options.TimeToLive = TimeSpan.FromDays(1);
+        });
+        builder.Services.AddSingleton<IEventPublisher, ServiceBusEventPublisher>();
 
         // // Mapster DI registration
         builder.Services.AddMapster();

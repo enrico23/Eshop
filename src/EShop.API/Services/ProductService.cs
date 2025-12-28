@@ -1,5 +1,4 @@
-﻿using Azure.Messaging.ServiceBus;
-using EShop.API.Models;
+﻿using EShop.API.Models;
 using EShop.Data;
 using EShop.Domain;
 using EShop.Domain.Catalog;
@@ -8,25 +7,27 @@ using EShop.Domain.Products;
 using EShop.Shared.Domain;
 using EShop.Shared.Representations.Product;
 using EShop.Shared.Services;
+using EShop.Shared.Services.Eventing;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq.Dynamic.Core;
-
+ 
 namespace EShop.API.Services;
 
 public class ProductService(
     CatalogDbContext context, 
     IMapper mapper,
     IImageStorageService imageStorageService,
-    IQueueEventPublisherService queueEventPublisherService) 
+    IEventPublisher eventPublisher) 
     : IProductService
 {
     private readonly CatalogDbContext _context = context;
     private readonly IMapper _mapper = mapper;
     private readonly IImageStorageService _imageStorageService = imageStorageService;
-    private readonly IQueueEventPublisherService _queueEventPublisherService = queueEventPublisherService;
+    private readonly IEventPublisher _eventPublisher = eventPublisher;
 
     public async Task<Shared.Representations.PagedResult<ProductDto>> GetPagedAsync(
         int page, int pageSize, 
@@ -162,7 +163,7 @@ public class ProductService(
         {
             foreach (var image in product.Images)
             {
-                await _queueEventPublisherService.SendDeleteImageMessageAsync(image.Url, ct);
+                await SendDeleteCommandAsync(image.Url, ct);
             }
 
             var newUrl = await _imageStorageService.UploadImageAsync(productFormDto.File, ct);
@@ -191,7 +192,7 @@ public class ProductService(
         {
             foreach (var image in entity.Images)
             {
-                await _queueEventPublisherService.SendDeleteImageMessageAsync(image.Url, ct);
+                await SendDeleteCommandAsync(image.Url, ct);
             }
         }
 
@@ -199,5 +200,18 @@ public class ProductService(
         await _context.SaveChangesAsync(ct);
 
         return true;
+    }
+
+    private async Task SendDeleteCommandAsync(string imageUrl, CancellationToken ct)
+    {
+        {
+            await _eventPublisher.PublishAsync(
+                "images-queue",
+                new EventEnvelope<DeleteImageRequest>(
+                    Type: "image.deleted",
+                    Data: new DeleteImageRequest(imageUrl),
+                    CorrelationId: Activity.Current?.TraceId.ToString(),
+                    Source: "eshop.api"), ct);
+        }
     }
 }
