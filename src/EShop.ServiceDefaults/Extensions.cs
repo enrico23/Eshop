@@ -146,11 +146,10 @@ public static class Extensions
     }
 }
 
-sealed class DropBlazorNoiseProcessor : BaseProcessor<Activity>
+internal sealed class DropBlazorNoiseProcessor : BaseProcessor<Activity>
 {
     public override void OnStart(Activity activity)
     {
-        // Drop at start so it never gets exported
         var src = activity.Source.Name;
 
         if (src.StartsWith("Microsoft.AspNetCore.Components", StringComparison.Ordinal) ||
