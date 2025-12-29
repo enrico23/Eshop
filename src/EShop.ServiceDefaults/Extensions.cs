@@ -7,6 +7,7 @@ using Microsoft.Extensions.ServiceDiscovery;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using System.Xml.Linq;
 
 namespace Microsoft.Extensions.Hosting;
 
@@ -71,15 +72,15 @@ public static class Extensions
                         path.StartsWith(AlivenessEndpointPath, StringComparison.OrdinalIgnoreCase))
                         return false;
 
-                    if (path.StartsWith("/_framework", StringComparison.OrdinalIgnoreCase) ||
-                        path.StartsWith("/_content",  StringComparison.OrdinalIgnoreCase) ||
-                        path.StartsWith("/_blazor",   StringComparison.OrdinalIgnoreCase) ||
-                        path.StartsWith("/css",       StringComparison.OrdinalIgnoreCase) ||
-                        path.StartsWith("/js",        StringComparison.OrdinalIgnoreCase))
-                        return false;
+                            if (path.StartsWith("/_framework", StringComparison.OrdinalIgnoreCase) ||
+                                path.StartsWith("/_content", StringComparison.OrdinalIgnoreCase) ||
+                                path.StartsWith("/_blazor", StringComparison.OrdinalIgnoreCase) ||
+                                path.StartsWith("/css", StringComparison.OrdinalIgnoreCase) ||
+                                path.StartsWith("/js", StringComparison.OrdinalIgnoreCase))
+                                return false;
 
-                    return true;
-                            })
+                        return true;
+                    })
                     // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
                     //.AddGrpcClientInstrumentation()
                     .AddHttpClientInstrumentation()
