@@ -5,6 +5,7 @@ using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;
 using EShop.Domain.Products;
 using EShop.Shared.Domain;
+using EShop.Shared.Observability.Correlation;
 using EShop.Shared.Representations.Product;
 using EShop.Shared.Services;
 using EShop.Shared.Services.Eventing;
@@ -21,13 +22,15 @@ public class ProductService(
     CatalogDbContext context, 
     IMapper mapper,
     IImageStorageService imageStorageService,
-    IEventPublisher eventPublisher) 
+    IEventPublisher eventPublisher,
+     ICorrelationIdAccessor correlationIdAccessor) 
     : IProductService
 {
     private readonly CatalogDbContext _context = context;
     private readonly IMapper _mapper = mapper;
     private readonly IImageStorageService _imageStorageService = imageStorageService;
     private readonly IEventPublisher _eventPublisher = eventPublisher;
+    private readonly ICorrelationIdAccessor _correlationIdAccessor = correlationIdAccessor;
 
     public async Task<Shared.Representations.PagedResult<ProductDto>> GetPagedAsync(
         int page, int pageSize, 
@@ -184,7 +187,6 @@ public class ProductService(
     public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)
     {
         var entity = await _context.Products.FirstOrDefaultAsync(b => b.Id == id, ct);
-
         if (entity is null)
             return false;
 
@@ -210,7 +212,7 @@ public class ProductService(
                 new EventEnvelope<DeleteImageRequest>(
                     Type: "image.deleted",
                     Data: new DeleteImageRequest(imageUrl),
-                    CorrelationId: Activity.Current?.TraceId.ToString(),
+                    CorrelationId: _correlationIdAccessor.CorrelationId,
                     Source: "eshop.api"), ct);
         }
     }

@@ -4,6 +4,11 @@ using EShop.Shared.Extensions;
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing =>
+    {
+        tracing.AddSource("EShop.ImagesQueueWorker");
+    });
 
 builder.AddAzureServiceBusClient("images-queue");
 

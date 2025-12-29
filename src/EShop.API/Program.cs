@@ -81,6 +81,8 @@ public partial class Program
             options.Policy = CorrelationIdPolicy.PreserveIncoming;
             options.HeaderName = "X-Correlation-ID";
         });
+        builder.Services.AddHttpContextAccessor();
+        builder.Services.AddScoped<ICorrelationIdAccessor, CorrelationIdAccessor>();
 
         var app = builder.Build();
 

@@ -2,7 +2,6 @@ using Azure.Messaging.ServiceBus;
 using EShop.Shared.Services;
 using EShop.Shared.Services.Eventing;
 using System.Text.Json;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace EShop.ImagesQueueWorker;
 
@@ -15,7 +14,8 @@ public class Worker(
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            await using var processor = serviceBusClient.CreateProcessor("images-queue", new ServiceBusProcessorOptions
+            await using var processor = serviceBusClient.CreateProcessor("images-queue", 
+                new ServiceBusProcessorOptions
             {
                 MaxConcurrentCalls = 1,
                 AutoCompleteMessages = false
