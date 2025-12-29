@@ -64,14 +64,29 @@ public static class Extensions
                 tracing.AddSource(builder.Environment.ApplicationName)
                     .AddAspNetCoreInstrumentation(tracing =>
                         // Exclude health check requests from tracing
-                        tracing.Filter = context =>
-                            !context.Request.Path.StartsWithSegments(HealthEndpointPath)
-                            && !context.Request.Path.StartsWithSegments(AlivenessEndpointPath)
-                    )
+                        tracing.Filter = context => {
+                             var path = context.Request.Path.Value ?? string.Empty;
+
+                    if (path.StartsWith(HealthEndpointPath, StringComparison.OrdinalIgnoreCase) ||
+                        path.StartsWith(AlivenessEndpointPath, StringComparison.OrdinalIgnoreCase))
+                        return false;
+
+                    if (path.StartsWith("/_framework", StringComparison.OrdinalIgnoreCase) ||
+                        path.StartsWith("/_content",  StringComparison.OrdinalIgnoreCase) ||
+                        path.StartsWith("/_blazor",   StringComparison.OrdinalIgnoreCase) ||
+                        path.StartsWith("/css",       StringComparison.OrdinalIgnoreCase) ||
+                        path.StartsWith("/js",        StringComparison.OrdinalIgnoreCase))
+                        return false;
+
+                    return true;
+                            })
                     // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
                     //.AddGrpcClientInstrumentation()
-                    .AddHttpClientInstrumentation();
+                    .AddHttpClientInstrumentation()
+                    .AddEntityFrameworkCoreInstrumentation();
             });
+
+        AppContext.SetSwitch("Azure.Experimental.EnableActivitySource", true);
 
         builder.AddOpenTelemetryExporters();
 
