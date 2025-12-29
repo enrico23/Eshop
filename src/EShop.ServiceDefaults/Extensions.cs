@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.ServiceDiscovery;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using System.Diagnostics;
 
 namespace Microsoft.Extensions.Hosting;
 
@@ -61,17 +61,35 @@ public static class Extensions
             })
             .WithTracing(tracing =>
             {
-                tracing.AddSource(builder.Environment.ApplicationName)
+                tracing
+                    .AddProcessor(new DropBlazorNoiseProcessor())
+                    .AddSource(builder.Environment.ApplicationName)
                     .AddAspNetCoreInstrumentation(tracing =>
                         // Exclude health check requests from tracing
-                        tracing.Filter = context =>
-                            !context.Request.Path.StartsWithSegments(HealthEndpointPath)
-                            && !context.Request.Path.StartsWithSegments(AlivenessEndpointPath)
-                    )
+                        tracing.Filter = context => {
+                             var path = context.Request.Path.Value ?? string.Empty;
+
+                    if (path.StartsWith(HealthEndpointPath, StringComparison.OrdinalIgnoreCase) ||
+                        path.StartsWith(AlivenessEndpointPath, StringComparison.OrdinalIgnoreCase))
+                        return false;
+
+                    if (path.StartsWith("/_framework", StringComparison.OrdinalIgnoreCase) ||
+                        path.StartsWith("/_content", StringComparison.OrdinalIgnoreCase) ||
+                        path.StartsWith("/_blazor", StringComparison.OrdinalIgnoreCase) ||
+                        path.StartsWith("/css", StringComparison.OrdinalIgnoreCase) ||
+                        path.StartsWith("/favicon", StringComparison.OrdinalIgnoreCase) ||
+                        path.StartsWith("/js", StringComparison.OrdinalIgnoreCase))
+                        return false;
+
+                        return true;
+                    })
                     // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
                     //.AddGrpcClientInstrumentation()
-                    .AddHttpClientInstrumentation();
+                    .AddHttpClientInstrumentation()
+                    .AddEntityFrameworkCoreInstrumentation();
             });
+
+        AppContext.SetSwitch("Azure.Experimental.EnableActivitySource", true);
 
         builder.AddOpenTelemetryExporters();
 
@@ -123,5 +141,20 @@ public static class Extensions
         }
 
         return app;
+    }
+}
+
+internal sealed class DropBlazorNoiseProcessor : BaseProcessor<Activity>
+{
+    public override void OnStart(Activity activity)
+    {
+        var src = activity.Source.Name;
+
+        if (src.StartsWith("Microsoft.AspNetCore.Components", StringComparison.Ordinal) ||
+            activity.DisplayName.StartsWith("Microsoft.AspNetCore.Components.Server.ComponentHub/", StringComparison.Ordinal))
+        {
+            activity.IsAllDataRequested = false; // hint to stop collecting
+            activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded; // ensure not recorded
+        }
     }
 }
