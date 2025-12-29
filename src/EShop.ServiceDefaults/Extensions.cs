@@ -7,6 +7,7 @@ using Microsoft.Extensions.ServiceDiscovery;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using System.Diagnostics;
 using System.Xml.Linq;
 
 namespace Microsoft.Extensions.Hosting;
@@ -62,7 +63,9 @@ public static class Extensions
             })
             .WithTracing(tracing =>
             {
-                tracing.AddSource(builder.Environment.ApplicationName)
+                tracing
+                    .AddProcessor(new DropBlazorNoiseProcessor())
+                    .AddSource(builder.Environment.ApplicationName)
                     .AddAspNetCoreInstrumentation(tracing =>
                         // Exclude health check requests from tracing
                         tracing.Filter = context => {
@@ -72,12 +75,13 @@ public static class Extensions
                         path.StartsWith(AlivenessEndpointPath, StringComparison.OrdinalIgnoreCase))
                         return false;
 
-                            if (path.StartsWith("/_framework", StringComparison.OrdinalIgnoreCase) ||
-                                path.StartsWith("/_content", StringComparison.OrdinalIgnoreCase) ||
-                                path.StartsWith("/_blazor", StringComparison.OrdinalIgnoreCase) ||
-                                path.StartsWith("/css", StringComparison.OrdinalIgnoreCase) ||
-                                path.StartsWith("/js", StringComparison.OrdinalIgnoreCase))
-                                return false;
+                    if (path.StartsWith("/_framework", StringComparison.OrdinalIgnoreCase) ||
+                        path.StartsWith("/_content", StringComparison.OrdinalIgnoreCase) ||
+                        path.StartsWith("/_blazor", StringComparison.OrdinalIgnoreCase) ||
+                        path.StartsWith("/css", StringComparison.OrdinalIgnoreCase) ||
+                        path.StartsWith("/favicon", StringComparison.OrdinalIgnoreCase) ||
+                        path.StartsWith("/js", StringComparison.OrdinalIgnoreCase))
+                        return false;
 
                         return true;
                     })
@@ -139,5 +143,21 @@ public static class Extensions
         }
 
         return app;
+    }
+}
+
+sealed class DropBlazorNoiseProcessor : BaseProcessor<Activity>
+{
+    public override void OnStart(Activity activity)
+    {
+        // Drop at start so it never gets exported
+        var src = activity.Source.Name;
+
+        if (src.StartsWith("Microsoft.AspNetCore.Components", StringComparison.Ordinal) ||
+            activity.DisplayName.StartsWith("Microsoft.AspNetCore.Components.Server.ComponentHub/", StringComparison.Ordinal))
+        {
+            activity.IsAllDataRequested = false; // hint to stop collecting
+            activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded; // ensure not recorded
+        }
     }
 }
