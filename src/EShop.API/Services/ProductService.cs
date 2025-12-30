@@ -9,7 +9,6 @@ using EShop.Shared.Observability.Correlation;
 using EShop.Shared.Representations.Product;
 using EShop.Shared.Services;
 using EShop.Shared.Services.Eventing;
-using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
