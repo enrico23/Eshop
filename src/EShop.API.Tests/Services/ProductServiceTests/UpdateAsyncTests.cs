@@ -24,7 +24,7 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
     }
 
     [Fact]
-    public async Task UpdateAsync_ThrowsDomainException_WhenSkuInUse_AndSkuChanged()
+    public async Task UpdateAsync_WhenSkuInUse_AndSkuChanged_ThrowsDomainException()
     {
         var id = Guid.NewGuid();
         var ct = CancellationToken.None;
@@ -44,7 +44,7 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
     }
 
     [Fact]
-    public async Task UpdateAsync_ThrowsDomainException_WhenCategoryIdMissing()
+    public async Task UpdateAsync_WhenCategoryIdMissing_ThrowsDomainException()
     {
         var id = Guid.NewGuid();
         var ct = CancellationToken.None;

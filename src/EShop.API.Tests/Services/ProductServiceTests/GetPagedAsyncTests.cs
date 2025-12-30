@@ -5,7 +5,7 @@ namespace EShop.API.Tests.Services.ProductServiceTests;
 public sealed class GetPagedAsyncTests : ProductServiceTestBase
 {
     [Fact]
-    public async Task GetPagedAsync_ClampsPageAndPageSize_AndCallsRepoWithClampedValues()
+    public async Task GetPagedAsync_Success()
     {
         // Arrange
         var ct = CancellationToken.None;

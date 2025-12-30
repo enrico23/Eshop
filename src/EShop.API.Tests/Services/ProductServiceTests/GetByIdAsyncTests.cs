@@ -21,7 +21,7 @@ public sealed class GetByIdAsyncTests : ProductServiceTestBase
     }
 
     [Fact]
-    public async Task GetByIdAsync_MapsAndReturnsDto_WhenFound()
+    public async Task GetByIdAsync_Success()
     {
         var id = Guid.NewGuid();
         var ct = CancellationToken.None;

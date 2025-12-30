@@ -15,7 +15,7 @@ public sealed class AddAsyncTests : ProductServiceTestBase
     }
 
     [Fact]
-    public async Task AddAsync_ThrowsDomainException_WhenNameAlreadyExists()
+    public async Task AddAsync_WhenNameAlreadyExists_ThrowsDomainException()
     {
         var ct = CancellationToken.None;
 
@@ -41,7 +41,7 @@ public sealed class AddAsyncTests : ProductServiceTestBase
     }
 
     [Fact]
-    public async Task AddAsync_UploadsImage_WhenFileProvided_AndSaves()
+    public async Task AddAsync_Success()
     {
         var ct = CancellationToken.None;
 
