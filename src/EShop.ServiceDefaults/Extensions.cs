@@ -69,19 +69,20 @@ public static class Extensions
                         tracing.Filter = context => {
                              var path = context.Request.Path.Value ?? string.Empty;
 
-                    if (path.StartsWith(HealthEndpointPath, StringComparison.OrdinalIgnoreCase) ||
-                        path.StartsWith(AlivenessEndpointPath, StringComparison.OrdinalIgnoreCase))
-                        return false;
+                        if (path.StartsWith(HealthEndpointPath, StringComparison.OrdinalIgnoreCase) ||
+                            path.StartsWith(AlivenessEndpointPath, StringComparison.OrdinalIgnoreCase))
+                            return false;
 
-                    if (path.StartsWith("/_framework", StringComparison.OrdinalIgnoreCase) ||
-                        path.StartsWith("/_content", StringComparison.OrdinalIgnoreCase) ||
-                        path.StartsWith("/_blazor", StringComparison.OrdinalIgnoreCase) ||
-                        path.StartsWith("/css", StringComparison.OrdinalIgnoreCase) ||
-                        path.StartsWith("/favicon", StringComparison.OrdinalIgnoreCase) ||
-                        path.StartsWith("/js", StringComparison.OrdinalIgnoreCase))
-                        return false;
+                        // remove blazor known type
+                        if (path.StartsWith("/_framework", StringComparison.OrdinalIgnoreCase) ||
+                            path.StartsWith("/_content", StringComparison.OrdinalIgnoreCase) ||
+                            path.StartsWith("/_blazor", StringComparison.OrdinalIgnoreCase) ||
+                            path.StartsWith("/css", StringComparison.OrdinalIgnoreCase) ||
+                            path.StartsWith("/favicon", StringComparison.OrdinalIgnoreCase) ||
+                            path.StartsWith("/js", StringComparison.OrdinalIgnoreCase))
+                            return false;
 
-                        return true;
+                            return true;
                     })
                     // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
                     //.AddGrpcClientInstrumentation()
@@ -144,6 +145,9 @@ public static class Extensions
     }
 }
 
+/// <summary>
+/// Reduce noise from Blazor server
+/// </summary>
 internal sealed class DropBlazorNoiseProcessor : BaseProcessor<Activity>
 {
     public override void OnStart(Activity activity)

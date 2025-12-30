@@ -2,6 +2,7 @@ using Azure.Storage.Blobs;
 using EShop.API.Exceptions;
 using EShop.API.Services;
 using EShop.Data;
+using EShop.Data.Repositories;
 using EShop.Shared.Observability.Correlation;
 using EShop.Shared.Services;
 using EShop.Shared.Services.Eventing;
@@ -70,6 +71,7 @@ public partial class Program
         TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
 
         builder.Services.AddScoped<ICategoryService, CategoryService>();
+        builder.Services.AddScoped<IProductRepository, ProductRepository>();
         builder.Services.AddScoped<IProductService, ProductService>();
 
         builder.Services.AddOpenApi();

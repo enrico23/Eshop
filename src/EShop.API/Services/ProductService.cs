@@ -1,5 +1,6 @@
 ﻿using EShop.API.Models;
 using EShop.Data;
+using EShop.Data.Repositories;
 using EShop.Domain;
 using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;
@@ -13,13 +14,13 @@ using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq.Dynamic.Core;
- 
+
 namespace EShop.API.Services;
 
 public class ProductService(
-    CatalogDbContext context, 
+    CatalogDbContext context,
+    IProductRepository productRepository,
     IMapper mapper,
     IImageStorageService imageStorageService,
     IEventPublisher eventPublisher,
@@ -27,6 +28,7 @@ public class ProductService(
     : IProductService
 {
     private readonly CatalogDbContext _context = context;
+    private readonly IProductRepository _productRepository = productRepository;
     private readonly IMapper _mapper = mapper;
     private readonly IImageStorageService _imageStorageService = imageStorageService;
     private readonly IEventPublisher _eventPublisher = eventPublisher;
@@ -40,27 +42,9 @@ public class ProductService(
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 200);
 
-        IQueryable<Product> query = _context.Products.AsNoTracking();
-
-        if(!string.IsNullOrEmpty(filter))
-            query = query.Where("Name.ToLower().Contains(@0)", filter.ToLower());
-        
-
-        if (!string.IsNullOrEmpty(orderBy))
-        {
-            var ordering = $"{orderBy} {orderDirection}";
-            query = query.OrderBy(ordering);
-        }
-
-        var total = await query.CountAsync(ct);
-
-        var items = await query
-            .ProjectToType<ProductDto>()
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(ct);
-
-        return new Shared.Representations.PagedResult<ProductDto>(items, page, pageSize, total);
+        var pagedResult = await _productRepository.GetPagedAsync(page, pageSize, orderBy, orderDirection, filter, ct);
+        var items = pagedResult.Items.Adapt<List<ProductDto>>();
+        return new Shared.Representations.PagedResult<ProductDto>(items, page, pageSize, pagedResult.Total);
     }
 
     public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default)
