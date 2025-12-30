@@ -1,8 +1,4 @@
-﻿using EShop.API.Models;
-using EShop.Domain.Exceptions;
-using EShop.Shared.Representations.Product;
-
-namespace EShop.API.Tests.Services.ProductServiceTests;
+﻿namespace EShop.API.Tests.Services.ProductServiceTests;
 
 public sealed class AddAsyncTests : ProductServiceTestBase
 {
