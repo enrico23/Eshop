@@ -1,5 +1,5 @@
 ﻿using EShop.API.Models;
-using EShop.Data;
+using EShop.Data.Repositories;
 using EShop.Domain;
 using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;
@@ -13,20 +13,18 @@ using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Linq.Dynamic.Core;
- 
+
 namespace EShop.API.Services;
 
 public class ProductService(
-    CatalogDbContext context, 
+    IProductRepository productRepository,
     IMapper mapper,
     IImageStorageService imageStorageService,
     IEventPublisher eventPublisher,
      ICorrelationIdAccessor correlationIdAccessor) 
     : IProductService
 {
-    private readonly CatalogDbContext _context = context;
+    private readonly IProductRepository _productRepository = productRepository;
     private readonly IMapper _mapper = mapper;
     private readonly IImageStorageService _imageStorageService = imageStorageService;
     private readonly IEventPublisher _eventPublisher = eventPublisher;
@@ -40,43 +38,18 @@ public class ProductService(
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 200);
 
-        IQueryable<Product> query = _context.Products.AsNoTracking();
-
-        if(!string.IsNullOrEmpty(filter))
-            query = query.Where("Name.ToLower().Contains(@0)", filter.ToLower());
-        
-
-        if (!string.IsNullOrEmpty(orderBy))
-        {
-            var ordering = $"{orderBy} {orderDirection}";
-            query = query.OrderBy(ordering);
-        }
-
-        var total = await query.CountAsync(ct);
-
-        var items = await query
-            .ProjectToType<ProductDto>()
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(ct);
-
-        return new Shared.Representations.PagedResult<ProductDto>(items, page, pageSize, total);
+        var pagedResult = await _productRepository.GetPagedAsync(page, pageSize, orderBy, orderDirection, filter, ct);
+        var items = _mapper.Map<List<ProductDto>>(pagedResult.Items);
+        return new Shared.Representations.PagedResult<ProductDto>(items, page, pageSize, pagedResult.Total);
     }
 
-    public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default)
-    {
-        return await _context.Products
-            .AsNoTracking()
-            .AnyAsync(b => b.Id == id, ct);
-    }
+    public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default) =>
+        await _productRepository.ExistsAsync(id, ct);
 
     public async Task<ProductDto?> GetByIdAsync(Guid id, CancellationToken ct)
     {
-        return await _context.Products
-            .AsNoTracking()
-            .Where(b => b.Id == id)
-            .ProjectToType<ProductDto>()
-            .FirstOrDefaultAsync(ct);
+        var product = await _productRepository.GetByIdAsync(id, track: false, ct);
+        return product is null ? null : _mapper.Map<ProductDto>(product);
     }
 
     public async Task<ProductDto> AddAsync(ProductFormDto productFormDto, CancellationToken ct)
@@ -85,14 +58,13 @@ public class ProductService(
 
         var productName = Product.ValidateName(productFormDto.Name);
 
-        var alreadyExists = await _context.Products
-            .AnyAsync(b => b.Name.ToLower() == productName.ToLower(), ct);
-        if (alreadyExists)
+        if (await _productRepository.NameExistsAsync(productName, ct))
             throw new DomainException($"A product with name '{productName}' already exists.");
 
         var productDescription = new ProductDescription(productFormDto.Description);
         var productPrice = new Money(productFormDto.Price);
         var productQuantity = new StockQuantity(productFormDto.Stock);
+
         var sku = new Sku(productFormDto.Sku);
 
         var product = Product.Create(
@@ -109,18 +81,17 @@ public class ProductService(
             product.AddImage(newUrl);
         }
 
-        await _context.Products.AddAsync(product, ct);
+        await _productRepository.AddAsync(product, ct);
+        await _productRepository.SaveChangesAsync(ct);
 
-        await _context.SaveChangesAsync(ct);
-
-        return product.Adapt<ProductDto>();
+        return _mapper.Map<ProductDto>(product);
     }
 
     public async Task<bool> UpdateAsync(Guid id, ProductFormDto productFormDto, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(productFormDto, nameof(productFormDto));
 
-        var product = await _context.Products.FirstOrDefaultAsync(b => b.Id == id, ct);
+        var product = await _productRepository.GetByIdAsync(id, track: true, ct);
         if (product is null)
             return false;
 
@@ -146,16 +117,10 @@ public class ProductService(
         }
 
         var newSku = new Sku(productFormDto.Sku);
-        if (!product.Sku.Equals(newSku))
-        {
-            var skuInUse = await _context.Products
-                .AnyAsync(p => p.Sku == newSku && p.Id != product.Id, ct);
-
-            if (skuInUse)
-                throw new DomainException($"A product with SKU '{newSku}' already exists.");
-
-            product.ChangeSku(newSku);
-        }
+        if (!product.Sku.Equals(newSku) 
+            && await _productRepository.SkuInUseAsync(newSku, product.Id, ct))
+                throw new DomainException($"A product with SKU: '{newSku}' already exists.");
+        product.ChangeSku(newSku);
 
         if (!productFormDto.CategoryId.HasValue)
             throw new DomainException("Category is required.");
@@ -165,28 +130,26 @@ public class ProductService(
         if (productFormDto.File is not null)
         {
             foreach (var image in product.Images)
-            {
                 await SendDeleteCommandAsync(image.Url, ct);
-            }
 
             var newUrl = await _imageStorageService.UploadImageAsync(productFormDto.File, ct);
             product.AddImage(newUrl);
 
             var newImages = new List<ProductImageSpec> {
-                new ProductImageSpec(newUrl, productFormDto.Name, true)
+                new ProductImageSpec(Url: newUrl, AltText: productFormDto.Name, IsPrimary: true)
             }.ToImmutableList();
 
             product.ReplaceImages(newImages!);
         }
 
-        await _context.SaveChangesAsync(ct);
+        await _productRepository.SaveChangesAsync(ct);
 
         return true;
     }
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)
     {
-        var entity = await _context.Products.FirstOrDefaultAsync(b => b.Id == id, ct);
+        var entity = await _productRepository.GetByIdAsync(id, track: true, ct);
         if (entity is null)
             return false;
 
@@ -198,8 +161,8 @@ public class ProductService(
             }
         }
 
-        _context.Products.Remove(entity);
-        await _context.SaveChangesAsync(ct);
+       _productRepository.Remove(entity);
+        await _productRepository.SaveChangesAsync(ct);
 
         return true;
     }
