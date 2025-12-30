@@ -1,5 +1,4 @@
 ﻿using EShop.API.Models;
-using EShop.Data;
 using EShop.Data.Repositories;
 using EShop.Domain;
 using EShop.Domain.Catalog;
@@ -18,7 +17,6 @@ using System.Collections.Immutable;
 namespace EShop.API.Services;
 
 public class ProductService(
-    CatalogDbContext context,
     IProductRepository productRepository,
     IMapper mapper,
     IImageStorageService imageStorageService,
@@ -26,7 +24,6 @@ public class ProductService(
      ICorrelationIdAccessor correlationIdAccessor) 
     : IProductService
 {
-    private readonly CatalogDbContext _context = context;
     private readonly IProductRepository _productRepository = productRepository;
     private readonly IMapper _mapper = mapper;
     private readonly IImageStorageService _imageStorageService = imageStorageService;
@@ -42,7 +39,7 @@ public class ProductService(
         pageSize = Math.Clamp(pageSize, 1, 200);
 
         var pagedResult = await _productRepository.GetPagedAsync(page, pageSize, orderBy, orderDirection, filter, ct);
-        var items = pagedResult.Items.Adapt<List<ProductDto>>();
+        var items = _mapper.Map<List<ProductDto>>(pagedResult.Items);
         return new Shared.Representations.PagedResult<ProductDto>(items, page, pageSize, pagedResult.Total);
     }
 
@@ -87,7 +84,7 @@ public class ProductService(
         await _productRepository.AddAsync(product, ct);
         await _productRepository.SaveChangesAsync(ct);
 
-        return product.Adapt<ProductDto>();
+        return _mapper.Map<ProductDto>(product);
     }
 
     public async Task<bool> UpdateAsync(Guid id, ProductFormDto productFormDto, CancellationToken ct)
