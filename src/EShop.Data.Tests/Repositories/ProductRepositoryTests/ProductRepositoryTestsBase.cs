@@ -1,43 +1,125 @@
-﻿namespace EShop.Data.Tests.Repositories.ProductRepositoryTests;
+﻿
+namespace EShop.Data.Tests.Repositories.ProductRepositoryTests;
 
 public abstract class ProductRepositoryTestsBase
 {
-    protected static IFixture CreateFixture()
+    protected ValueTask TestAsync(
+        int seedCount,
+        Func<TestScope, ValueTask> testBody) =>
+        TestScope.CreateAsync(
+            seedFactory: f => f.CreateMany<Product>(seedCount),
+            testBody: testBody);
+
+    protected ValueTask TestAsync(
+        IEnumerable<Product> seed,
+        Func<TestScope, ValueTask> testBody) =>
+        TestScope.CreateAsync(
+            seedFactory: _ => seed,
+            testBody: testBody);
+
+    protected ValueTask Test(
+        int seedCount,
+        Action<TestScope> testBody) =>
+        TestAsync(seedCount, scope =>
+        {
+            testBody(scope);
+            return ValueTask.CompletedTask;
+        });
+
+    protected ValueTask Test(
+        IEnumerable<Product> seed,
+        Action<TestScope> testBody) =>
+        TestAsync(seed, scope =>
+        {
+            testBody(scope);
+            return ValueTask.CompletedTask;
+        });
+
+    
+    protected sealed class TestScope : IAsyncDisposable
     {
-        var fixture = new Fixture();
+        private readonly CatalogDbContext _context;
 
-        fixture.Register(() =>
-            Product.Create(
-                name: $"Product {fixture.Create<int>()}",
-                description: new Domain.Products.ProductDescription(
-                    fixture.Create<string>()),
-                price: new Domain.Money(
-                    amount: fixture.Create<decimal>() % 1000 + 1),
-                stock: new StockQuantity(
-                    fixture.Create<int>() % 100 + 1),
-                sku: new Sku(
-                    $"SKU-{fixture.Create<Guid>()}"),
-                categoryId: fixture.Create<Guid>()
-            )
-        );
+        private TestScope(
+            CatalogDbContext context,
+            IFixture fixture,
+            List<Product> products)
+        {
+            _context = context;
+            Fixture = fixture;
+            Products = products;
+            Sut = new ProductRepository(context);
+        }
 
-        return fixture;
-    }
+      
+        public ProductRepository Sut { get; }
 
-    protected static CatalogDbContext CreateContext(string dbName)
-    {
-        var options = new DbContextOptionsBuilder<CatalogDbContext>()
-            .UseInMemoryDatabase(databaseName: dbName)
-            .EnableSensitiveDataLogging()
-            .Options;
+        public IFixture Fixture { get; }
 
-        return new CatalogDbContext(options);
-    }
+        public IReadOnlyList<Product> Products { get; }
 
-    protected static async Task SeedAsync(CatalogDbContext context, IEnumerable<Product> products)
-    {
-        context.Products.AddRange(products);
-        await context.SaveChangesAsync();
-        context.ChangeTracker.Clear();
+        
+        public static async ValueTask CreateAsync(
+            Func<IFixture, IEnumerable<Product>> seedFactory,
+            Func<TestScope, ValueTask> testBody)
+        {
+            var fixture = CreateFixture();
+
+            await using var context = CreateContext();
+
+            var products = seedFactory(fixture)?.ToList() ?? new List<Product>();
+
+            if (products.Count > 0)
+                await SeedAsync(context, products).ConfigureAwait(false);
+
+            await using var scope = new TestScope(context, fixture, products);
+            await testBody(scope).ConfigureAwait(false);
+        }
+
+        public ValueTask DisposeAsync() =>
+            _context.DisposeAsync();
+
+        private static IFixture CreateFixture()
+        {
+            var fixture = new Fixture();
+
+            fixture.Register(() =>
+                Product.Create(
+                    name: $"Product {fixture.Create<int>()}",
+                    description: new Domain.Products.ProductDescription(
+                        fixture.Create<string>()),
+                    price: new Domain.Money(
+                        amount: (fixture.Create<decimal>() % 1000m) + 1m),
+                    stock: new StockQuantity(
+                        (fixture.Create<int>() % 100) + 1),
+                    sku: new Sku(
+                        $"SKU-{fixture.Create<Guid>()}"),
+                    categoryId: fixture.Create<Guid>()
+                )
+            );
+
+            return fixture;
+        }
+
+        private static CatalogDbContext CreateContext()
+        {
+            var dbName = $"CatalogTests_{Guid.NewGuid():N}";
+
+            var options = new DbContextOptionsBuilder<CatalogDbContext>()
+                .UseInMemoryDatabase(dbName)
+                .EnableSensitiveDataLogging()
+                .Options;
+
+            return new CatalogDbContext(options);
+        }
+
+        private static async Task SeedAsync(
+            CatalogDbContext context,
+            IEnumerable<Product> products)
+        {
+            context.Products.AddRange(products);
+            await context.SaveChangesAsync().ConfigureAwait(false);
+            context.ChangeTracker.Clear();
+        }
     }
 }

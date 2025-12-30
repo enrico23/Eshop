@@ -39,12 +39,42 @@ public interface IProductRepository
     /// <returns></returns>
     Task<Product?> GetByIdAsync(Guid id, bool track = false, CancellationToken ct = default);
 
+    /// <summary>
+    /// Product Name Already Exists
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
     Task<bool> NameExistsAsync(string name, CancellationToken ct);
 
+    /// <summary>
+    /// Product Sku is already in use
+    /// </summary>
+    /// <param name="sku"></param>
+    /// <param name="excludeId"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
     Task<bool> SkuInUseAsync(Sku sku, Guid? excludeId, CancellationToken ct);
 
+    /// <summary>
+    /// Add Product to DbContext
+    /// </summary>
+    /// <param name="product"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
     Task AddAsync(Product product, CancellationToken ct);
+
+    /// <summary>
+    /// Remove Product from DbContext
+    /// </summary>
+    /// <param name="product"></param>
     void Remove(Product product);
+
+    /// <summary>
+    /// Save DbContext
+    /// </summary>
+    /// <param name="ct"></param>
+    /// <returns></returns>
     Task SaveChangesAsync(CancellationToken ct);
 }
 
