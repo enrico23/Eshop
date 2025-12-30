@@ -1,7 +1,4 @@
-﻿using EShop.Domain.Catalog;
-using EShop.Domain.Exceptions;
-using EShop.Shared.Domain;
-using EShop.Shared.Services.Eventing;
+﻿using EShop.Shared.Services.Eventing;
 
 namespace EShop.API.Tests.Services.ProductServiceTests;
 
@@ -24,7 +21,7 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
     }
 
     [Fact]
-    public async Task UpdateAsync_WhenSkuInUse_AndSkuChanged_ThrowsDomainException()
+    public async Task UpdateAsync_WhenSkuInUse_AndSkuChanged_ThenThrowsDomainException()
     {
         var id = Guid.NewGuid();
         var ct = CancellationToken.None;
@@ -44,7 +41,7 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
     }
 
     [Fact]
-    public async Task UpdateAsync_WhenCategoryIdMissing_ThrowsDomainException()
+    public async Task UpdateAsync_WhenCategoryIdMissing_ThenThrowsDomainException()
     {
         var id = Guid.NewGuid();
         var ct = CancellationToken.None;
@@ -62,7 +59,7 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
     }
 
     [Fact]
-    public async Task UpdateAsync_WhenFileProvided_PublishesDeleteEventsForExistingImages_UploadsNewImage_ReplacesImages_AndSaves()
+    public async Task UpdateAsync_Success()
     {
         var id = Guid.NewGuid();
         var ct = CancellationToken.None;

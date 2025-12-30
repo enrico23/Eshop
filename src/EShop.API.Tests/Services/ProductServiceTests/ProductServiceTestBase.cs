@@ -1,17 +1,6 @@
-﻿using EShop.API.Models;
-using EShop.API.Services;
-using EShop.API.Tests.Services.ProductServiceTests;
-using EShop.Data.Repositories;
-using EShop.Domain;
-using EShop.Domain.Catalog;
-using EShop.Domain.Products;
-using EShop.Shared.Domain;
-using EShop.Shared.Observability.Correlation;
-using EShop.Shared.Services;
-using EShop.Shared.Services.Eventing;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 
-namespace EShop.API.Tests.Services;
+namespace EShop.API.Tests.Services.ProductServiceTests;
 
 public abstract class ProductServiceTestBase
 {
