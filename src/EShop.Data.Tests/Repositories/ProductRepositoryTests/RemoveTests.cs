@@ -20,5 +20,5 @@ public sealed class RemoveTests : ProductRepositoryTestsBase
            // Assert
            var after = await t.Sut.GetByIdAsync(product.Id, false, CancellationToken.None);
            Assert.Null(after);
-       }).AsTask();
+       });
 }

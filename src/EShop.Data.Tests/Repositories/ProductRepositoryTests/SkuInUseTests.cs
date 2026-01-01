@@ -13,7 +13,7 @@ public sealed class SkuInUseTests : ProductRepositoryTestsBase
             var inUse = await t.Sut.SkuInUseAsync(sku, excludeId: null, CancellationToken.None);
 
             Assert.True(inUse);
-        }).AsTask();
+        });
 
     [Fact]
     public Task SkuInUseAsync_WhenSkuDoesNotExist_ReturnsFalse() =>
@@ -27,7 +27,7 @@ public sealed class SkuInUseTests : ProductRepositoryTestsBase
             var inUse = await t.Sut.SkuInUseAsync(missingSku, excludeId: null, CancellationToken.None);
 
             Assert.False(inUse);
-        }).AsTask();
+        });
 
     [Fact]
     public Task SkuInUseAsync_WhenSkuExistsButExcludedById_ReturnsFalse() =>
@@ -38,7 +38,7 @@ public sealed class SkuInUseTests : ProductRepositoryTestsBase
         var inUse = await t.Sut.SkuInUseAsync(product.Sku, excludeId: product.Id, CancellationToken.None);
 
         Assert.False(inUse);
-    }).AsTask();
+    });
 
     [Fact]
     public Task SkuInUseAsync_WhenSkuExistsOnAnotherProduct_NotExcluded_ReturnsTrue()
@@ -66,7 +66,7 @@ public sealed class SkuInUseTests : ProductRepositoryTestsBase
             var inUse = await t.Sut.SkuInUseAsync(sharedSku, excludeId: t.Products[0].Id, CancellationToken.None);
 
             Assert.True(inUse);
-        }).AsTask();
+        });
     }
 
     [Fact]
@@ -79,5 +79,5 @@ public sealed class SkuInUseTests : ProductRepositoryTestsBase
             var inUse = await t.Sut.SkuInUseAsync(sku, excludeId, CancellationToken.None);
 
             Assert.True(inUse);
-        }).AsTask();
+        });
 }
