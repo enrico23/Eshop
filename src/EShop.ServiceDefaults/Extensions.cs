@@ -64,6 +64,7 @@ public static class Extensions
                 tracing
                     .AddProcessor(new DropBlazorNoiseProcessor())
                     .AddSource(builder.Environment.ApplicationName)
+                    .AddSource("EShop.ImagesQueueWorker")
                     .AddAspNetCoreInstrumentation(tracing =>
                         // Exclude health check requests from tracing
                         tracing.Filter = context => {
