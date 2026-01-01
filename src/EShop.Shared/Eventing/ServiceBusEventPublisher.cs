@@ -7,17 +7,6 @@ using System.Text.Json;
 
 namespace EShop.Shared.Eventing;
 
-public interface IEventPublisher
-{
-    Task PublishAsync<T>(string destination, EventEnvelope<T> envelope, CancellationToken ct);
-}
-
-public sealed class ServiceBusPublisherOptions
-{
-    public TimeSpan TimeToLive { get; set; } = TimeSpan.FromDays(1);
-    public int MaxCachedSenders { get; init; } = 64;
-}
-
 public sealed class ServiceBusEventPublisher(
     ServiceBusClient client,
     IOptions<ServiceBusPublisherOptions> options,
