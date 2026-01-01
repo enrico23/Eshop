@@ -8,7 +8,7 @@ global using EShop.Domain.Products;
 global using EShop.Domain.Exceptions;
 global using EShop.Shared.Domain;
 global using EShop.Domain.Catalog;
-global using EShop.Shared.Services.Eventing;
+global using EShop.Shared.Eventing;
 global using EShop.Data.Repositories;
 global using EShop.Shared.Observability.Correlation;
 global using EShop.Shared.Services;

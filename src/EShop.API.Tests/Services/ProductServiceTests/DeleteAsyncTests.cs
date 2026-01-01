@@ -1,4 +1,6 @@
-﻿namespace EShop.API.Tests.Services.ProductServiceTests;
+﻿using EShop.Shared.Eventing;
+
+namespace EShop.API.Tests.Services.ProductServiceTests;
 
 public sealed class DeleteAsyncTests : ProductServiceTestBase
 {

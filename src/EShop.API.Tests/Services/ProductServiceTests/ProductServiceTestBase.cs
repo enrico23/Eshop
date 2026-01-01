@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using EShop.Shared.Eventing;
+using System.Collections.Immutable;
 
 namespace EShop.API.Tests.Services.ProductServiceTests;
 

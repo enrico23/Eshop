@@ -1,4 +1,4 @@
-﻿namespace EShop.Shared.Services.Eventing;
+﻿namespace EShop.Shared.Eventing;
 
 public sealed record EventEnvelope<T>(
     string Type,

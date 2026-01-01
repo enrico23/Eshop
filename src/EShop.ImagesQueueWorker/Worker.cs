@@ -1,6 +1,6 @@
 using Azure.Messaging.ServiceBus;
+using EShop.Shared.Eventing;
 using EShop.Shared.Services;
-using EShop.Shared.Services.Eventing;
 using System.Text.Json;
 
 namespace EShop.ImagesQueueWorker;
