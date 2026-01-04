@@ -18,6 +18,7 @@ builder.Services
         o.MaxConcurrentCalls = 2;
         o.AutoComplete = false;
         o.EntityName = "images-delete";
+        o.QueueName = "images-queue";
     })
     .ValidateOnStart();
 builder.AddAzureServiceBusClient("images-queue");

@@ -50,10 +50,11 @@ public class EventConsumeWorker(
     private static void InvalidPayload() { }
     private static void JsonParseFailure() { }
     private static void UnknownType() { }
+    
 
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
-        _processor = _serviceBusClient.CreateProcessor("images-queue", new ServiceBusProcessorOptions
+        _processor = _serviceBusClient.CreateProcessor(_serviceBusConsumerOptions.QueueName, new ServiceBusProcessorOptions
         {
             MaxConcurrentCalls = _serviceBusConsumerOptions.MaxConcurrentCalls,
             AutoCompleteMessages = _serviceBusConsumerOptions.AutoComplete,
@@ -97,7 +98,7 @@ public class EventConsumeWorker(
     private async Task MessageHandler(ProcessMessageEventArgs args)
     {
         using var activity = ImagesQueueWorkerActivitySource.ActivitySource
-            .StartActivity("ServiceBus Process Message", ActivityKind.Consumer);
+            .StartActivity("servicebus.process", ActivityKind.Consumer);
 
         activity?.SetTag("messaging.system", "azure.servicebus");
         activity?.SetTag("messaging.destination", args.EntityPath);
@@ -164,18 +165,22 @@ public class EventConsumeWorker(
             activity?.SetTag("app.outcome", "error");
 
             _logger.LogError(ex, "Unhandled message processing error. MessageId={MessageId}", args.Message.MessageId);
+
             throw; // Let processor abandon/retry
         }
     }
 
+    private static void ProcessError() { }
+
+    private static readonly Action<ILogger, ServiceBusErrorSource, string, string, Exception?> _processErrorLog =
+        LoggerMessage.Define<ServiceBusErrorSource, string, string>(
+            LogLevel.Warning,
+            new EventId(1002, nameof(ProcessError)),
+           "ServiceBus processor error. ErrorSource={ErrorSource} EntityPath={EntityPath} Namespace={Namespace}");
+
     private Task ErrorHandler(ProcessErrorEventArgs args)
     {
-        _logger.LogError(
-            args.Exception,
-            "ServiceBus processor error. ErrorSource={ErrorSource} EntityPath={EntityPath} Namespace={Namespace}",
-            args.ErrorSource,
-            args.EntityPath,
-            args.FullyQualifiedNamespace);
+        _processErrorLog(_logger, args.ErrorSource, args.EntityPath, args.FullyQualifiedNamespace, args.Exception);
 
         return Task.CompletedTask;
     }
