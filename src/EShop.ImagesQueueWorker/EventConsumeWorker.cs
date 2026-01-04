@@ -22,7 +22,6 @@ public class EventConsumeWorker(
 
     private ServiceBusProcessor? _processor;
 
-   
     private static readonly Action<ILogger, string, Exception?> _invalidPayloadLog =
         LoggerMessage.Define<string>(
             LogLevel.Warning,
@@ -145,7 +144,7 @@ public class EventConsumeWorker(
         }
         catch (JsonException jex)
         {
-            activity?.AddException(ex);
+            activity?.AddException(jex);
             activity?.SetStatus(ActivityStatusCode.Error);
 
             _jsonParseFailureLog(_logger, args.Message.MessageId, jex.Message, null);
