@@ -50,7 +50,6 @@ public class EventConsumeWorker(
     private static void InvalidPayload() { }
     private static void JsonParseFailure() { }
     private static void UnknownType() { }
-    
 
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
