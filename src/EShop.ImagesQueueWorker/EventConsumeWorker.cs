@@ -101,9 +101,6 @@ public class EventConsumeWorker(
 
         activity?.SetTag("messaging.system", "azure.servicebus");
         activity?.SetTag("messaging.destination", args.EntityPath);
-        activity?.SetTag("messaging.message_id", args.Message.MessageId);
-        activity?.SetTag("messaging.correlation_id", args.Message.CorrelationId);
-        activity?.SetTag("messaging.delivery_count", args.Message.DeliveryCount);
 
         var cancellationToken = args.CancellationToken;
 
@@ -137,15 +134,20 @@ public class EventConsumeWorker(
                args.Message.DeliveryCount,
                null);
 
+            activity?.SetTag("event.type", envelope.Type);
+
             await _imageStorageService.DeleteImageAsync(envelope.Data.Url, cancellationToken);
 
             if (!_serviceBusConsumerOptions.AutoComplete)
                 await args.CompleteMessageAsync(args.Message, cancellationToken);
+
+            activity?.SetTag("app.outcome", "success");
         }
         catch (JsonException jex)
         {
             activity?.AddException(jex);
             activity?.SetStatus(ActivityStatusCode.Error);
+            activity?.SetTag("app.outcome", "error");
 
             _jsonParseFailureLog(_logger, args.Message.MessageId, jex.Message, null);
 
@@ -159,6 +161,7 @@ public class EventConsumeWorker(
         {
             activity?.AddException(ex);
             activity?.SetStatus(ActivityStatusCode.Error);
+            activity?.SetTag("app.outcome", "error");
 
             _logger.LogError(ex, "Unhandled message processing error. MessageId={MessageId}", args.Message.MessageId);
             throw; // Let processor abandon/retry
