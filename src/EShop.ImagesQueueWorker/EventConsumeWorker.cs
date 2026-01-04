@@ -1,6 +1,5 @@
 using Azure.Messaging.ServiceBus;
 using EShop.Shared.Eventing;
-using EShop.Shared.Services;
 using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.Text.Json;
@@ -11,14 +10,14 @@ public class EventConsumeWorker(
     ILogger<EventConsumeWorker> logger, 
     ServiceBusClient serviceBusClient,
     IOptions<ServiceBusConsumerOptions> serviceBusConsumerOptions,
-    IImageStorageService imageStorageService) 
+     EventHandlerRegistry registry) 
     : BackgroundService
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private readonly ILogger<EventConsumeWorker> _logger = logger;
     private readonly ServiceBusClient _serviceBusClient = serviceBusClient;
-    private readonly IImageStorageService _imageStorageService = imageStorageService;
     private readonly ServiceBusConsumerOptions _serviceBusConsumerOptions = serviceBusConsumerOptions.Value;
+    private readonly EventHandlerRegistry _registry = registry;
 
     private ServiceBusProcessor? _processor;
 
@@ -40,11 +39,11 @@ public class EventConsumeWorker(
             new EventId(1003, nameof(UnknownType)),
             "Unknown event type. MessageId={MessageId} Type={Type}. DeadLettering.");
 
-    private static readonly Action<ILogger, string?, string, string, int, Exception?> _messageReceivedLog =
-        LoggerMessage.Define<string?, string, string, int>(
+    private static readonly Action<ILogger, string?, string, int, Exception?> _messageReceivedLog =
+        LoggerMessage.Define<string?, string, int>(
             LogLevel.Information,
             new EventId(1000, nameof(MessageReceived)),
-            "Received message. MessageId={MessageId} Type={Type} Url={Url} DeliveryCount={DeliveryCount}");
+            "Received message. MessageId={MessageId} Type={Type} DeliveryCount={DeliveryCount}");
 
     private static void MessageReceived() { }
     private static void InvalidPayload() { }
@@ -103,40 +102,37 @@ public class EventConsumeWorker(
         activity?.SetTag("messaging.destination", args.EntityPath);
 
         var cancellationToken = args.CancellationToken;
+        var messageId = args.Message.MessageId ?? "(null)";
 
         try
         {
-            var envelope = args.Message.Body.ToObjectFromJson<EventEnvelope<DeleteImageRequest>>(JsonOptions);
+            var envelope = args.Message.Body.ToObjectFromJson<EventEnvelope>(JsonOptions);
 
-            if (envelope?.Data?.Url is null)
+            if (string.IsNullOrWhiteSpace(envelope?.Type))
             {
-                _invalidPayloadLog(_logger, args.Message.MessageId, null);
+                activity?.SetStatus(ActivityStatusCode.Error);
+                activity?.SetTag("app.outcome", "error");
 
-                await args.DeadLetterMessageAsync(args.Message, "InvalidPayload", "Missing Data.Url", cancellationToken);
-
+                _invalidPayloadLog(_logger, messageId, null);
+                await args.DeadLetterMessageAsync(args.Message, "InvalidPayload", "Missing Type", args.CancellationToken);
                 return;
             }
-
-            if (!string.Equals(envelope.Type, "image.deleted", StringComparison.Ordinal))
-            {
-                _unknownTypeLog(_logger, args.Message.MessageId, envelope.Type ?? "(null)", null);
-
-                await args.DeadLetterMessageAsync(args.Message, "UnknownType", envelope.Type ?? "(null)", cancellationToken);
-
-                return;
-            }
-
-            _messageReceivedLog(
-               _logger,
-               args.Message.MessageId,
-               envelope.Type!,
-               envelope.Data.Url!,
-               args.Message.DeliveryCount,
-               null);
 
             activity?.SetTag("event.type", envelope.Type);
 
-            await _imageStorageService.DeleteImageAsync(envelope.Data.Url, cancellationToken);
+            if (!_registry.TryGet(envelope.Type, out var handler))
+            {
+                activity?.SetStatus(ActivityStatusCode.Error);
+                activity?.SetTag("app.outcome", "error");
+
+                _unknownTypeLog(_logger, messageId, envelope.Type, null);
+                await args.DeadLetterMessageAsync(args.Message, "UnknownType", envelope.Type, args.CancellationToken);
+                return;
+            }
+
+            _messageReceivedLog(_logger, messageId, envelope.Type!, args.Message.DeliveryCount, null);
+
+            await handler.ExecuteAsync(envelope.Data, cancellationToken);
 
             if (!_serviceBusConsumerOptions.AutoComplete)
                 await args.CompleteMessageAsync(args.Message, cancellationToken);
@@ -150,7 +146,6 @@ public class EventConsumeWorker(
             activity?.SetTag("app.outcome", "error");
 
             _jsonParseFailureLog(_logger, args.Message.MessageId, jex.Message, null);
-
             await args.DeadLetterMessageAsync(args.Message, "InvalidJson", jex.Message, cancellationToken);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -174,7 +169,7 @@ public class EventConsumeWorker(
     private static readonly Action<ILogger, ServiceBusErrorSource, string, string, Exception?> _processErrorLog =
         LoggerMessage.Define<ServiceBusErrorSource, string, string>(
             LogLevel.Warning,
-            new EventId(1002, nameof(ProcessError)),
+            new EventId(1005, nameof(ProcessError)),
            "ServiceBus processor error. ErrorSource={ErrorSource} EntityPath={EntityPath} Namespace={Namespace}");
 
     private Task ErrorHandler(ProcessErrorEventArgs args)

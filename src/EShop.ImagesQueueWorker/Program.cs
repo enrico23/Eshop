@@ -23,6 +23,8 @@ builder.Services
     .ValidateOnStart();
 builder.AddAzureServiceBusClient("images-queue");
 
+
+// Blob Storage
 var blobConnectionString = builder.Configuration.GetConnectionString("Blobs") 
     ?? throw new InvalidOperationException("Connection string for the blob storage is missing");
 
@@ -33,6 +35,8 @@ builder.Services.AddAzureBlobStorage(
          builder.Configuration.GetSection("AzureBlobStorage").Bind(options);
      });
 
+builder.Services.AddSingleton<IEventHandler, ImageDeletedHandler>();
+builder.Services.AddSingleton<EventHandlerRegistry>();
 builder.Services.AddHostedService<EventConsumeWorker>();
 
 var host = builder.Build();
