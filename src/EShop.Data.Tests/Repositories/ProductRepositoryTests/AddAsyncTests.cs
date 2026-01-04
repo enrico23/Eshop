@@ -15,6 +15,6 @@ public sealed class AddAsyncTests : ProductRepositoryTestsBase
            var loaded = await t.Sut.GetByIdAsync(product.Id, false, CancellationToken.None);
            Assert.NotNull(loaded);
            Assert.Equal(product.Id, loaded!.Id);
-       }).AsTask();
+       });
 
 }

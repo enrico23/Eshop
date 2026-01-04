@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Services.Eventing;
+﻿using EShop.Shared.Eventing;
 
 namespace EShop.API.Tests.Services.ProductServiceTests;
 

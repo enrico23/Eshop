@@ -11,7 +11,7 @@ public sealed class GetByIdAsyncTests : ProductRepositoryTestsBase
             Assert.NotNull(product);
             Assert.Equal(expected.Id, product!.Id);
             Assert.Equal(expected.Name, product.Name);
-        }).AsTask();
+        });
 
     [Fact]
     public Task GetByIdAsync_WhenNotFound_ReturnsNull() =>
@@ -19,5 +19,5 @@ public sealed class GetByIdAsyncTests : ProductRepositoryTestsBase
         {
             var product = await t.Sut.GetByIdAsync(Guid.NewGuid(), false, CancellationToken.None);
             Assert.Null(product);
-        }).AsTask();
+        });
 }

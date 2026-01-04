@@ -8,7 +8,7 @@ public sealed class ExistsAsyncTests : ProductRepositoryTestsBase
         {
             var exists = await t.Sut.ExistsAsync(t.Products[0].Id, CancellationToken.None);
             Assert.True(exists);
-        }).AsTask();
+        });
 
     [Fact]
     public Task ExistsAsync_WhenProductDoesNotExist_ReturnsFalse() =>
@@ -16,5 +16,5 @@ public sealed class ExistsAsyncTests : ProductRepositoryTestsBase
         {
             var exists = await t.Sut.ExistsAsync(t.Products[0].Id, CancellationToken.None);
             Assert.True(exists);
-        }).AsTask();
+        });
 }

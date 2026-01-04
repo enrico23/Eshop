@@ -29,6 +29,6 @@ public sealed class NameExistsAsyncTests : ProductRepositoryTestsBase
                 var exists = await t.Sut.NameExistsAsync(queryName, CancellationToken.None);
 
                 Assert.Equal(expected, exists);
-            }).AsTask();
+            });
     }
 }

@@ -3,21 +3,21 @@ namespace EShop.Data.Tests.Repositories.ProductRepositoryTests;
 
 public abstract class ProductRepositoryTestsBase
 {
-    protected ValueTask TestAsync(
+    protected async Task TestAsync(
         int seedCount,
-        Func<TestScope, ValueTask> testBody) =>
+        Func<TestScope, ValueTask> testBody) => await
         TestScope.CreateAsync(
             seedFactory: f => f.CreateMany<Product>(seedCount),
             testBody: testBody);
 
-    protected ValueTask TestAsync(
+    protected async Task TestAsync(
         IEnumerable<Product> seed,
-        Func<TestScope, ValueTask> testBody) =>
+        Func<TestScope, ValueTask> testBody) => await
         TestScope.CreateAsync(
             seedFactory: _ => seed,
             testBody: testBody);
 
-    protected ValueTask Test(
+    protected Task Test(
         int seedCount,
         Action<TestScope> testBody) =>
         TestAsync(seedCount, scope =>
@@ -26,7 +26,7 @@ public abstract class ProductRepositoryTestsBase
             return ValueTask.CompletedTask;
         });
 
-    protected ValueTask Test(
+    protected Task Test(
         IEnumerable<Product> seed,
         Action<TestScope> testBody) =>
         TestAsync(seed, scope =>

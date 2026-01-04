@@ -22,7 +22,7 @@ public sealed class GetPagedAsyncTests : ProductRepositoryTestsBase
                 Assert.Equal(25, result.Total);
                 Assert.Equal(10, result.Items.Count);
                 Assert.All(result.Items, p => Assert.Contains(t.Products, x => x.Id == p.Id));
-            }).AsTask();
+            });
     }
 
     [Fact]
@@ -45,7 +45,7 @@ public sealed class GetPagedAsyncTests : ProductRepositoryTestsBase
                 Assert.Collection(result.Items,
                     item => Assert.Equal(expected.Name, item.Name));
 
-            }).AsTask();
+            });
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public sealed class GetPagedAsyncTests : ProductRepositoryTestsBase
                 Assert.Equal(3, result.Total);
                 var names = result.Items.Select(x => x.Name).ToList();
                 Assert.Equal(names.OrderByDescending(x => x).ToList(), names);
-            }).AsTask();
+            });
 
     [Theory]
     [InlineData(1, 5, 12, 5)]
@@ -91,6 +91,6 @@ public sealed class GetPagedAsyncTests : ProductRepositoryTestsBase
                 Assert.Equal(expectedCount, result.Items.Count);
                 Assert.All(result.Items, p => Assert.False(string.IsNullOrWhiteSpace(p.Name)));
 
-            }).AsTask();
+            });
     }
 }
