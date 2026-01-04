@@ -1,7 +1,5 @@
 using Azure.Messaging.ServiceBus;
 using EShop.Shared.Eventing;
-using EShop.Shared.Services;
-using Microsoft.Azure.Amqp.Framing;
 using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.Text.Json;
@@ -12,14 +10,14 @@ public class EventConsumeWorker(
     ILogger<EventConsumeWorker> logger, 
     ServiceBusClient serviceBusClient,
     IOptions<ServiceBusConsumerOptions> serviceBusConsumerOptions,
-    IEventHandler eventHandler) 
+     EventHandlerRegistry registry) 
     : BackgroundService
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private readonly ILogger<EventConsumeWorker> _logger = logger;
     private readonly ServiceBusClient _serviceBusClient = serviceBusClient;
     private readonly ServiceBusConsumerOptions _serviceBusConsumerOptions = serviceBusConsumerOptions.Value;
-    private readonly IEventHandler _eventHandler = eventHandler;
+    private readonly EventHandlerRegistry _registry = registry;
 
     private ServiceBusProcessor? _processor;
 
@@ -41,11 +39,11 @@ public class EventConsumeWorker(
             new EventId(1003, nameof(UnknownType)),
             "Unknown event type. MessageId={MessageId} Type={Type}. DeadLettering.");
 
-    private static readonly Action<ILogger, string?, string, string, int, Exception?> _messageReceivedLog =
-        LoggerMessage.Define<string?, string, string, int>(
+    private static readonly Action<ILogger, string?, string, int, Exception?> _messageReceivedLog =
+        LoggerMessage.Define<string?, string, int>(
             LogLevel.Information,
             new EventId(1000, nameof(MessageReceived)),
-            "Received message. MessageId={MessageId} Type={Type} Url={Url} DeliveryCount={DeliveryCount}");
+            "Received message. MessageId={MessageId} Type={Type} DeliveryCount={DeliveryCount}");
 
     private static void MessageReceived() { }
     private static void InvalidPayload() { }
@@ -126,15 +124,22 @@ public class EventConsumeWorker(
 
             activity?.SetTag("event.type", envelope.Type);
 
-            await _eventHandler.ExecuteAsync(envelope.Data, cancellationToken);
+            if (!_registry.TryGet(envelope.Type, out var handler))
+            {
+                _unknownTypeLog(_logger, messageId, envelope.Type, null);
+                await args.DeadLetterMessageAsync(args.Message, "UnknownType", envelope.Type, args.CancellationToken);
+                return;
+            }
 
-            //_messageReceivedLog(
-            //   _logger,
-            //   args.Message.MessageId,
-            //   envelope.Type!,
-            //   envelope.Data.Url!,
-            //   args.Message.DeliveryCount,
-            //   null);
+            await handler.ExecuteAsync(envelope.Data, cancellationToken);
+
+            _messageReceivedLog(
+               _logger,
+               args.Message.MessageId,
+               envelope.Type!,
+               
+               args.Message.DeliveryCount,
+               null);
 
             if (!_serviceBusConsumerOptions.AutoComplete)
                 await args.CompleteMessageAsync(args.Message, cancellationToken);

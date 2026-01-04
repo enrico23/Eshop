@@ -36,6 +36,7 @@ builder.Services.AddAzureBlobStorage(
      });
 
 builder.Services.AddSingleton<IEventHandler, ImageDeletedHandler>();
+builder.Services.AddSingleton<EventHandlerRegistry>();
 builder.Services.AddHostedService<EventConsumeWorker>();
 
 var host = builder.Build();
