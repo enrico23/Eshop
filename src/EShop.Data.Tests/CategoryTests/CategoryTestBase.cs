@@ -4,7 +4,7 @@ public abstract class CategoryTestBase
     : RepositoryTestsBase<Category, CategoryRepository>
 {
     protected override CategoryRepository CreateSut(CatalogDbContext context) =>
-        new CategoryRepository(context);
+        new(context);
 
     protected override void RegisterEntityFactory(IFixture fixture)
     {

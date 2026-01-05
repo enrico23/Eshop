@@ -1,14 +1,11 @@
-﻿
-using EShop.Shared.Testing;
-
-namespace EShop.Data.Tests.Repositories.ProductRepositoryTests;
+﻿namespace EShop.Data.Tests.Repositories.ProductRepositoryTests;
 
 public abstract class ProductRepositoryTestsBase 
     : RepositoryTestsBase<Product, ProductRepository>
 {
 
     protected override ProductRepository CreateSut(CatalogDbContext context) =>
-       new ProductRepository(context);
+       new(context);
 
     protected override void RegisterEntityFactory(IFixture fixture)
     {
