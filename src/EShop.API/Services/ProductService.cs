@@ -21,8 +21,8 @@ public class ProductService(
     IMapper mapper,
     IImageStorageService imageStorageService,
     IEventPublisher eventPublisher,
-     ICorrelationIdAccessor correlationIdAccessor,
-     IUnitOfWork unitOfWork) 
+    ICorrelationIdAccessor correlationIdAccessor,
+    IUnitOfWork unitOfWork) 
     : IProductService
 {
     private readonly IProductRepository _productRepository = productRepository;
