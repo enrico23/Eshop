@@ -20,7 +20,7 @@ public interface ICategoryRepository
           string? filter,
           CancellationToken ct);
 
-    Task<ICollection<Category>> GetAllAsync(CancellationToken ct);
+    Task<ICollection<Category>> GetAllAsync(CancellationToken ct = default);
 
     /// <summary>
     /// Category exists
@@ -28,7 +28,7 @@ public interface ICategoryRepository
     /// <param name="id"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task<bool> ExistsAsync(Guid id, CancellationToken ct);
+    Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
 
     /// <summary>
     /// Get Category by Id
@@ -45,7 +45,7 @@ public interface ICategoryRepository
     /// <param name="name"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task<bool> NameExistsAsync(string name, CancellationToken ct);
+    Task<bool> NameExistsAsync(string name, CancellationToken ct = default);
 
     /// <summary>
     /// Add Category to DbContext
@@ -53,7 +53,7 @@ public interface ICategoryRepository
     /// <param name="category"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task AddAsync(Category category, CancellationToken ct);
+    Task AddAsync(Category category, CancellationToken ct = default);
 
     /// <summary>
     /// Remove Category from DbContext
@@ -95,7 +95,7 @@ public sealed class CategoryRepository(CatalogDbContext context) : ICategoryRepo
         return new Shared.Representations.PagedResult<Category>(items, page, pageSize, total);
     }
 
-    public async Task<ICollection<Category>> GetAllAsync(CancellationToken ct)
+    public async Task<ICollection<Category>> GetAllAsync(CancellationToken ct = default)
     {
         return await _context.Categories
             .AsNoTracking()
@@ -103,7 +103,7 @@ public sealed class CategoryRepository(CatalogDbContext context) : ICategoryRepo
             .ToListAsync(ct);
     }
 
-    public Task<bool> ExistsAsync(Guid id, CancellationToken ct) =>
+    public Task<bool> ExistsAsync(Guid id, CancellationToken ct = default) =>
          _context.Categories.AsNoTracking().AnyAsync(c => c.Id == id, ct);
 
     public Task<Category?> GetByIdAsync(Guid id, bool track = false, CancellationToken ct = default) =>
@@ -111,15 +111,15 @@ public sealed class CategoryRepository(CatalogDbContext context) : ICategoryRepo
             ? _context.Categories.FirstOrDefaultAsync(c => c.Id == id, ct)
             : _context.Categories.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id, ct);
 
-    public Task<bool> NameExistsAsync(string name, CancellationToken ct) =>
+    public Task<bool> NameExistsAsync(string name, CancellationToken ct = default) =>
         _context.Categories.AnyAsync(c => c.Name.ToLower() == name.ToLower(), ct);
 
-    public Task AddAsync(Category category, CancellationToken ct) =>
+    public Task AddAsync(Category category, CancellationToken ct = default) =>
         _context.Categories.AddAsync(category, ct).AsTask();
 
     public void Remove(Category category) =>
         _context.Categories.Remove(category);
 
-    public async Task<bool> HasAnyProductsAsync(Guid id, CancellationToken ct) =>
+    public async Task<bool> HasAnyProductsAsync(Guid id, CancellationToken ct = default) =>
         await _context.Products.AnyAsync(p => p.CategoryId == id);
 }

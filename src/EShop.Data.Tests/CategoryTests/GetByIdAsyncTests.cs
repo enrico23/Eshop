@@ -1,6 +1,6 @@
 ﻿namespace EShop.Data.Tests.CategoryTests;
 
-public sealed class GetByIdAsyncTests : CategoryTestBase
+public sealed class GetByIdAsyncTests : CategoryRepositoryTestsBase
 {
     [Fact]
     public async Task GetByIdAsync_WhenFound_ReturnsCategories()
