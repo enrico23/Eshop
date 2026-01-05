@@ -1,4 +1,6 @@
 ﻿
+using EShop.Shared.Testing;
+
 namespace EShop.Data.Tests.Repositories.ProductRepositoryTests;
 
 public abstract class ProductRepositoryTestsBase
@@ -51,7 +53,6 @@ public abstract class ProductRepositoryTestsBase
             Sut = new ProductRepository(context);
         }
 
-      
         public ProductRepository Sut { get; }
 
         public IFixture Fixture { get; }
@@ -65,12 +66,12 @@ public abstract class ProductRepositoryTestsBase
         {
             var fixture = CreateFixture();
 
-            await using var context = CreateContext();
+            await using var context = EfContextHelpers.CreateContext();
 
             var products = seedFactory(fixture)?.ToList() ?? new List<Product>();
 
             if (products.Count > 0)
-                await SeedAsync(context, products).ConfigureAwait(false);
+                await context.SeedAsync(products).ConfigureAwait(false);
 
             await using var scope = new TestScope(context, fixture, products);
             await testBody(scope).ConfigureAwait(false);
@@ -99,27 +100,6 @@ public abstract class ProductRepositoryTestsBase
             );
 
             return fixture;
-        }
-
-        private static CatalogDbContext CreateContext()
-        {
-            var dbName = $"CatalogTests_{Guid.NewGuid():N}";
-
-            var options = new DbContextOptionsBuilder<CatalogDbContext>()
-                .UseInMemoryDatabase(dbName)
-                .EnableSensitiveDataLogging()
-                .Options;
-
-            return new CatalogDbContext(options);
-        }
-
-        private static async Task SeedAsync(
-            CatalogDbContext context,
-            IEnumerable<Product> products)
-        {
-            context.Products.AddRange(products);
-            await context.SaveChangesAsync().ConfigureAwait(false);
-            context.ChangeTracker.Clear();
         }
     }
 }
