@@ -1,4 +1,6 @@
 ﻿
+using EShop.Domain.Catalog;
+
 namespace EShop.Data.Repositories;
 
 public interface IRepository<T>
@@ -15,4 +17,3 @@ public sealed class Repository<T>(CatalogDbContext context)
         return await result.FindAsync(id);
     }
 }
-
