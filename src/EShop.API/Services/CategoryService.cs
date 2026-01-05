@@ -1,19 +1,23 @@
 ﻿using EShop.Data;
+using EShop.Data.Repositories;
 using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;
 using EShop.Shared.Representations.Category;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Dynamic.Core;
 
 namespace EShop.API.Services;
 
-public class CategoryService(CatalogDbContext context, IMapper mapper) : ICategoryService
+public class CategoryService(
+    ICategoryRepository categoryRepository, 
+    IMapper mapper,
+    IUnitOfWork unitOfWork) 
+    : ICategoryService
 {
-    private readonly CatalogDbContext _context = context;
-
+    private readonly ICategoryRepository _categoryRepository = categoryRepository;
     private readonly IMapper _mapper = mapper;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<Shared.Representations.PagedResult<CategoryDto>> GetPagedAsync(
         int page, int pageSize,
@@ -23,61 +27,31 @@ public class CategoryService(CatalogDbContext context, IMapper mapper) : ICatego
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 200);
 
-        IQueryable<Category> query = _context.Categories.AsNoTracking();
-
-        if (!string.IsNullOrEmpty(filter))
-        {
-            query = query.Where("Name.ToLower().Contains(@0)", filter.ToLower());
-        }
-
-        if (!string.IsNullOrEmpty(orderBy))
-        {
-            var ordering = $"{orderBy} {orderDirection}";
-            query = query.OrderBy(ordering);
-        }
-
-        var total = await query.CountAsync(ct);
-
-        var items = await query
-            .ProjectToType<CategoryDto>()
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(ct);
-
-        return new Shared.Representations.PagedResult<CategoryDto>(items, page, pageSize, total);
+        var pagedResult = await _categoryRepository.GetPagedAsync(page, pageSize, orderBy, orderDirection, filter, ct);
+        var items = _mapper.Map<List<CategoryDto>>(pagedResult.Items);
+        return new Shared.Representations.PagedResult<CategoryDto>(items, page, pageSize, pagedResult.Total);
     }
 
     public async Task<ICollection<CategoryDto>> GetAllAsync(CancellationToken ct)
     {
-        return await _context.Categories
-            .AsNoTracking()
-            .OrderBy(c => c.Name)
-            .ProjectToType<CategoryDto>()
-            .ToListAsync(ct);
+        var categories = await _categoryRepository.GetAllAsync(ct);
+        return _mapper.Map<List<CategoryDto>>(categories);
     }
 
-    public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default)
-    {
-        return await _context.Categories
-            .AsNoTracking()
-            .AnyAsync(b => b.Id == id, ct);
-    }
-
-
+    public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default) =>
+         await _categoryRepository.ExistsAsync(id, ct);
+    
     public async Task<CategoryDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
-        return await _context.Categories
-             .AsNoTracking()
-             .Where(b => b.Id == id)
-             .ProjectToType<CategoryDto>()
-             .FirstOrDefaultAsync(ct);
-    }
+        var category = await _categoryRepository.GetByIdAsync(id, false, ct);
+        return category is null ? null : _mapper.Map<CategoryDto>(category);
+     }
 
     public async Task<bool> UpdateAsync(Guid id, UpdateCategoryDto updateCategoryDto, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(updateCategoryDto, nameof(updateCategoryDto));
 
-        var entity = await _context.Categories.FirstOrDefaultAsync(b => b.Id == id, ct);
+        var entity = await _categoryRepository.GetByIdAsync(id, true, ct);
         if (entity is null)
             return false;
 
@@ -87,7 +61,7 @@ public class CategoryService(CatalogDbContext context, IMapper mapper) : ICatego
 
         entity.ChangeName(updateCategoryDto.Name!);
 
-        await _context.SaveChangesAsync(ct);
+        await _unitOfWork.SaveChangesAsync(ct);
         return true;
     }
 
@@ -99,30 +73,30 @@ public class CategoryService(CatalogDbContext context, IMapper mapper) : ICatego
         if (string.IsNullOrWhiteSpace(categoryName))
             throw new DomainException("Category name is required.");
 
-        var alreadyExists = await _context.Categories.AnyAsync(c => c.Name.ToLower() == categoryName.ToLower(), ct);
+        var alreadyExists = await _categoryRepository.NameExistsAsync(categoryName, ct);
         if (alreadyExists)
             throw new DomainException($"A category with name '{categoryName}' already exists.");
 
         var category = new Category(categoryName);
 
-        await _context.Categories.AddAsync(category, ct);
-        await _context.SaveChangesAsync(ct);
+        await _categoryRepository.AddAsync(category, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         return category.Adapt<CategoryDto>();
     }
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)
     {
-        var entity = await _context.Categories.FirstOrDefaultAsync(b => b.Id == id, ct);
+        var entity = await _categoryRepository.GetByIdAsync(id, true, ct);
 
         if (entity is null) return false;
 
-        var hasProducts = await _context.Products.AnyAsync(p => p.CategoryId == id, ct);
+        var hasProducts = await _categoryRepository.HasAnyProductsAsync(id, ct);
         if (hasProducts)
             throw new DomainException("Category cannot be deleted because it contains products.");
 
-        _context.Categories.Remove(entity);
-        await _context.SaveChangesAsync(ct);
+        _categoryRepository.Remove(entity);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         return true;
     }

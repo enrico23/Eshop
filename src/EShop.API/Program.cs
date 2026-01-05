@@ -68,6 +68,8 @@ public partial class Program
         builder.Services.AddMapster();
         TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
 
+        builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+        builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
         builder.Services.AddScoped<ICategoryService, CategoryService>();
         builder.Services.AddScoped<IProductRepository, ProductRepository>();
         builder.Services.AddScoped<IProductService, ProductService>();

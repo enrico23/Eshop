@@ -17,7 +17,7 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
         var result = await sut.UpdateAsync(id, ValidForm(status: ProductStatus.Active, withFile: false), ct);
 
         Assert.False(result);
-        await _repo.DidNotReceive().SaveChangesAsync(ct);
+        await _unitOfWork.DidNotReceive().SaveChangesAsync(ct);
     }
 
     [Fact]
@@ -37,7 +37,7 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
         form.Sku = "SKU-NEW";
 
         await Assert.ThrowsAsync<DomainException>(() => sut.UpdateAsync(id, form, ct));
-        await _repo.DidNotReceive().SaveChangesAsync(ct);
+        await _unitOfWork.DidNotReceive().SaveChangesAsync(ct);
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
         form.CategoryId = null;
 
         await Assert.ThrowsAsync<DomainException>(() => sut.UpdateAsync(id, form, ct));
-        await _repo.DidNotReceive().SaveChangesAsync(ct);
+        await _unitOfWork.DidNotReceive().SaveChangesAsync(ct);
     }
 
     [Fact]
@@ -95,7 +95,7 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
 
         await _repo.DidNotReceiveWithAnyArgs().SkuInUseAsync(default!, default, default);
 
-        await _repo.Received(1).SaveChangesAsync(ct);
+        await _unitOfWork.Received(1).SaveChangesAsync(ct);
 
     
         Assert.Contains(product.Images, i => i.Url == "https://cdn/new.png");

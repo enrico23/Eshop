@@ -1,4 +1,5 @@
 ﻿using EShop.API.Models;
+using EShop.Data;
 using EShop.Data.Repositories;
 using EShop.Domain;
 using EShop.Domain.Catalog;
@@ -20,7 +21,8 @@ public class ProductService(
     IMapper mapper,
     IImageStorageService imageStorageService,
     IEventPublisher eventPublisher,
-     ICorrelationIdAccessor correlationIdAccessor) 
+    ICorrelationIdAccessor correlationIdAccessor,
+    IUnitOfWork unitOfWork) 
     : IProductService
 {
     private readonly IProductRepository _productRepository = productRepository;
@@ -28,6 +30,7 @@ public class ProductService(
     private readonly IImageStorageService _imageStorageService = imageStorageService;
     private readonly IEventPublisher _eventPublisher = eventPublisher;
     private readonly ICorrelationIdAccessor _correlationIdAccessor = correlationIdAccessor;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<Shared.Representations.PagedResult<ProductDto>> GetPagedAsync(
         int page, int pageSize, 
@@ -81,7 +84,7 @@ public class ProductService(
         }
 
         await _productRepository.AddAsync(product, ct);
-        await _productRepository.SaveChangesAsync(ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         return _mapper.Map<ProductDto>(product);
     }
@@ -141,7 +144,7 @@ public class ProductService(
             product.ReplaceImages(newImages!);
         }
 
-        await _productRepository.SaveChangesAsync(ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         return true;
     }
@@ -161,7 +164,7 @@ public class ProductService(
         }
 
        _productRepository.Remove(entity);
-        await _productRepository.SaveChangesAsync(ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         return true;
     }

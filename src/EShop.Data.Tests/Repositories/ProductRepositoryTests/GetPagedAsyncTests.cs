@@ -7,9 +7,9 @@ public sealed class GetPagedAsyncTests : ProductRepositoryTestsBase
     {
         return TestAsync(
             seedCount: 25,
-            testBody: async t =>
+            testBody: async scope =>
             {
-                var result = await t.Sut.GetPagedAsync(
+                var result = await scope.Sut.GetPagedAsync(
                     page: 2,
                     pageSize: 10,
                     orderBy: "",
@@ -21,7 +21,7 @@ public sealed class GetPagedAsyncTests : ProductRepositoryTestsBase
                 Assert.Equal(10, result.PageSize);
                 Assert.Equal(25, result.Total);
                 Assert.Equal(10, result.Items.Count);
-                Assert.All(result.Items, p => Assert.Contains(t.Products, x => x.Id == p.Id));
+                Assert.All(result.Items, p => Assert.Contains(scope.Entities, x => x.Id == p.Id));
             });
     }
 
@@ -30,10 +30,10 @@ public sealed class GetPagedAsyncTests : ProductRepositoryTestsBase
     {
         return TestAsync(
             seedCount: 25,
-            testBody: async t =>
+            testBody: async scope =>
             {
-                var expected = t.Products.First();
-                var result = await t.Sut.GetPagedAsync(
+                var expected = scope.Entities.First();
+                var result = await scope.Sut.GetPagedAsync(
                     page: 1,
                     pageSize: 50,
                     orderBy: "Name",
@@ -52,9 +52,9 @@ public sealed class GetPagedAsyncTests : ProductRepositoryTestsBase
     public  Task GetPagedAsync_WithOrderByNameDescending_SortsCorrectly() =>
      TestAsync(
             seedCount: 3,
-            testBody: async t =>
+            testBody: async scope =>
             {
-                var result = await t.Sut.GetPagedAsync(
+                var result = await scope.Sut.GetPagedAsync(
                     page: 1,
                     pageSize: 10,
                     orderBy: "Name",
@@ -75,10 +75,10 @@ public sealed class GetPagedAsyncTests : ProductRepositoryTestsBase
     {
         return TestAsync(
             seedCount: totalSeed,
-            testBody: async t =>
+            testBody: async scope =>
             {
                 // Act
-                var result = await t.Sut.GetPagedAsync(
+                var result = await scope.Sut.GetPagedAsync(
                     page: page,
                     pageSize: pageSize,
                     orderBy: "Name",
@@ -90,7 +90,6 @@ public sealed class GetPagedAsyncTests : ProductRepositoryTestsBase
                 Assert.Equal(totalSeed, result.Total);
                 Assert.Equal(expectedCount, result.Items.Count);
                 Assert.All(result.Items, p => Assert.False(string.IsNullOrWhiteSpace(p.Name)));
-
             });
     }
 }

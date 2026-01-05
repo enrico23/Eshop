@@ -69,13 +69,6 @@ public interface IProductRepository
     /// </summary>
     /// <param name="product"></param>
     void Remove(Product product);
-
-    /// <summary>
-    /// Save DbContext
-    /// </summary>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    Task SaveChangesAsync(CancellationToken ct);
 }
 
 public sealed class ProductRepository(CatalogDbContext context) : IProductRepository
@@ -122,7 +115,4 @@ public sealed class ProductRepository(CatalogDbContext context) : IProductReposi
 
     public void Remove(Product product) => 
         _context.Products.Remove(product);
-
-    public Task SaveChangesAsync(CancellationToken ct) => 
-        _context.SaveChangesAsync(ct);
 }
