@@ -22,11 +22,11 @@ public sealed class NameExistsAsyncTests : ProductRepositoryTestsBase
                     sku: new Sku("SKU-1"),
                     categoryId: Guid.NewGuid())
             ],
-            testBody: async t =>
+            testBody: async scope =>
             {
-                var id = t.Products.Single().Id;
+                var id = scope.Entities.Single().Id;
 
-                var exists = await t.Sut.NameExistsAsync(queryName, CancellationToken.None);
+                var exists = await scope.Sut.NameExistsAsync(queryName, CancellationToken.None);
 
                 Assert.Equal(expected, exists);
             });

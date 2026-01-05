@@ -1,6 +1,5 @@
 ﻿
 using EShop.Domain.Catalog;
-using EShop.Shared.Representations.Category;
 
 namespace EShop.Data.Repositories;
 
@@ -75,7 +74,8 @@ public sealed class CategoryRepository(CatalogDbContext context) : ICategoryRepo
 {
     private readonly CatalogDbContext _context = context;
 
-    public async Task<Shared.Representations.PagedResult<Category>> GetPagedAsync(int page, int pageSize, string orderBy, string orderDirection, string? filter, 
+    public async Task<Shared.Representations.PagedResult<Category>> GetPagedAsync(
+        int page, int pageSize, string orderBy, string orderDirection, string? filter, 
         CancellationToken ct)
     {
         IQueryable<Category> query = _context.Categories.AsNoTracking();

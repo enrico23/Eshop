@@ -4,21 +4,21 @@ public sealed class RemoveTests : ProductRepositoryTestsBase
 {
     [Fact]
     public Task Remove_WhenSaved_RemovesEntityFromStore() =>
-       TestAsync(seedCount: 1, async t =>
+       TestAsync(seedCount: 1, async scope =>
        {
            // Arrange
-           var product = t.Products[0];
+           var product = scope.Entities[0];
 
            // Sanity check it exists before delete
-           var before = await t.Sut.GetByIdAsync(product.Id, false, CancellationToken.None);
+           var before = await scope.Sut.GetByIdAsync(product.Id, false, CancellationToken.None);
            Assert.NotNull(before);
 
            // Act
-           t.Sut.Remove(product);
-           await t.SaveChangesAsync(CancellationToken.None);
+           scope.Sut.Remove(product);
+           await scope.SaveChangesAsync(CancellationToken.None);
 
            // Assert
-           var after = await t.Sut.GetByIdAsync(product.Id, false, CancellationToken.None);
+           var after = await scope.Sut.GetByIdAsync(product.Id, false, CancellationToken.None);
            Assert.Null(after);
        });
 }
