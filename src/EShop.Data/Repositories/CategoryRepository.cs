@@ -110,5 +110,4 @@ public sealed class CategoryRepository(CatalogDbContext context) : ICategoryRepo
 
     public Task SaveChangesAsync(CancellationToken ct) =>
         _context.SaveChangesAsync(ct);
-
 }

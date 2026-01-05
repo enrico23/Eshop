@@ -15,7 +15,7 @@ public sealed class RemoveTests : ProductRepositoryTestsBase
 
            // Act
            t.Sut.Remove(product);
-           await t.Sut.SaveChangesAsync(CancellationToken.None);
+           await t.SaveChangesAsync(CancellationToken.None);
 
            // Assert
            var after = await t.Sut.GetByIdAsync(product.Id, false, CancellationToken.None);

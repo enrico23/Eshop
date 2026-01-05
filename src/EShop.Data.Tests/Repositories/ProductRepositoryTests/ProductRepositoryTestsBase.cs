@@ -45,36 +45,53 @@ public abstract class ProductRepositoryTestsBase
         private TestScope(
             CatalogDbContext context,
             IFixture fixture,
-            List<Product> products)
+            IReadOnlyList<Product> products,
+            ProductRepository sut,
+            IUnitOfWork uow)
         {
             _context = context;
             Fixture = fixture;
             Products = products;
-            Sut = new ProductRepository(context);
+            Sut = sut;
+            Uow = uow;
         }
 
         public ProductRepository Sut { get; }
+
+        public IUnitOfWork Uow { get; }
 
         public IFixture Fixture { get; }
 
         public IReadOnlyList<Product> Products { get; }
 
-        
+        public Task SaveChangesAsync(CancellationToken none) => Uow.SaveChangesAsync();
+
+
         public static async Task CreateAsync(
             Func<IFixture, IEnumerable<Product>> seedFactory,
             Func<TestScope, Task> testBody)
         {
+            var context = EfContextHelpers.CreateContext();
             var fixture = CreateFixture();
 
-            await using var context = EfContextHelpers.CreateContext();
+            try
+            {
+                var products = seedFactory(fixture)?.ToList() ?? new List<Product>();
 
-            var products = seedFactory(fixture)?.ToList() ?? new List<Product>();
+                if (products.Count > 0)
+                    await context.SeedAsync(products).ConfigureAwait(false);
 
-            if (products.Count > 0)
-                await context.SeedAsync(products).ConfigureAwait(false);
+                var uow = new EfUnitOfWork(context);
+                var sut = new ProductRepository(context);
 
-            await using var scope = new TestScope(context, fixture, products);
-            await testBody(scope);
+                await using var scope = new TestScope(context, fixture, products, sut, uow);
+                await testBody(scope);
+            }
+            catch (Exception)
+            {
+                await context.DisposeAsync();
+                throw;
+            }
         }
 
         public ValueTask DisposeAsync() =>
