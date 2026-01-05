@@ -1,4 +1,4 @@
-﻿using EShop.Shared.Eventing;
+﻿using EShop.Data;
 using System.Collections.Immutable;
 
 namespace EShop.API.Tests.Services.ProductServiceTests;
@@ -10,8 +10,9 @@ public abstract class ProductServiceTestBase
     internal IImageStorageService _imageStorage = Substitute.For<IImageStorageService>();
     internal IEventPublisher _publisher = Substitute.For<IEventPublisher>();
     internal ICorrelationIdAccessor _corr = Substitute.For<ICorrelationIdAccessor>();
+    internal IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
 
-    internal ProductService CreateSut() => new ProductService(_repo, _mapper, _imageStorage, _publisher, _corr);
+    internal ProductService CreateSut() => new ProductService(_repo, _mapper, _imageStorage, _publisher, _corr, _unitOfWork);
 
     internal static Product CreateProductWithImages(Guid id, string sku, string[] imageUrls)
     {

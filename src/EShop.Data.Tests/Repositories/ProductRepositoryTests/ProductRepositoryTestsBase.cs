@@ -7,14 +7,14 @@ public abstract class ProductRepositoryTestsBase
 {
     protected async Task TestAsync(
         int seedCount,
-        Func<TestScope, ValueTask> testBody) => await
+        Func<TestScope, Task> testBody) => await
         TestScope.CreateAsync(
             seedFactory: f => f.CreateMany<Product>(seedCount),
             testBody: testBody);
 
     protected async Task TestAsync(
         IEnumerable<Product> seed,
-        Func<TestScope, ValueTask> testBody) => await
+        Func<TestScope, Task> testBody) => await
         TestScope.CreateAsync(
             seedFactory: _ => seed,
             testBody: testBody);
@@ -25,7 +25,7 @@ public abstract class ProductRepositoryTestsBase
         TestAsync(seedCount, scope =>
         {
             testBody(scope);
-            return ValueTask.CompletedTask;
+            return Task.CompletedTask;
         });
 
     protected Task Test(
@@ -34,7 +34,7 @@ public abstract class ProductRepositoryTestsBase
         TestAsync(seed, scope =>
         {
             testBody(scope);
-            return ValueTask.CompletedTask;
+            return Task.CompletedTask;
         });
 
     
@@ -60,9 +60,9 @@ public abstract class ProductRepositoryTestsBase
         public IReadOnlyList<Product> Products { get; }
 
         
-        public static async ValueTask CreateAsync(
+        public static async Task CreateAsync(
             Func<IFixture, IEnumerable<Product>> seedFactory,
-            Func<TestScope, ValueTask> testBody)
+            Func<TestScope, Task> testBody)
         {
             var fixture = CreateFixture();
 
@@ -74,7 +74,7 @@ public abstract class ProductRepositoryTestsBase
                 await context.SeedAsync(products).ConfigureAwait(false);
 
             await using var scope = new TestScope(context, fixture, products);
-            await testBody(scope).ConfigureAwait(false);
+            await testBody(scope);
         }
 
         public ValueTask DisposeAsync() =>

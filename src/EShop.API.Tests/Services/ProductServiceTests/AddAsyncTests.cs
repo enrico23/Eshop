@@ -33,7 +33,7 @@ public sealed class AddAsyncTests : ProductServiceTestBase
         await Assert.ThrowsAsync<DomainException>(() => sut.AddAsync(form, ct));
 
         await _repo.DidNotReceiveWithAnyArgs().AddAsync(default!, default);
-        await _repo.DidNotReceiveWithAnyArgs().SaveChangesAsync(default);
+        await _unitOfWork.DidNotReceiveWithAnyArgs().SaveChangesAsync(default);
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public sealed class AddAsyncTests : ProductServiceTestBase
         Assert.NotNull(result);
         await _imageStorage.Received(1).UploadImageAsync(form.File, ct);
         await _repo.Received(1).AddAsync(Arg.Any<Product>(), ct);
-        await _repo.Received(1).SaveChangesAsync(ct);
+        await _unitOfWork.Received(1).SaveChangesAsync(ct);
 
         Assert.NotNull(added);
         Assert.Contains(added!.Images, i => i.Url == "https://cdn/new.png");

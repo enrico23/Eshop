@@ -18,7 +18,7 @@ public sealed class DeleteAsyncTests : ProductServiceTestBase
 
         Assert.False(result);
         _repo.DidNotReceiveWithAnyArgs().Remove(default!);
-        await _repo.DidNotReceive().SaveChangesAsync(ct);
+        await _unitOfWork.DidNotReceive().SaveChangesAsync(ct);
     }
 
     [Fact]
@@ -48,6 +48,6 @@ public sealed class DeleteAsyncTests : ProductServiceTestBase
             ct);
 
         _repo.Received(1).Remove(entity);
-        await _repo.Received(1).SaveChangesAsync(ct);
+        await _unitOfWork.Received(1).SaveChangesAsync(ct);
     }
 }

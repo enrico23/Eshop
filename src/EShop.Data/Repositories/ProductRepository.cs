@@ -123,6 +123,6 @@ public sealed class ProductRepository(CatalogDbContext context) : IProductReposi
     public void Remove(Product product) => 
         _context.Products.Remove(product);
 
-    public Task SaveChangesAsync(CancellationToken ct) => 
+    public Task SaveChangesAsync(CancellationToken ct) =>
         _context.SaveChangesAsync(ct);
 }
