@@ -1,6 +1,6 @@
 ﻿namespace EShop.Data.Tests.CategoryTests;
 
-public sealed class NameExistsAsyncTests : CategoryRepositoryTestsBase
+public sealed class NameExistsAsyncTests : CategoryRepositoryTestBase
 {
     [Theory]
     [InlineData("Widget", "widget", true)]

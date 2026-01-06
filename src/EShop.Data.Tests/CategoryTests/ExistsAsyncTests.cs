@@ -1,6 +1,6 @@
 ﻿namespace EShop.Data.Tests.CategoryTests;
 
-public sealed class ExistsAsyncTests : CategoryRepositoryTestsBase
+public sealed class ExistsAsyncTests : CategoryRepositoryTestBase
 {
     [Fact]
     public Task ExistsAsync_WhenCategoryExists_ReturnsTrue() =>

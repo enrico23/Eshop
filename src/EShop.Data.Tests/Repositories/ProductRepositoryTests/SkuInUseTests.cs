@@ -2,7 +2,7 @@
 
 namespace EShop.Data.Tests.Repositories.ProductRepositoryTests;
 
-public sealed class SkuInUseTests : ProductRepositoryTestsBase
+public sealed class SkuInUseTests : ProductRepositoryTestBase
 {
     [Fact]
     public Task SkuInUseAsync_WhenSkuExistsAndNoExclude_ReturnsTrue() =>

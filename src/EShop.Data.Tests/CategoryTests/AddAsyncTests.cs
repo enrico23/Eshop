@@ -1,6 +1,6 @@
 ﻿namespace EShop.Data.Tests.CategoryTests;
 
-public sealed class AddAsyncTests : CategoryRepositoryTestsBase
+public sealed class AddAsyncTests : CategoryRepositoryTestBase
 {
     [Fact]
     public Task AddCategoryAsync_Success() =>
