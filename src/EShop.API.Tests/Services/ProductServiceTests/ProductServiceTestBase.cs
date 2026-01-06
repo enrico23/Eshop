@@ -1,4 +1,5 @@
 ﻿using EShop.Data;
+using EShop.Shared.Exceptions;
 using System.Collections.Immutable;
 
 namespace EShop.API.Tests.Services.ProductServiceTests;
@@ -11,8 +12,9 @@ public abstract class ProductServiceTestBase
     internal IEventPublisher _publisher = Substitute.For<IEventPublisher>();
     internal ICorrelationIdAccessor _corr = Substitute.For<ICorrelationIdAccessor>();
     internal IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
+    internal ISqlServerExceptionsHelper _sqlServerExceptionsHelper = Substitute.For<ISqlServerExceptionsHelper>();
 
-    internal ProductService CreateSut() => new ProductService(_repo, _mapper, _imageStorage, _publisher, _corr, _unitOfWork);
+    internal ProductService CreateSut() => new ProductService(_repo, _mapper, _imageStorage, _publisher, _corr, _unitOfWork, _sqlServerExceptionsHelper);
 
     internal static Product CreateProductWithImages(Guid id, string sku, string[] imageUrls)
     {

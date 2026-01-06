@@ -7,6 +7,7 @@ using EShop.Domain.Exceptions;
 using EShop.Domain.Products;
 using EShop.Shared.Domain;
 using EShop.Shared.Eventing;
+using EShop.Shared.Exceptions;
 using EShop.Shared.Observability.Correlation;
 using EShop.Shared.Representations.Product;
 using EShop.Shared.Services;
@@ -22,7 +23,8 @@ public class ProductService(
     IImageStorageService imageStorageService,
     IEventPublisher eventPublisher,
     ICorrelationIdAccessor correlationIdAccessor,
-    IUnitOfWork unitOfWork) 
+    IUnitOfWork unitOfWork,
+    ISqlServerExceptionsHelper sqlServerExceptionsHelper) 
     : IProductService
 {
     private readonly IProductRepository _productRepository = productRepository;
@@ -31,6 +33,7 @@ public class ProductService(
     private readonly IEventPublisher _eventPublisher = eventPublisher;
     private readonly ICorrelationIdAccessor _correlationIdAccessor = correlationIdAccessor;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly ISqlServerExceptionsHelper _sqlServerExceptionsHelper = sqlServerExceptionsHelper;
 
     public async Task<Shared.Representations.PagedResult<ProductDto>> GetPagedAsync(
         int page, int pageSize, 
@@ -60,9 +63,6 @@ public class ProductService(
 
         var productName = Product.ValidateName(productFormDto.Name);
 
-        if (await _productRepository.NameExistsAsync(productName, ct))
-            throw new DomainException($"A product with name '{productName}' already exists.");
-
         var productDescription = new ProductDescription(productFormDto.Description);
         var productPrice = new Money(productFormDto.Price);
         var productQuantity = new StockQuantity(productFormDto.Stock);
@@ -83,10 +83,17 @@ public class ProductService(
             product.AddImage(newUrl);
         }
 
-        await _productRepository.AddAsync(product, ct);
-        await _unitOfWork.SaveChangesAsync(ct);
+        try
+        {
+            await _productRepository.AddAsync(product, ct);
+            await _unitOfWork.SaveChangesAsync(ct);
 
-        return _mapper.Map<ProductDto>(product);
+            return _mapper.Map<ProductDto>(product);
+        }
+        catch (DbUpdateException ex) when (_sqlServerExceptionsHelper.IsUniqueViolation(ex))
+        {
+            throw new DomainException($"A product with name '{productName}' already exists.");
+        }
     }
 
     public async Task<bool> UpdateAsync(Guid id, ProductFormDto productFormDto, CancellationToken ct)

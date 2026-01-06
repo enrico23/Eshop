@@ -1,4 +1,6 @@
-﻿namespace EShop.API.Tests.Services.ProductServiceTests;
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace EShop.API.Tests.Services.ProductServiceTests;
 
 public sealed class AddAsyncTests : ProductServiceTestBase
 {
@@ -13,6 +15,7 @@ public sealed class AddAsyncTests : ProductServiceTestBase
     [Fact]
     public async Task AddAsync_WhenNameAlreadyExists_ThrowsDomainException()
     {
+        var sut = CreateSut();
         var ct = CancellationToken.None;
 
         var form = new ProductFormDto
@@ -26,14 +29,14 @@ public sealed class AddAsyncTests : ProductServiceTestBase
             File = null
         };
 
-        _repo.NameExistsAsync(Arg.Any<string>(), ct).Returns(true);
+        var dbEx = new DbUpdateException("db fail", innerException: new Exception("inner"));
+        _sqlServerExceptionsHelper.IsUniqueViolation(dbEx).Returns(true);
 
-        var sut = CreateSut();
+        _repo.AddAsync(Arg.Any<Product>(), ct).Returns<Task>(_ => throw dbEx);
 
-        await Assert.ThrowsAsync<DomainException>(() => sut.AddAsync(form, ct));
+        var ex = await Assert.ThrowsAsync<DomainException>(() => sut.AddAsync(form, ct));
 
-        await _repo.DidNotReceiveWithAnyArgs().AddAsync(default!, default);
-        await _unitOfWork.DidNotReceiveWithAnyArgs().SaveChangesAsync(default);
+        await _unitOfWork.DidNotReceive().SaveChangesAsync(ct);
     }
 
     [Fact]

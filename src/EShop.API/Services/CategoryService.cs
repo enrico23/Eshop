@@ -13,12 +13,14 @@ namespace EShop.API.Services;
 public class CategoryService(
     ICategoryRepository categoryRepository, 
     IMapper mapper,
-    IUnitOfWork unitOfWork) 
+    IUnitOfWork unitOfWork,
+    ISqlServerExceptionsHelper sqlServerExceptionsHelper) 
     : ICategoryService
 {
     private readonly ICategoryRepository _categoryRepository = categoryRepository;
     private readonly IMapper _mapper = mapper;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly ISqlServerExceptionsHelper _sqlServerExceptionsHelper = sqlServerExceptionsHelper;
 
     public async Task<Shared.Representations.PagedResult<CategoryDto>> GetPagedAsync(
         int page, int pageSize,
@@ -82,7 +84,7 @@ public class CategoryService(
             await _unitOfWork.SaveChangesAsync(ct);
             return category.Adapt<CategoryDto>();
         }
-        catch (DbUpdateException ex) when (SqlServerExceptionsHelper.IsUniqueViolation(ex))
+        catch (DbUpdateException ex) when (_sqlServerExceptionsHelper.IsUniqueViolation(ex))
         {
             throw new DomainException($"A category with name '{categoryName}' already exists.");
         }
