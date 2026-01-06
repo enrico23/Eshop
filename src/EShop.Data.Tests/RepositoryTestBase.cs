@@ -8,9 +8,11 @@ using EShop.Shared.Testing;
 /// </summary>
 /// <typeparam name="TEntity"></typeparam>
 /// <typeparam name="TSut"></typeparam>
-public abstract class RepositoryTestBase<TEntity, TSut>
+public abstract class RepositoryTestBase<TEntity, TSut, TContext, TUnitOfWork>
     where TEntity : class
     where TSut : class
+    where TContext : DbContext
+    where TUnitOfWork : IUnitOfWork
 {
     protected Task TestAsync(
         int seedCount,
@@ -26,15 +28,24 @@ public abstract class RepositoryTestBase<TEntity, TSut>
             seedFactory: _ => seed,
             testBody: testBody);
 
-    protected abstract TSut CreateSut(CatalogDbContext context);
+    protected abstract TSut CreateSut(TContext context);
 
     protected abstract void RegisterEntityFactory(IFixture fixture);
+
+    protected abstract TContext CreateContext();
+
+    protected abstract TUnitOfWork CreateUnitOfWOrk(TContext context);
+
+    protected virtual async Task SeedAsync(TContext context, IReadOnlyCollection<TEntity> entities)
+    {
+         await context.Set<TEntity>().AddRangeAsync(entities);
+    }
 
     private async Task CreateAsync(
         Func<IFixture, IEnumerable<TEntity>> seedFactory,
         Func<TestScope, Task> testBody)
     {
-        var context = EfContextHelpers.CreateContext();
+        var context = CreateContext();
         var fixture = new Fixture();
         RegisterEntityFactory(fixture);
 
@@ -43,9 +54,14 @@ public abstract class RepositoryTestBase<TEntity, TSut>
             var entities = seedFactory(fixture)?.ToList() ?? new List<TEntity>();
 
             if (entities.Count > 0)
-                await context.SeedAsync(entities).ConfigureAwait(false);
+            {
+                // await context.SeedAsync(entities).ConfigureAwait(false);
+                await SeedAsync(context, entities).ConfigureAwait(false);
+                await context.SaveChangesAsync();
+            }
+                
 
-            var uow = new EfUnitOfWork(context);
+            var uow = CreateUnitOfWOrk(context);
             var sut = CreateSut(context);
 
             await using var scope = new TestScope(context, fixture, entities, sut, uow);
@@ -60,10 +76,10 @@ public abstract class RepositoryTestBase<TEntity, TSut>
 
     protected sealed class TestScope : IAsyncDisposable
     {
-        private readonly CatalogDbContext _context;
+        private readonly TContext _context;
 
         internal TestScope(
-            CatalogDbContext context,
+            TContext context,
             IFixture fixture,
             IReadOnlyList<TEntity> entities,
             TSut sut,

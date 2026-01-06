@@ -1,7 +1,9 @@
-﻿namespace EShop.Data.Tests.Repositories.ProductRepositoryTests;
+﻿using EShop.Shared.Testing;
+
+namespace EShop.Data.Tests.Repositories.ProductRepositoryTests;
 
 public abstract class ProductRepositoryTestsBase 
-    : RepositoryTestBase<Product, ProductRepository>
+    : RepositoryTestBase<Product, ProductRepository, CatalogDbContext, EfUnitOfWork>
 {
 
     protected override ProductRepository CreateSut(CatalogDbContext context) =>
@@ -23,5 +25,15 @@ public abstract class ProductRepositoryTestsBase
                 categoryId: fixture.Create<Guid>()
             )
         );
+    }
+
+    protected override EfUnitOfWork CreateUnitOfWOrk(CatalogDbContext context)
+    {
+        return new EfUnitOfWork(context);
+    }
+
+    protected override CatalogDbContext CreateContext()
+    {
+        return EfContextHelpers.CreateContext();
     }
 }
