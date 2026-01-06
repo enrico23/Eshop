@@ -6,7 +6,7 @@ public abstract class ProductRepositoryTestsBase
     : RepositoryTestBase<Product, ProductRepository, CatalogDbContext, EfUnitOfWork>
 {
 
-    protected override ProductRepository CreateSut(CatalogDbContext context) =>
+    protected override ProductRepository CreateRepository(CatalogDbContext context) =>
        new(context);
 
     protected override void RegisterEntityFactory(IFixture fixture)
@@ -27,13 +27,9 @@ public abstract class ProductRepositoryTestsBase
         );
     }
 
-    protected override EfUnitOfWork CreateUnitOfWOrk(CatalogDbContext context)
-    {
-        return new EfUnitOfWork(context);
-    }
+    protected override EfUnitOfWork CreateUnitOfWOrk(CatalogDbContext context) =>
+        new(context);
 
-    protected override CatalogDbContext CreateContext()
-    {
-        return EfContextHelpers.CreateContext();
-    }
+    protected override CatalogDbContext CreateContext() =>
+         EfContextHelpers.CreateContext();
 }

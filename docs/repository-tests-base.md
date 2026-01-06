@@ -2,7 +2,9 @@
 
 ## Purpose
 
-`RepositoryTestBase<TEntity, TSut>` provides a reusable harness for repository tests by creating a fresh EF Core context, seeding data, building the SUT, and ensuring deterministic cleanup.
+`RepositoryTestBase` provides a reusable harness for repository tests by 
+creating a fresh EF Core context, seeding data, building the SUT, and 
+ensuring deterministic cleanup.
 
 ## Pattern flow
 

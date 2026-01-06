@@ -1,16 +1,20 @@
 ﻿using EShop.Data;
-using EShop.Shared.Testing;
 
 /// <summary>
-/// Provides a reusable test harness for repository tests.
-/// Handles DbContext creation, data seeding, SUT construction,
-/// and deterministic cleanup.
+/// Base class for repsotory tests 
+/// build around the Unit Of Work pattern.
 /// </summary>
 /// <typeparam name="TEntity"></typeparam>
-/// <typeparam name="TSut"></typeparam>
-public abstract class RepositoryTestBase<TEntity, TSut, TContext, TUnitOfWork>
+/// <typeparam name="TRepository"></typeparam>
+/// <typeparam name="TContext"></typeparam>
+/// <typeparam name="TUnitOfWork"></typeparam>
+/// <remarks>
+/// Derived classes are responsible for providing 
+/// infrastructure-specific construction logic via abstract factory methods.
+/// </remarks>
+public abstract class RepositoryTestBase<TEntity, TRepository, TContext, TUnitOfWork>
     where TEntity : class
-    where TSut : class
+    where TRepository : class
     where TContext : DbContext
     where TUnitOfWork : IUnitOfWork
 {
@@ -28,18 +32,45 @@ public abstract class RepositoryTestBase<TEntity, TSut, TContext, TUnitOfWork>
             seedFactory: _ => seed,
             testBody: testBody);
 
-    protected abstract TSut CreateSut(TContext context);
-
-    protected abstract void RegisterEntityFactory(IFixture fixture);
-
+    /// <summary>
+    /// Creates a new database context instance
+    /// for single execution
+    /// </summary>
+    /// <remarks>
+    /// The returned context defines the lifetime boundary for the test.
+    /// It must be configured for isolation (in-memory or test database).
+    /// The context will be disposed automatically by the test harness.
+    /// </remarks>
     protected abstract TContext CreateContext();
 
+    /// <summary>
+    /// Creates the Unit Of Work that coordinates persistence operations.
+    /// </summary>
+    /// <param name="context"></param>
+    /// <remarks>
+    /// The Unit Of Work must be scope to the provided context and must not
+    /// manage its context lifetime.
+    /// </remarks>
     protected abstract TUnitOfWork CreateUnitOfWOrk(TContext context);
 
-    protected virtual async Task SeedAsync(TContext context, IReadOnlyCollection<TEntity> entities)
-    {
-         await context.Set<TEntity>().AddRangeAsync(entities);
-    }
+    /// <summary>
+    /// Create an instance of the Repository under test
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
+    protected abstract TRepository CreateRepository(TContext context);
+
+    /// <summary>
+    /// Registers an AutoFixture factory for creating valid instances of 
+    /// <typeparamref name="TEntity" />
+    /// </summary>
+    /// <param name="fixture">The AutoFixture instance used by the test harness</param>
+    /// <remarks>
+    /// The Registered factory must producee fully valid entitities that
+    /// can be persisted y the context without additional
+    /// initialization.
+    /// </remarks>
+    protected abstract void RegisterEntityFactory(IFixture fixture);
 
     private async Task CreateAsync(
         Func<IFixture, IEnumerable<TEntity>> seedFactory,
@@ -51,18 +82,16 @@ public abstract class RepositoryTestBase<TEntity, TSut, TContext, TUnitOfWork>
 
         try
         {
-            var entities = seedFactory(fixture)?.ToList() ?? new List<TEntity>();
+            var entities = seedFactory(fixture)?.ToList() ?? [];
 
             if (entities.Count > 0)
             {
-                // await context.SeedAsync(entities).ConfigureAwait(false);
                 await SeedAsync(context, entities).ConfigureAwait(false);
                 await context.SaveChangesAsync();
             }
-                
 
             var uow = CreateUnitOfWOrk(context);
-            var sut = CreateSut(context);
+            var sut = CreateRepository(context);
 
             await using var scope = new TestScope(context, fixture, entities, sut, uow);
             await testBody(scope).ConfigureAwait(false);
@@ -82,7 +111,7 @@ public abstract class RepositoryTestBase<TEntity, TSut, TContext, TUnitOfWork>
             TContext context,
             IFixture fixture,
             IReadOnlyList<TEntity> entities,
-            TSut sut,
+            TRepository sut,
             IUnitOfWork uow)
         {
             _context = context;
@@ -92,7 +121,7 @@ public abstract class RepositoryTestBase<TEntity, TSut, TContext, TUnitOfWork>
             Uow = uow;
         }
 
-        public TSut Sut { get; }
+        public TRepository Sut { get; }
         public IUnitOfWork Uow { get; }
         public IFixture Fixture { get; }
         public IReadOnlyList<TEntity> Entities { get; }
@@ -102,5 +131,10 @@ public abstract class RepositoryTestBase<TEntity, TSut, TContext, TUnitOfWork>
 
         public ValueTask DisposeAsync() =>
             _context.DisposeAsync();
+    }
+
+    private async Task SeedAsync(TContext context, IReadOnlyCollection<TEntity> entities)
+    {
+        await context.Set<TEntity>().AddRangeAsync(entities);
     }
 }
