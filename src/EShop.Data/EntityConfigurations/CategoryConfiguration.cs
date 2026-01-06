@@ -1,5 +1,4 @@
 ﻿using EShop.Domain.Catalog;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EShop.Data.EntityConfigurations;
@@ -21,5 +20,7 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
           .HasDefaultValueSql("SYSUTCDATETIME()");
 
         builder.Property(p => p.UpdatedUtc);
+
+        builder.HasIndex(p => p.Name).IsUnique();
     }
 }
