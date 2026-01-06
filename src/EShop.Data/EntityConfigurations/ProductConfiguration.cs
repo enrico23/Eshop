@@ -85,5 +85,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             img.Property(i => i.IsPrimary)
                 .IsRequired();
         });
+
+        builder.HasIndex(p => p.Name).IsUnique();
     }
 }

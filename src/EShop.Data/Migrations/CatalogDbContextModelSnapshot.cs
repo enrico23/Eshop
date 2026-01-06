@@ -92,6 +92,9 @@ namespace EShop.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Products", (string)null);
                 });
 
