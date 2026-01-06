@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EShop.Data.Migrations
 {
     [DbContext(typeof(CatalogDbContext))]
-    [Migration("20260106132532_AddIndexToCategoriesColumnName")]
+    [Migration("20260106141203_AddIndexToCategoriesColumnName")]
     partial class AddIndexToCategoriesColumnName
     {
         /// <inheritdoc />
@@ -45,6 +45,9 @@ namespace EShop.Data.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Categories", (string)null);
                 });
