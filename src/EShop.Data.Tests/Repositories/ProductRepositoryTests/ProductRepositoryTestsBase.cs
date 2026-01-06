@@ -1,7 +1,7 @@
 ﻿namespace EShop.Data.Tests.Repositories.ProductRepositoryTests;
 
 public abstract class ProductRepositoryTestsBase 
-    : RepositoryTestsBase<Product, ProductRepository>
+    : RepositoryTestBase<Product, ProductRepository>
 {
 
     protected override ProductRepository CreateSut(CatalogDbContext context) =>

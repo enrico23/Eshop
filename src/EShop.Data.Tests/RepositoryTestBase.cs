@@ -8,8 +8,9 @@ using EShop.Shared.Testing;
 /// </summary>
 /// <typeparam name="TEntity"></typeparam>
 /// <typeparam name="TSut"></typeparam>
-public abstract class RepositoryTestsBase<TEntity, TSut>
+public abstract class RepositoryTestBase<TEntity, TSut>
     where TEntity : class
+    where TSut : class
 {
     protected Task TestAsync(
         int seedCount,
