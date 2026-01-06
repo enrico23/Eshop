@@ -2,9 +2,14 @@
 
 namespace EShop.Shared.Exceptions;
 
-public static class SqlServerExceptionsHelper
+public sealed class SqlServerExceptionsHelper : ISqlServerExceptionsHelper
 {
-    public static bool IsUniqueViolation(Exception ex)
+    public bool IsUniqueViolation(Exception ex)
        => ex.InnerException is SqlException sqlEx
           && (sqlEx.Number == 2601 || sqlEx.Number == 2627);
+}
+
+public interface ISqlServerExceptionsHelper
+{
+    bool IsUniqueViolation(Exception ex);
 }

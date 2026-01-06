@@ -4,6 +4,7 @@ using EShop.API.Services;
 using EShop.Data;
 using EShop.Data.Repositories;
 using EShop.Shared.Eventing;
+using EShop.Shared.Exceptions;
 using EShop.Shared.Observability.Correlation;
 using EShop.Shared.Services;
 using Mapster;
@@ -73,6 +74,7 @@ public partial class Program
         builder.Services.AddScoped<ICategoryService, CategoryService>();
         builder.Services.AddScoped<IProductRepository, ProductRepository>();
         builder.Services.AddScoped<IProductService, ProductService>();
+        builder.Services.AddScoped<ISqlServerExceptionsHelper, SqlServerExceptionsHelper>();
 
         builder.Services.AddOpenApi();
         builder.Services.AddControllers();
