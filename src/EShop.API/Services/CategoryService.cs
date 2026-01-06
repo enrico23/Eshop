@@ -2,6 +2,7 @@
 using EShop.Data.Repositories;
 using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;
+using EShop.Shared.Exceptions;
 using EShop.Shared.Representations.Category;
 using Mapster;
 using MapsterMapper;
@@ -73,16 +74,18 @@ public class CategoryService(
         if (string.IsNullOrWhiteSpace(categoryName))
             throw new DomainException("Category name is required.");
 
-        var alreadyExists = await _categoryRepository.NameExistsAsync(categoryName, ct);
-        if (alreadyExists)
-            throw new DomainException($"A category with name '{categoryName}' already exists.");
-
         var category = new Category(categoryName);
 
-        await _categoryRepository.AddAsync(category, ct);
-        await _unitOfWork.SaveChangesAsync(ct);
-
-        return category.Adapt<CategoryDto>();
+        try
+        {
+            await _categoryRepository.AddAsync(category, ct);
+            await _unitOfWork.SaveChangesAsync(ct);
+            return category.Adapt<CategoryDto>();
+        }
+        catch (DbUpdateException ex) when (SqlServerExceptionsHelper.IsUniqueViolation(ex))
+        {
+            throw new DomainException($"A category with name '{categoryName}' already exists.");
+        }
     }
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)
