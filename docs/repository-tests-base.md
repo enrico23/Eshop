@@ -9,7 +9,7 @@ ensuring deterministic cleanup.
 ## Pattern flow
 
 1. Call `TestAsync` with either a seed count or explicit seed set.
-2. A new `CatalogDbContext` is created via `EfContextHelpers.CreateContext()`.
+2. A new `DbContext` is created.
 3. The test fixture is created and `RegisterEntityFactory` is invoked to register entity creation rules.
 4. Seed data is generated, persisted via `SeedAsync`, and a `EfUnitOfWork` and SUT are created.
 5. The test body runs inside a `TestScope` that exposes the SUT, fixture, unit of work, and seeded entities.
