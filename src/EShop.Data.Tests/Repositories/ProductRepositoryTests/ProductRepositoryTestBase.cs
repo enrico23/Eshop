@@ -2,7 +2,7 @@
 
 namespace EShop.Data.Tests.Repositories.ProductRepositoryTests;
 
-public abstract class ProductRepositoryTestsBase 
+public abstract class ProductRepositoryTestBase 
     : RepositoryTestBase<Product, ProductRepository, CatalogDbContext, EfUnitOfWork>
 {
 

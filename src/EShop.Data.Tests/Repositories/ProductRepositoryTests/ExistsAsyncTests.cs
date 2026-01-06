@@ -1,6 +1,6 @@
 ﻿namespace EShop.Data.Tests.Repositories.ProductRepositoryTests;
 
-public sealed class ExistsAsyncTests : ProductRepositoryTestsBase
+public sealed class ExistsAsyncTests : ProductRepositoryTestBase
 {
     [Fact]
     public Task ExistsAsync_WhenProductExists_ReturnsTrue() =>

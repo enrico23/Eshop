@@ -2,7 +2,7 @@
 
 namespace EShop.Data.Tests.CategoryTests;
 
-public abstract class CategoryRepositoryTestsBase 
+public abstract class CategoryRepositoryTestBase 
     : RepositoryTestBase<Category, CategoryRepository, CatalogDbContext, EfUnitOfWork>
 {
     protected override CategoryRepository CreateRepository(CatalogDbContext context) =>

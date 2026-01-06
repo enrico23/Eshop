@@ -1,6 +1,6 @@
 ﻿namespace EShop.Data.Tests.Repositories.ProductRepositoryTests;
 
-public sealed class AddAsyncTests : ProductRepositoryTestsBase
+public sealed class AddAsyncTests : ProductRepositoryTestBase
 {
     [Fact]
     public Task AddAsync_WhenCommitted_PersistsAndCanBeReadBack() =>

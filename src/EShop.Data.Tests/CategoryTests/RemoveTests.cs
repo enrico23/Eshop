@@ -1,6 +1,6 @@
 ﻿namespace EShop.Data.Tests.CategoryTests;
 
-public sealed class RemoveTests : CategoryRepositoryTestsBase
+public sealed class RemoveTests : CategoryRepositoryTestBase
 {
     [Fact]
     public Task RemoveCategory_WhenSaved_RemovesEntityFromStore() =>

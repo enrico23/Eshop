@@ -1,6 +1,6 @@
 ﻿namespace EShop.Data.Tests.Repositories.ProductRepositoryTests;
 
-public sealed class GetPagedAsyncTests : ProductRepositoryTestsBase
+public sealed class GetPagedAsyncTests : ProductRepositoryTestBase
 {
     [Fact]
     public Task GetPagedAsync_WhenNoFilterAndNoOrder_ReturnsPageWithCorrectTotalAndItems()

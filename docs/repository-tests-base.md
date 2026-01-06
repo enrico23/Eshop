@@ -10,7 +10,8 @@ ensuring deterministic cleanup.
 
 1. Call `TestAsync` with either a seed count or explicit seed set.
 2. A new `DbContext` is created.
-3. The test fixture is created and `RegisterEntityFactory` is invoked to register entity creation rules.
+3. The test fixture is created and `RegisterEntityFactory` is invoked to register 
+entity creation rules.
 4. Seed data is generated, persisted via `SeedAsync`, and a `EfUnitOfWork` and SUT are created.
 5. The test body runs inside a `TestScope` that exposes the SUT, fixture, unit of work, and seeded entities.
 6. The context is disposed on scope disposal; exceptions also dispose the context before rethrow.
@@ -27,10 +28,14 @@ ensuring deterministic cleanup.
 
 Derived bases provide only what is specific to the repository:
 
-- `CreateSut(CatalogDbContext context)` builds the repository instance.
+- `CreateContext` creates a new database context instance.
+- `CreateUnitOfWOrk(TContext context)` creates the Unit Of Work that coordinates 
+persistence operations.
+- `CreateRepository(TContext context)` builds the repository instance (SUT).
 - `RegisterEntityFactory(IFixture fixture)` configures how to create the entity type used in tests.
 
-Example: `ProductRepositoryTestsBase` wires the product repository and registers a `Product` factory.
+Example: `ProductRepositoryTestsBase` wires the product repository 
+and registers a `Product` factory.
 
 ## Example usage
 

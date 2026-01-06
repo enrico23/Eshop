@@ -2,7 +2,7 @@
 
 namespace EShop.Data.Tests.Repositories.ProductRepositoryTests;
 
-public sealed class NameExistsAsyncTests : ProductRepositoryTestsBase
+public sealed class NameExistsAsyncTests : ProductRepositoryTestBase
 {
     [Theory]
     [InlineData("Widget", "widget", true)]
