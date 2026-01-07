@@ -2,7 +2,7 @@
 
 namespace EShop.Domain.Catalog;
 
-public sealed class  Category : AuditableEntity
+public sealed class  Category : AuditableEntity, IEntity<Guid>
 {
     public Guid Id { get; private set; }
 

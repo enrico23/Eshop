@@ -6,7 +6,8 @@ namespace EShop.API.Tests.Services.CategoryServiceTests;
 
 public abstract class CategoryServiceTestBase
 {
-    internal ICategoryRepository _repo = Substitute.For<ICategoryRepository>();
+    internal IExtendedCategoryRepository _repo = Substitute.For<IExtendedCategoryRepository>();
+    internal IRepository<Category, Guid, CatalogDbContext> _repo2 = Substitute.For<IRepository<Category, Guid, CatalogDbContext>>();
     internal IMapper _mapper = Substitute.For<IMapper>();
     internal IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
     internal ISqlServerExceptionsHelper _sqlServerExceptionsHelper = Substitute.For<ISqlServerExceptionsHelper>();
@@ -18,7 +19,7 @@ public abstract class CategoryServiceTestBase
 
     private async Task CreateAsync(Func<TestScope, Task> testBody)
     {
-        var sut = new CategoryService(_repo, _mapper, _unitOfWork, _sqlServerExceptionsHelper);
+        var sut = new CategoryService(_repo, _repo2, _mapper, _unitOfWork, _sqlServerExceptionsHelper);
        
         try
         {

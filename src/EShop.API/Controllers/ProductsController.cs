@@ -19,9 +19,10 @@ public class ProductsController(IProductService productService) : ControllerBase
     public async Task<ActionResult> GetPagedAsync(
         [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
         [FromQuery] string orderBy = "Name", [FromQuery] string orderDirection = "asc", 
-        [FromQuery] string? filter = null, CancellationToken ct = default)
+        [FromQuery] string? filter = null, 
+        [FromQuery] Guid? categoryId = null, CancellationToken ct = default)
     {
-        var results = await _productService.GetPagedAsync(page, pageSize, orderBy, orderDirection, filter, ct);
+        var results = await _productService.GetPagedAsync(page, pageSize, orderBy, orderDirection, filter, categoryId, ct);
 
         return Ok(results);
     }

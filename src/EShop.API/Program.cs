@@ -3,6 +3,7 @@ using EShop.API.Exceptions;
 using EShop.API.Services;
 using EShop.Data;
 using EShop.Data.Repositories;
+using EShop.Domain;
 using EShop.Shared.Eventing;
 using EShop.Shared.Exceptions;
 using EShop.Shared.Observability.Correlation;
@@ -70,9 +71,10 @@ public partial class Program
         TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
 
         builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
-        builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+        builder.Services.AddScoped(typeof(IRepository<,,>), typeof(EfRepository<,,>));
+        builder.Services.AddScoped<IExtendedCategoryRepository, ExtendedCategoryRepository>();
         builder.Services.AddScoped<ICategoryService, CategoryService>();
-        builder.Services.AddScoped<IProductRepository, ProductRepository>();
+        builder.Services.AddScoped<IExtendedProductRepository, ExtendedProductRepository>();
         builder.Services.AddScoped<IProductService, ProductService>();
         builder.Services.AddScoped<ISqlServerExceptionsHelper, SqlServerExceptionsHelper>();
 

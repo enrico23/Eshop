@@ -2,3 +2,7 @@
 global using System.Linq.Dynamic.Core;
 global using Microsoft.EntityFrameworkCore.Design;
 global using Microsoft.Extensions.Configuration;
+global using System.Linq.Expressions;
+
+global using EShop.Domain;
+global using EShop.Domain.Catalog;

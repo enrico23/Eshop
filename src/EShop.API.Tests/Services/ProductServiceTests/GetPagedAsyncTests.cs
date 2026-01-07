@@ -14,13 +14,13 @@ public sealed class GetPagedAsyncTests : ProductServiceTestBase
             PageSize: 1,
             Total: 0);
 
-        _repo.GetPagedAsync(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string?>(), ct)
+        _repo.GetPagedAsync(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<Guid?>(), ct)
                 .Returns(paged);
 
         var sut = CreateSut();
 
         // Act
-        await sut.GetPagedAsync(page: 0, pageSize: 500, orderBy: "Name", orderDirection: "asc", filter: null, ct);
+        await sut.GetPagedAsync(page: 0, pageSize: 500, orderBy: "Name", orderDirection: "asc", filter: null, categoryId: null, ct);
 
         // Assert: page should become 1, pageSize should clamp to 200
         await _repo.Received(1).GetPagedAsync(
@@ -28,6 +28,7 @@ public sealed class GetPagedAsyncTests : ProductServiceTestBase
             200,
             "Name",
             "asc",
+            null,
             null,
             ct);
     }

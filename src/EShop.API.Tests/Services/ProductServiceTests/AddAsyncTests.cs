@@ -32,7 +32,7 @@ public sealed class AddAsyncTests : ProductServiceTestBase
         var dbEx = new DbUpdateException("db fail", innerException: new Exception("inner"));
         _sqlServerExceptionsHelper.IsUniqueViolation(dbEx).Returns(true);
 
-        _repo.AddAsync(Arg.Any<Product>(), ct).Returns<Task>(_ => throw dbEx);
+        _repo2.AddAsync(Arg.Any<Product>(), ct).Returns<Task>(_ => throw dbEx);
 
         var ex = await Assert.ThrowsAsync<DomainException>(() => sut.AddAsync(form, ct));
 
@@ -55,12 +55,11 @@ public sealed class AddAsyncTests : ProductServiceTestBase
             File = FormFileHelpers.CreateFakeFormFile()
         };
 
-        _repo.NameExistsAsync(Arg.Any<string>(), ct).Returns(false);
         _imageStorage.UploadImageAsync(form.File, ct).Returns("https://cdn/new.png");
 
         // Capture the entity passed into AddAsync to assert it contains the image URL
         Product? added = null;
-        await _repo.AddAsync(Arg.Do<Product>(p => added = p), ct);
+        await _repo2.AddAsync(Arg.Do<Product>(p => added = p), ct);
 
         _mapper
             .Map<ProductDto>(Arg.Any<Product>())
@@ -72,7 +71,7 @@ public sealed class AddAsyncTests : ProductServiceTestBase
 
         Assert.NotNull(result);
         await _imageStorage.Received(1).UploadImageAsync(form.File, ct);
-        await _repo.Received(1).AddAsync(Arg.Any<Product>(), ct);
+        await _repo2.Received(1).AddAsync(Arg.Any<Product>(), ct);
         await _unitOfWork.Received(1).SaveChangesAsync(ct);
 
         Assert.NotNull(added);

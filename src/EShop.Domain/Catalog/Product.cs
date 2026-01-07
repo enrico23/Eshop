@@ -5,7 +5,7 @@ using EShop.Domain.Products;
 using EShop.Domain.Validation;
 using EShop.Shared.Domain;
 
-public sealed class Product : AuditableEntity
+public sealed class Product : AuditableEntity, IEntity<Guid>
 {
     public Guid Id { get; private set; }
 

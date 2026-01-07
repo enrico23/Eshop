@@ -3,6 +3,7 @@ using EShop.Data.Repositories;
 using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;
 using EShop.Shared.Exceptions;
+using EShop.Shared.Representations;
 using EShop.Shared.Representations.Category;
 using Mapster;
 using MapsterMapper;
@@ -10,14 +11,34 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EShop.API.Services;
 
-public class CategoryService(
-    ICategoryRepository categoryRepository, 
+public interface ICategoryService
+{
+    Task<PagedResult<CategoryDto>> GetPagedAsync(int page, int pageSize,
+        string orderBy = "Name", string orderDirection = "asc", string? filter = null, CancellationToken ct = default);
+
+    Task<ICollection<CategoryDto>> GetAllAsync(CancellationToken ct);
+
+    Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
+
+    Task<CategoryDto?> GetByIdAsync(Guid id, CancellationToken ct = default);
+
+    Task<bool> UpdateAsync(Guid id, UpdateCategoryDto updateCategoryDto, CancellationToken ct);
+
+    Task<CategoryDto> AddAsync(CreateCategoryDto createCategoryDto, CancellationToken ct);
+
+    Task<bool> DeleteAsync(Guid id, CancellationToken ct);
+}
+
+public sealed class CategoryService(
+    IExtendedCategoryRepository categoryRepository, 
+    IRepository<Category, Guid, CatalogDbContext> categoryRepo, 
     IMapper mapper,
     IUnitOfWork unitOfWork,
     ISqlServerExceptionsHelper sqlServerExceptionsHelper) 
     : ICategoryService
 {
-    private readonly ICategoryRepository _categoryRepository = categoryRepository;
+    private readonly IExtendedCategoryRepository _categoryRepository = categoryRepository;
+    private readonly IRepository<Category, Guid, CatalogDbContext> _categoryRepo = categoryRepo;
     private readonly IMapper _mapper = mapper;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly ISqlServerExceptionsHelper _sqlServerExceptionsHelper = sqlServerExceptionsHelper;
@@ -30,7 +51,7 @@ public class CategoryService(
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 200);
 
-        var pagedResult = await _categoryRepository.GetPagedAsync(page, pageSize, orderBy, orderDirection, filter, ct);
+        var pagedResult = await _categoryRepo.GetPagedAsync(page, pageSize, orderBy, orderDirection, filter, ct);
         var items = _mapper.Map<List<CategoryDto>>(pagedResult.Items);
         return new Shared.Representations.PagedResult<CategoryDto>(items, page, pageSize, pagedResult.Total);
     }
@@ -42,11 +63,11 @@ public class CategoryService(
     }
 
     public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default) =>
-         await _categoryRepository.ExistsAsync(id, ct);
+         await _categoryRepo.ExistsAsync(id, ct);
     
     public async Task<CategoryDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
-        var category = await _categoryRepository.GetByIdAsync(id, false, ct);
+        var category = await _categoryRepo.GetByIdAsync(id, false, ct);
         return category is null ? null : _mapper.Map<CategoryDto>(category);
      }
 
@@ -54,7 +75,7 @@ public class CategoryService(
     {
         ArgumentNullException.ThrowIfNull(updateCategoryDto, nameof(updateCategoryDto));
 
-        var entity = await _categoryRepository.GetByIdAsync(id, true, ct);
+        var entity = await _categoryRepo.GetByIdAsync(id, true, ct);
         if (entity is null)
             return false;
 
@@ -80,7 +101,7 @@ public class CategoryService(
 
         try
         {
-            await _categoryRepository.AddAsync(category, ct);
+            await _categoryRepo.AddAsync(category, ct);
             await _unitOfWork.SaveChangesAsync(ct);
             return category.Adapt<CategoryDto>();
         }
@@ -92,7 +113,7 @@ public class CategoryService(
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)
     {
-        var entity = await _categoryRepository.GetByIdAsync(id, true, ct);
+        var entity = await _categoryRepo.GetByIdAsync(id, true, ct);
 
         if (entity is null) return false;
 
@@ -100,7 +121,7 @@ public class CategoryService(
         if (hasProducts)
             throw new DomainException("Category cannot be deleted because it contains products.");
 
-        _categoryRepository.Remove(entity);
+        _categoryRepo.Remove(entity);
         await _unitOfWork.SaveChangesAsync(ct);
 
         return true;

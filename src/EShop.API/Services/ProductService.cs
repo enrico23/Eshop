@@ -9,6 +9,7 @@ using EShop.Shared.Domain;
 using EShop.Shared.Eventing;
 using EShop.Shared.Exceptions;
 using EShop.Shared.Observability.Correlation;
+using EShop.Shared.Representations;
 using EShop.Shared.Representations.Product;
 using EShop.Shared.Services;
 using MapsterMapper;
@@ -17,8 +18,26 @@ using System.Collections.Immutable;
 
 namespace EShop.API.Services;
 
-public class ProductService(
-    IProductRepository productRepository,
+public interface IProductService
+{
+    Task<PagedResult<ProductDto>> GetPagedAsync(int page, int pageSize,
+        string orderBy = "Name", string orderDirection = "asc",
+        string? filter = null, Guid? categoryId = null, CancellationToken ct = default);
+
+    Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
+
+    Task<ProductDto?> GetByIdAsync(Guid id, CancellationToken ct);
+
+    Task<ProductDto> AddAsync(ProductFormDto productFormDto, CancellationToken ct);
+
+    Task<bool> UpdateAsync(Guid id, ProductFormDto productFormDto, CancellationToken ct);
+
+    Task<bool> DeleteAsync(Guid id, CancellationToken ct);
+}
+
+public sealed class ProductService(
+    IExtendedProductRepository productRepository,
+    IRepository<Product, Guid, CatalogDbContext> productRepo,
     IMapper mapper,
     IImageStorageService imageStorageService,
     IEventPublisher eventPublisher,
@@ -27,7 +46,8 @@ public class ProductService(
     ISqlServerExceptionsHelper sqlServerExceptionsHelper) 
     : IProductService
 {
-    private readonly IProductRepository _productRepository = productRepository;
+    private readonly IExtendedProductRepository _productRepository = productRepository;
+    private readonly IRepository<Product, Guid, CatalogDbContext> _productRepo = productRepo;
     private readonly IMapper _mapper = mapper;
     private readonly IImageStorageService _imageStorageService = imageStorageService;
     private readonly IEventPublisher _eventPublisher = eventPublisher;
@@ -38,22 +58,22 @@ public class ProductService(
     public async Task<Shared.Representations.PagedResult<ProductDto>> GetPagedAsync(
         int page, int pageSize, 
         string orderBy = "Name", string orderDirection = "asc",
-        string? filter = null, CancellationToken ct = default)
+        string? filter = null, Guid? categoryId = null, CancellationToken ct = default)
     {
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 200);
 
-        var pagedResult = await _productRepository.GetPagedAsync(page, pageSize, orderBy, orderDirection, filter, ct);
+        var pagedResult = await _productRepository.GetPagedAsync(page, pageSize, orderBy, orderDirection, filter, categoryId, ct);
         var items = _mapper.Map<List<ProductDto>>(pagedResult.Items);
         return new Shared.Representations.PagedResult<ProductDto>(items, page, pageSize, pagedResult.Total);
     }
 
     public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default) =>
-        await _productRepository.ExistsAsync(id, ct);
+        await _productRepo.ExistsAsync(id, ct);
 
     public async Task<ProductDto?> GetByIdAsync(Guid id, CancellationToken ct)
     {
-        var product = await _productRepository.GetByIdAsync(id, track: false, ct);
+        var product = await _productRepo.GetByIdAsync(id, track: false, ct);
         return product is null ? null : _mapper.Map<ProductDto>(product);
     }
 
@@ -85,7 +105,7 @@ public class ProductService(
 
         try
         {
-            await _productRepository.AddAsync(product, ct);
+            await _productRepo.AddAsync(product, ct);
             await _unitOfWork.SaveChangesAsync(ct);
 
             return _mapper.Map<ProductDto>(product);
@@ -100,7 +120,7 @@ public class ProductService(
     {
         ArgumentNullException.ThrowIfNull(productFormDto, nameof(productFormDto));
 
-        var product = await _productRepository.GetByIdAsync(id, track: true, ct);
+        var product = await _productRepo.GetByIdAsync(id, track: true, ct);
         if (product is null)
             return false;
 
@@ -158,7 +178,7 @@ public class ProductService(
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)
     {
-        var entity = await _productRepository.GetByIdAsync(id, track: true, ct);
+        var entity = await _productRepo.GetByIdAsync(id, track: true, ct);
         if (entity is null)
             return false;
 
@@ -170,7 +190,7 @@ public class ProductService(
             }
         }
 
-       _productRepository.Remove(entity);
+       _productRepo.Remove(entity);
         await _unitOfWork.SaveChangesAsync(ct);
 
         return true;

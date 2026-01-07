@@ -1,6 +1,4 @@
-﻿using EShop.Data;
-
-/// <summary>
+﻿/// <summary>
 /// Base class for repsotory tests 
 /// build around the Unit Of Work pattern.
 /// </summary>

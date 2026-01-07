@@ -1,4 +1,4 @@
-﻿namespace EShop.Data.Tests.CategoryTests;
+﻿namespace EShop.Data.Tests.Repositories.CategoryTests;
 
 public sealed class RemoveTests : CategoryRepositoryTestBase
 {

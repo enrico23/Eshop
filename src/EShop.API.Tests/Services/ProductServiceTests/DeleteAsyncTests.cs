@@ -1,6 +1,4 @@
-﻿using EShop.Shared.Eventing;
-
-namespace EShop.API.Tests.Services.ProductServiceTests;
+﻿namespace EShop.API.Tests.Services.ProductServiceTests;
 
 public sealed class DeleteAsyncTests : ProductServiceTestBase
 {
@@ -10,14 +8,14 @@ public sealed class DeleteAsyncTests : ProductServiceTestBase
         var id = Guid.NewGuid();
         var ct = CancellationToken.None;
 
-        _repo.GetByIdAsync(id, track: true, ct).Returns((Product?)null);
+        _repo2.GetByIdAsync(id, track: true, ct).Returns((Product?)null);
 
         var sut = CreateSut();
 
         var result = await sut.DeleteAsync(id, ct);
 
         Assert.False(result);
-        _repo.DidNotReceiveWithAnyArgs().Remove(default!);
+        _repo2.DidNotReceiveWithAnyArgs().Remove(default!);
         await _unitOfWork.DidNotReceive().SaveChangesAsync(ct);
     }
 
@@ -34,7 +32,7 @@ public sealed class DeleteAsyncTests : ProductServiceTestBase
             sku: "SKU-1",
             imageUrls: new[] { "https://cdn/a.png" });
 
-        _repo.GetByIdAsync(id, track: true, ct).Returns(entity);
+        _repo2.GetByIdAsync(id, track: true, ct).Returns(entity);
 
         var sut = CreateSut();
 
@@ -47,7 +45,7 @@ public sealed class DeleteAsyncTests : ProductServiceTestBase
             Arg.Any<EventEnvelope<DeleteImageRequest>>(),
             ct);
 
-        _repo.Received(1).Remove(entity);
+        _repo2.Received(1).Remove(entity);
         await _unitOfWork.Received(1).SaveChangesAsync(ct);
     }
 }
