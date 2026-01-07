@@ -3,10 +3,10 @@
 namespace EShop.Data.Tests.Repositories.ProductRepositoryTests;
 
 public abstract class ProductRepositoryTestBase 
-    : RepositoryTestBase<Product, ProductRepository, CatalogDbContext, EfUnitOfWork>
+    : RepositoryTestBase<Product, ExtendedProductRepository, CatalogDbContext, EfUnitOfWork>
 {
 
-    protected override ProductRepository CreateRepository(CatalogDbContext context) =>
+    protected override ExtendedProductRepository CreateRepository(CatalogDbContext context) =>
        new(context);
 
     protected override void RegisterEntityFactory(IFixture fixture)

@@ -6,7 +6,7 @@ namespace EShop.API.Tests.Services.CategoryServiceTests;
 
 public abstract class CategoryServiceTestBase
 {
-    internal ICategoryRepository _repo = Substitute.For<ICategoryRepository>();
+    internal IExtendedCategoryRepository _repo = Substitute.For<IExtendedCategoryRepository>();
     internal IRepository<Category, Guid, CatalogDbContext> _repo2 = Substitute.For<IRepository<Category, Guid, CatalogDbContext>>();
     internal IMapper _mapper = Substitute.For<IMapper>();
     internal IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();

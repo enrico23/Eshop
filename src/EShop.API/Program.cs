@@ -72,9 +72,9 @@ public partial class Program
 
         builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
         builder.Services.AddScoped(typeof(IRepository<,,>), typeof(EfRepository<,,>));
-        builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+        builder.Services.AddScoped<IExtendedCategoryRepository, ExtendedCategoryRepository>();
         builder.Services.AddScoped<ICategoryService, CategoryService>();
-        builder.Services.AddScoped<IProductRepository, ProductRepository>();
+        builder.Services.AddScoped<IExtendedProductRepository, ExtendedProductRepository>();
         builder.Services.AddScoped<IProductService, ProductService>();
         builder.Services.AddScoped<ISqlServerExceptionsHelper, SqlServerExceptionsHelper>();
 

@@ -11,14 +11,14 @@ using Microsoft.EntityFrameworkCore;
 namespace EShop.API.Services;
 
 public class CategoryService(
-    ICategoryRepository categoryRepository, 
+    IExtendedCategoryRepository categoryRepository, 
     IRepository<Category, Guid, CatalogDbContext> categoryRepo, 
     IMapper mapper,
     IUnitOfWork unitOfWork,
     ISqlServerExceptionsHelper sqlServerExceptionsHelper) 
     : ICategoryService
 {
-    private readonly ICategoryRepository _categoryRepository = categoryRepository;
+    private readonly IExtendedCategoryRepository _categoryRepository = categoryRepository;
     private readonly IRepository<Category, Guid, CatalogDbContext> _categoryRepo = categoryRepo;
     private readonly IMapper _mapper = mapper;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;

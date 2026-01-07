@@ -1,19 +1,19 @@
 ﻿namespace EShop.Data.Repositories;
 
-public interface ICategoryRepository
+public interface IExtendedCategoryRepository
 {
     Task<ICollection<Category>> GetAllAsync(CancellationToken ct = default);
 
     Task<bool> HasAnyProductsAsync(Guid id, CancellationToken ct);
 }
 
-public sealed class CategoryRepository :
+public sealed class ExtendedCategoryRepository :
     EfRepository<Category, Guid, CatalogDbContext>,
-    ICategoryRepository
+    IExtendedCategoryRepository
 {
     private readonly CatalogDbContext _context;
 
-    public CategoryRepository(CatalogDbContext context) : base(context) => _context = context;
+    public ExtendedCategoryRepository(CatalogDbContext context) : base(context) => _context = context;
 
     public async Task<ICollection<Category>> GetAllAsync(CancellationToken ct = default)
     {

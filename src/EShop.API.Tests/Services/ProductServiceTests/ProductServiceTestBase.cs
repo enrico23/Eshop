@@ -6,7 +6,7 @@ namespace EShop.API.Tests.Services.ProductServiceTests;
 
 public abstract class ProductServiceTestBase
 {
-    internal IProductRepository _repo = Substitute.For<IProductRepository>();
+    internal IExtendedProductRepository _repo = Substitute.For<IExtendedProductRepository>();
     internal IRepository<Product, Guid, CatalogDbContext> _repo2 = Substitute.For<IRepository<Product, Guid, CatalogDbContext>>();
     internal IMapper _mapper = Substitute.For<IMapper>();
     internal IImageStorageService _imageStorage = Substitute.For<IImageStorageService>();

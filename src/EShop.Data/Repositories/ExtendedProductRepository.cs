@@ -1,6 +1,6 @@
 ﻿namespace EShop.Data.Repositories;
 
-public interface IProductRepository
+public interface IExtendedProductRepository
 {
     Task<Shared.Representations.PagedResult<Product>> GetPagedAsync(
           int page, int pageSize, string orderBy, string orderDirection, 
@@ -10,12 +10,12 @@ public interface IProductRepository
     Task<bool> SkuInUseAsync(Sku sku, Guid? excludeId, CancellationToken ct);
 }
 
-public sealed class ProductRepository : 
-    EfRepository<Product, Guid, CatalogDbContext>, IProductRepository
+public sealed class ExtendedProductRepository : 
+    EfRepository<Product, Guid, CatalogDbContext>, IExtendedProductRepository
 {
     private readonly CatalogDbContext _context;
 
-    public ProductRepository(CatalogDbContext context) : base(context) => _context = context;
+    public ExtendedProductRepository(CatalogDbContext context) : base(context) => _context = context;
 
     public async Task<Shared.Representations.PagedResult<Product>> GetPagedAsync(
           int page, int pageSize, string orderBy, string orderDirection, string? filter, Guid? categoryId, CancellationToken ct = default)

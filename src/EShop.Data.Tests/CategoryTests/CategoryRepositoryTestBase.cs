@@ -3,9 +3,9 @@
 namespace EShop.Data.Tests.CategoryTests;
 
 public abstract class CategoryRepositoryTestBase 
-    : RepositoryTestBase<Category, CategoryRepository, CatalogDbContext, EfUnitOfWork>
+    : RepositoryTestBase<Category, ExtendedCategoryRepository, CatalogDbContext, EfUnitOfWork>
 {
-    protected override CategoryRepository CreateRepository(CatalogDbContext context) =>
+    protected override ExtendedCategoryRepository CreateRepository(CatalogDbContext context) =>
         new(context);
 
     protected override void RegisterEntityFactory(IFixture fixture) =>

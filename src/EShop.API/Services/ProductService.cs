@@ -9,6 +9,7 @@ using EShop.Shared.Domain;
 using EShop.Shared.Eventing;
 using EShop.Shared.Exceptions;
 using EShop.Shared.Observability.Correlation;
+using EShop.Shared.Representations;
 using EShop.Shared.Representations.Product;
 using EShop.Shared.Services;
 using MapsterMapper;
@@ -17,8 +18,26 @@ using System.Collections.Immutable;
 
 namespace EShop.API.Services;
 
+public interface IProductService
+{
+    Task<PagedResult<ProductDto>> GetPagedAsync(int page, int pageSize,
+        string orderBy = "Name", string orderDirection = "asc",
+        string? filter = null, Guid? categoryId = null, CancellationToken ct = default);
+
+    Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
+
+    Task<ProductDto?> GetByIdAsync(Guid id, CancellationToken ct);
+
+    Task<ProductDto> AddAsync(ProductFormDto productFormDto, CancellationToken ct);
+
+    Task<bool> UpdateAsync(Guid id, ProductFormDto productFormDto, CancellationToken ct);
+
+    Task<bool> DeleteAsync(Guid id, CancellationToken ct);
+}
+
+
 public class ProductService(
-    IProductRepository productRepository,
+    IExtendedProductRepository productRepository,
     IRepository<Product, Guid, CatalogDbContext> productRepo,
     IMapper mapper,
     IImageStorageService imageStorageService,
@@ -28,7 +47,7 @@ public class ProductService(
     ISqlServerExceptionsHelper sqlServerExceptionsHelper) 
     : IProductService
 {
-    private readonly IProductRepository _productRepository = productRepository;
+    private readonly IExtendedProductRepository _productRepository = productRepository;
     private readonly IRepository<Product, Guid, CatalogDbContext> _productRepo = productRepo;
     private readonly IMapper _mapper = mapper;
     private readonly IImageStorageService _imageStorageService = imageStorageService;
