@@ -4,6 +4,10 @@ public interface IRepository<TEntity, TKey, TDbContext>
     where TEntity : class, IEntity<TKey>
     where TDbContext : DbContext
 {
+    Task<Shared.Representations.PagedResult<TEntity>> GetPagedAsync(
+       int page, int pageSize, string orderBy, string orderDirection, string? filter,
+       CancellationToken ct = default);
+
     Task<TEntity?> GetByIdAsync(TKey id, bool track = false, CancellationToken ct = default);
 
     Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
@@ -22,6 +26,27 @@ public class EfRepository<TEntity, TKey, TDbContext> : IRepository<TEntity, TKey
     private readonly DbSet<TEntity> _set;
 
     public EfRepository(TDbContext dbContext) => _set = dbContext.Set<TEntity>();
+
+    public async Task<Shared.Representations.PagedResult<TEntity>> GetPagedAsync(
+       int page, int pageSize, string orderBy, string orderDirection, string? filter,
+       CancellationToken ct = default)
+    {
+        IQueryable<TEntity> query = _set.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(filter))
+            query = query.Where("Name.ToLower().Contains(@0)", filter.ToLower());
+
+        if (!string.IsNullOrWhiteSpace(orderBy))
+            query = query.OrderBy($"{orderBy} {orderDirection}");
+
+        var total = await query.CountAsync(ct);
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        return new Shared.Representations.PagedResult<TEntity>(items, page, pageSize, total);
+    }
 
     public Task<TEntity?> GetByIdAsync(TKey id, bool track = false, CancellationToken ct = default)
     {

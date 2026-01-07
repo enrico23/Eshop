@@ -32,7 +32,7 @@ public class CategoryService(
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 200);
 
-        var pagedResult = await _categoryRepository.GetPagedAsync(page, pageSize, orderBy, orderDirection, filter, ct);
+        var pagedResult = await _categoryRepo.GetPagedAsync(page, pageSize, orderBy, orderDirection, filter, ct);
         var items = _mapper.Map<List<CategoryDto>>(pagedResult.Items);
         return new Shared.Representations.PagedResult<CategoryDto>(items, page, pageSize, pagedResult.Total);
     }

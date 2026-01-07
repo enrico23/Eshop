@@ -40,12 +40,12 @@ public class ProductService(
     public async Task<Shared.Representations.PagedResult<ProductDto>> GetPagedAsync(
         int page, int pageSize, 
         string orderBy = "Name", string orderDirection = "asc",
-        string? filter = null, CancellationToken ct = default)
+        string? filter = null, Guid? categoryId = null, CancellationToken ct = default)
     {
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 200);
 
-        var pagedResult = await _productRepository.GetPagedAsync(page, pageSize, orderBy, orderDirection, filter, ct);
+        var pagedResult = await _productRepository.GetPagedAsync(page, pageSize, orderBy, orderDirection, filter, categoryId, ct);
         var items = _mapper.Map<List<ProductDto>>(pagedResult.Items);
         return new Shared.Representations.PagedResult<ProductDto>(items, page, pageSize, pagedResult.Total);
     }

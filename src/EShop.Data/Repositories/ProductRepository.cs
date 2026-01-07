@@ -4,8 +4,8 @@ public interface IProductRepository
 {
     Task<Shared.Representations.PagedResult<Product>> GetPagedAsync(
           int page, int pageSize, string orderBy, string orderDirection, 
-          string? filter, 
-          CancellationToken ct);
+          string? filter, Guid? categoryId,
+          CancellationToken ct = default);
 
     Task<bool> SkuInUseAsync(Sku sku, Guid? excludeId, CancellationToken ct);
 }
@@ -18,7 +18,7 @@ public sealed class ProductRepository :
     public ProductRepository(CatalogDbContext context) : base(context) => _context = context;
 
     public async Task<Shared.Representations.PagedResult<Product>> GetPagedAsync(
-          int page, int pageSize, string orderBy, string orderDirection, string? filter, CancellationToken ct)
+          int page, int pageSize, string orderBy, string orderDirection, string? filter, Guid? categoryId, CancellationToken ct = default)
     {
         IQueryable<Product> query = _context.Products.AsNoTracking();
 

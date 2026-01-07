@@ -8,7 +8,7 @@ public interface IProductService
 {
     Task<PagedResult<ProductDto>> GetPagedAsync(int page, int pageSize, 
         string orderBy = "Name", string orderDirection = "asc", 
-        string? filter = null, CancellationToken ct = default);
+        string? filter = null, Guid? categoryId = null, CancellationToken ct = default);
 
     Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
 
