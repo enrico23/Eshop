@@ -71,9 +71,15 @@ public interface IProductRepository
     void Remove(Product product);
 }
 
-public sealed class ProductRepository(CatalogDbContext context) : IProductRepository
+public sealed class ProductRepository : 
+    EfRepository<Product, Guid>, IProductRepository
 {
-    private readonly CatalogDbContext _context = context;
+    private readonly CatalogDbContext _context;
+
+    public ProductRepository(CatalogDbContext context) : base(context)
+    {
+        _context = context;
+    }
 
     public async Task<Shared.Representations.PagedResult<Product>> GetPagedAsync(
           int page, int pageSize, string orderBy, string orderDirection, string? filter, CancellationToken ct)
@@ -97,11 +103,6 @@ public sealed class ProductRepository(CatalogDbContext context) : IProductReposi
 
     public Task<bool> ExistsAsync(Guid id, CancellationToken ct) =>
           _context.Products.AsNoTracking().AnyAsync(p => p.Id == id, ct);
-
-    public Task<Product?> GetByIdAsync(Guid id, bool track = false, CancellationToken ct = default) =>
-        track
-            ? _context.Products.FirstOrDefaultAsync(p => p.Id == id, ct)
-            : _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id, ct);
 
     public Task<bool> NameExistsAsync(string name, CancellationToken ct) =>
          _context.Products.AnyAsync(p => p.Name.ToLower() == name.ToLower(), ct);

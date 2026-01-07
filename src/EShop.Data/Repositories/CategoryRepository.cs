@@ -70,9 +70,16 @@ public interface ICategoryRepository
     Task<bool> HasAnyProductsAsync(Guid id, CancellationToken ct);
 }
 
-public sealed class CategoryRepository(CatalogDbContext context) : ICategoryRepository
+public sealed class CategoryRepository :
+    EfRepository<Category, Guid>,
+    ICategoryRepository
 {
-    private readonly CatalogDbContext _context = context;
+    private readonly CatalogDbContext _context;
+
+    public CategoryRepository(CatalogDbContext context) : base(context)
+    {
+        _context = context;
+    }
 
     public async Task<Shared.Representations.PagedResult<Category>> GetPagedAsync(
         int page, int pageSize, string orderBy, string orderDirection, string? filter, 
@@ -106,10 +113,10 @@ public sealed class CategoryRepository(CatalogDbContext context) : ICategoryRepo
     public Task<bool> ExistsAsync(Guid id, CancellationToken ct = default) =>
          _context.Categories.AsNoTracking().AnyAsync(c => c.Id == id, ct);
 
-    public Task<Category?> GetByIdAsync(Guid id, bool track = false, CancellationToken ct = default) =>
-        track
-            ? _context.Categories.FirstOrDefaultAsync(c => c.Id == id, ct)
-            : _context.Categories.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id, ct);
+    //public Task<Category?> GetByIdAsync(Guid id, bool track = false, CancellationToken ct = default) =>
+    //    track
+    //        ? _context.Categories.FirstOrDefaultAsync(c => c.Id == id, ct)
+    //        : _context.Categories.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id, ct);
 
     public Task<bool> NameExistsAsync(string name, CancellationToken ct = default) =>
         _context.Categories.AnyAsync(c => c.Name.ToLower() == name.ToLower(), ct);
