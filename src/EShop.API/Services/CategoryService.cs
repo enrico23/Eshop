@@ -12,12 +12,14 @@ namespace EShop.API.Services;
 
 public class CategoryService(
     ICategoryRepository categoryRepository, 
+    IRepository<Category, Guid, CatalogDbContext> categoryRepo, 
     IMapper mapper,
     IUnitOfWork unitOfWork,
     ISqlServerExceptionsHelper sqlServerExceptionsHelper) 
     : ICategoryService
 {
     private readonly ICategoryRepository _categoryRepository = categoryRepository;
+    private readonly IRepository<Category, Guid, CatalogDbContext> _categoryRepo = categoryRepo;
     private readonly IMapper _mapper = mapper;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly ISqlServerExceptionsHelper _sqlServerExceptionsHelper = sqlServerExceptionsHelper;
@@ -46,7 +48,7 @@ public class CategoryService(
     
     public async Task<CategoryDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
-        var category = await _categoryRepository.GetByIdAsync(id, false, ct);
+        var category = await _categoryRepo.GetByIdAsync(id, false, ct);
         return category is null ? null : _mapper.Map<CategoryDto>(category);
      }
 
@@ -54,7 +56,7 @@ public class CategoryService(
     {
         ArgumentNullException.ThrowIfNull(updateCategoryDto, nameof(updateCategoryDto));
 
-        var entity = await _categoryRepository.GetByIdAsync(id, true, ct);
+        var entity = await _categoryRepo.GetByIdAsync(id, true, ct);
         if (entity is null)
             return false;
 
@@ -92,7 +94,7 @@ public class CategoryService(
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)
     {
-        var entity = await _categoryRepository.GetByIdAsync(id, true, ct);
+        var entity = await _categoryRepo.GetByIdAsync(id, true, ct);
 
         if (entity is null) return false;
 

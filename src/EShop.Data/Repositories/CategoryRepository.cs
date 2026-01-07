@@ -5,16 +5,6 @@ namespace EShop.Data.Repositories;
 
 public interface ICategoryRepository
 {
-    /// <summary>
-    /// Get Categories Paged
-    /// </summary>
-    /// <param name="page"></param>
-    /// <param name="pageSize"></param>
-    /// <param name="orderBy"></param>
-    /// <param name="orderDirection"></param>
-    /// <param name="filter"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     Task<Shared.Representations.PagedResult<Category>> GetPagedAsync(
           int page, int pageSize, string orderBy, string orderDirection,
           string? filter,
@@ -22,56 +12,19 @@ public interface ICategoryRepository
 
     Task<ICollection<Category>> GetAllAsync(CancellationToken ct = default);
 
-    /// <summary>
-    /// Category exists
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
 
-    /// <summary>
-    /// Get Category by Id
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="track"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    Task<Category?> GetByIdAsync(Guid id, bool track = false, CancellationToken ct = default);
-
-    /// <summary>
-    /// Category name aalready exists
-    /// </summary>
-    /// <param name="name"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     Task<bool> NameExistsAsync(string name, CancellationToken ct = default);
 
-    /// <summary>
-    /// Add Category to DbContext
-    /// </summary>
-    /// <param name="category"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     Task AddAsync(Category category, CancellationToken ct = default);
 
-    /// <summary>
-    /// Remove Category from DbContext
-    /// </summary>
-    /// <param name="category"></param>
     void Remove(Category category);
 
-    /// <summary>
-    /// Has any products
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     Task<bool> HasAnyProductsAsync(Guid id, CancellationToken ct);
 }
 
 public sealed class CategoryRepository :
-    EfRepository<Category, Guid>,
+    EfRepository<Category, Guid, CatalogDbContext>,
     ICategoryRepository
 {
     private readonly CatalogDbContext _context;
@@ -112,11 +65,6 @@ public sealed class CategoryRepository :
 
     public Task<bool> ExistsAsync(Guid id, CancellationToken ct = default) =>
          _context.Categories.AsNoTracking().AnyAsync(c => c.Id == id, ct);
-
-    //public Task<Category?> GetByIdAsync(Guid id, bool track = false, CancellationToken ct = default) =>
-    //    track
-    //        ? _context.Categories.FirstOrDefaultAsync(c => c.Id == id, ct)
-    //        : _context.Categories.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id, ct);
 
     public Task<bool> NameExistsAsync(string name, CancellationToken ct = default) =>
         _context.Categories.AnyAsync(c => c.Name.ToLower() == name.ToLower(), ct);

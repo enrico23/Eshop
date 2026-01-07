@@ -71,7 +71,7 @@ public partial class Program
         TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
 
         builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
-        builder.Services.AddScoped(typeof(IRepository<,>), typeof(EfRepository<,>));
+        builder.Services.AddScoped(typeof(IRepository<,,>), typeof(EfRepository<,,>));
         builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
         builder.Services.AddScoped<ICategoryService, CategoryService>();
         builder.Services.AddScoped<IProductRepository, ProductRepository>();
