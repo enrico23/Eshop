@@ -82,7 +82,7 @@ public class CategoryService(
 
         try
         {
-            await _categoryRepository.AddAsync(category, ct);
+            await _categoryRepo.AddAsync(category, ct);
             await _unitOfWork.SaveChangesAsync(ct);
             return category.Adapt<CategoryDto>();
         }
@@ -102,7 +102,7 @@ public class CategoryService(
         if (hasProducts)
             throw new DomainException("Category cannot be deleted because it contains products.");
 
-        _categoryRepository.Remove(entity);
+        _categoryRepo.Remove(entity);
         await _unitOfWork.SaveChangesAsync(ct);
 
         return true;

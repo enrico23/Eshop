@@ -9,10 +9,6 @@ public interface ICategoryRepository
 
     Task<ICollection<Category>> GetAllAsync(CancellationToken ct = default);
 
-    Task AddAsync(Category category, CancellationToken ct = default);
-
-    void Remove(Category category);
-
     Task<bool> HasAnyProductsAsync(Guid id, CancellationToken ct);
 }
 
@@ -52,12 +48,6 @@ public sealed class CategoryRepository :
             .OrderBy(c => c.Name)
             .ToListAsync(ct);
     }
-
-    public Task AddAsync(Category category, CancellationToken ct = default) =>
-        _context.Categories.AddAsync(category, ct).AsTask();
-
-    public void Remove(Category category) =>
-        _context.Categories.Remove(category);
 
     public async Task<bool> HasAnyProductsAsync(Guid id, CancellationToken ct = default) =>
         await _context.Products.AnyAsync(p => p.CategoryId == id);
