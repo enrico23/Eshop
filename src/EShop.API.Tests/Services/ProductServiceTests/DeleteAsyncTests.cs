@@ -10,7 +10,7 @@ public sealed class DeleteAsyncTests : ProductServiceTestBase
         var id = Guid.NewGuid();
         var ct = CancellationToken.None;
 
-        _repo.GetByIdAsync(id, track: true, ct).Returns((Product?)null);
+        _repo2.GetByIdAsync(id, track: true, ct).Returns((Product?)null);
 
         var sut = CreateSut();
 
@@ -34,7 +34,7 @@ public sealed class DeleteAsyncTests : ProductServiceTestBase
             sku: "SKU-1",
             imageUrls: new[] { "https://cdn/a.png" });
 
-        _repo.GetByIdAsync(id, track: true, ct).Returns(entity);
+        _repo2.GetByIdAsync(id, track: true, ct).Returns(entity);
 
         var sut = CreateSut();
 

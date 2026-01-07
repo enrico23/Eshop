@@ -19,6 +19,7 @@ namespace EShop.API.Services;
 
 public class ProductService(
     IProductRepository productRepository,
+    IRepository<Product, Guid, CatalogDbContext> productRepo,
     IMapper mapper,
     IImageStorageService imageStorageService,
     IEventPublisher eventPublisher,
@@ -28,6 +29,7 @@ public class ProductService(
     : IProductService
 {
     private readonly IProductRepository _productRepository = productRepository;
+    private readonly IRepository<Product, Guid, CatalogDbContext> _productRepo = productRepo;
     private readonly IMapper _mapper = mapper;
     private readonly IImageStorageService _imageStorageService = imageStorageService;
     private readonly IEventPublisher _eventPublisher = eventPublisher;
@@ -53,7 +55,7 @@ public class ProductService(
 
     public async Task<ProductDto?> GetByIdAsync(Guid id, CancellationToken ct)
     {
-        var product = await _productRepository.GetByIdAsync(id, track: false, ct);
+        var product = await _productRepo.GetByIdAsync(id, track: false, ct);
         return product is null ? null : _mapper.Map<ProductDto>(product);
     }
 
@@ -100,7 +102,7 @@ public class ProductService(
     {
         ArgumentNullException.ThrowIfNull(productFormDto, nameof(productFormDto));
 
-        var product = await _productRepository.GetByIdAsync(id, track: true, ct);
+        var product = await _productRepo.GetByIdAsync(id, track: true, ct);
         if (product is null)
             return false;
 
@@ -158,7 +160,7 @@ public class ProductService(
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)
     {
-        var entity = await _productRepository.GetByIdAsync(id, track: true, ct);
+        var entity = await _productRepo.GetByIdAsync(id, track: true, ct);
         if (entity is null)
             return false;
 

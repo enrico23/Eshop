@@ -7,6 +7,7 @@ namespace EShop.API.Tests.Services.ProductServiceTests;
 public abstract class ProductServiceTestBase
 {
     internal IProductRepository _repo = Substitute.For<IProductRepository>();
+    internal IRepository<Product, Guid, CatalogDbContext> _repo2 = Substitute.For<IRepository<Product, Guid, CatalogDbContext>>();
     internal IMapper _mapper = Substitute.For<IMapper>();
     internal IImageStorageService _imageStorage = Substitute.For<IImageStorageService>();
     internal IEventPublisher _publisher = Substitute.For<IEventPublisher>();
@@ -14,7 +15,7 @@ public abstract class ProductServiceTestBase
     internal IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
     internal ISqlServerExceptionsHelper _sqlServerExceptionsHelper = Substitute.For<ISqlServerExceptionsHelper>();
 
-    internal ProductService CreateSut() => new ProductService(_repo, _mapper, _imageStorage, _publisher, _corr, _unitOfWork, _sqlServerExceptionsHelper);
+    internal ProductService CreateSut() => new ProductService(_repo, _repo2, _mapper, _imageStorage, _publisher, _corr, _unitOfWork, _sqlServerExceptionsHelper);
 
     internal static Product CreateProductWithImages(Guid id, string sku, string[] imageUrls)
     {

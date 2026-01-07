@@ -8,7 +8,7 @@ public sealed class GetByIdAsyncTests : ProductServiceTestBase
         var id = Guid.NewGuid();
         var ct = CancellationToken.None;
 
-        _repo.GetByIdAsync(id, track: false, ct).Returns((Product?)null);
+        _repo2.GetByIdAsync(id, track: false, ct).Returns((Product?)null);
 
         var sut = CreateSut();
 
@@ -27,7 +27,7 @@ public sealed class GetByIdAsyncTests : ProductServiceTestBase
         var product = CreateProductWithImages(id, sku: "SKU-1", imageUrls: Array.Empty<string>());
         var dto = new ProductDto();
 
-        _repo.GetByIdAsync(id, track: false, ct).Returns(product);
+        _repo2.GetByIdAsync(id, track: false, ct).Returns(product);
         _mapper.Map<ProductDto>(product).Returns(dto);
 
         var sut = CreateSut();

@@ -10,7 +10,7 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
         var id = Guid.NewGuid();
         var ct = CancellationToken.None;
 
-        _repo.GetByIdAsync(id, track: true, ct).Returns((Product?)null);
+        _repo2.GetByIdAsync(id, track: true, ct).Returns((Product?)null);
 
         var sut = CreateSut();
 
@@ -28,7 +28,7 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
 
         var product = CreateProductWithImages(id, sku: "SKU-OLD", imageUrls: Array.Empty<string>());
 
-        _repo.GetByIdAsync(id, track: true, ct).Returns(product);
+        _repo2.GetByIdAsync(id, track: true, ct).Returns(product);
         _repo.SkuInUseAsync(Arg.Any<Sku>(), product.Id, ct).Returns(true);
 
         var sut = CreateSut();
@@ -47,7 +47,7 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
         var ct = CancellationToken.None;
 
         var product = CreateProductWithImages(id, sku: "SKU-1", imageUrls: Array.Empty<string>());
-        _repo.GetByIdAsync(id, track: true, ct).Returns(product);
+        _repo2.GetByIdAsync(id, track: true, ct).Returns(product);
 
         var sut = CreateSut();
 
@@ -71,7 +71,7 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
             sku: "SKU-1",
             imageUrls: new[] { "https://cdn/old1.png", "https://cdn/old2.png" });
 
-        _repo.GetByIdAsync(id, track: true, ct).Returns(product);
+        _repo2.GetByIdAsync(id, track: true, ct).Returns(product);
 
         var form = ValidForm(status: ProductStatus.Active, withFile: true);
         form.File = FormFileHelpers.CreateFakeFormFile();

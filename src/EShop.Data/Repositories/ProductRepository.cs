@@ -27,18 +27,6 @@ public interface IProductRepository
     /// <returns></returns>
     Task<bool> ExistsAsync(Guid id, CancellationToken ct);
 
-    /// <summary>
-    /// Get Product by Id
-    /// </summary>
-    /// <remarks>
-    /// Track with EF Core
-    /// </remarks>
-    /// <param name="id"></param>
-    /// <param name="track"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    Task<Product?> GetByIdAsync(Guid id, bool track = false, CancellationToken ct = default);
-
     Task<bool> NameExistsAsync(string name, CancellationToken ct);
 
     Task<bool> SkuInUseAsync(Sku sku, Guid? excludeId, CancellationToken ct);
