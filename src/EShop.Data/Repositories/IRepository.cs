@@ -1,12 +1,14 @@
-﻿using EShop.Domain;
-
-namespace EShop.Data.Repositories;
+﻿namespace EShop.Data.Repositories;
 
 public interface IRepository<TEntity, TKey, TDbContext> 
     where TEntity : class, IEntity<TKey>
     where TDbContext : DbContext
 {
     Task<TEntity?> GetByIdAsync(TKey id, bool track = false, CancellationToken ct = default);
+
+    Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
+
+    Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken ct = default);
 }
 
 public class EfRepository<TEntity, TKey, TDbContext> : IRepository<TEntity, TKey, TDbContext>
@@ -28,4 +30,10 @@ public class EfRepository<TEntity, TKey, TDbContext> : IRepository<TEntity, TKey
         return _set.AsNoTracking()
              .FirstOrDefaultAsync(e => e.Id != null && e.Id.Equals(id), ct);
     }
+
+    public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default) =>
+         await _set.AnyAsync(e=> e.Id != null && e.Id.Equals(id), ct);
+
+    public Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken ct = default)
+       => _set.AsNoTracking().AnyAsync(predicate, ct);
 }

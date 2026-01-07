@@ -51,7 +51,7 @@ public class ProductService(
     }
 
     public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default) =>
-        await _productRepository.ExistsAsync(id, ct);
+        await _productRepo.ExistsAsync(id, ct);
 
     public async Task<ProductDto?> GetByIdAsync(Guid id, CancellationToken ct)
     {

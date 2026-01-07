@@ -12,9 +12,7 @@ public interface ICategoryRepository
 
     Task<ICollection<Category>> GetAllAsync(CancellationToken ct = default);
 
-    Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
-
-    Task<bool> NameExistsAsync(string name, CancellationToken ct = default);
+    // Task<bool> NameExistsAsync(string name, CancellationToken ct = default);
 
     Task AddAsync(Category category, CancellationToken ct = default);
 
@@ -63,11 +61,8 @@ public sealed class CategoryRepository :
             .ToListAsync(ct);
     }
 
-    public Task<bool> ExistsAsync(Guid id, CancellationToken ct = default) =>
-         _context.Categories.AsNoTracking().AnyAsync(c => c.Id == id, ct);
-
-    public Task<bool> NameExistsAsync(string name, CancellationToken ct = default) =>
-        _context.Categories.AnyAsync(c => c.Name.ToLower() == name.ToLower(), ct);
+    //public Task<bool> NameExistsAsync(string name, CancellationToken ct = default) =>
+    //    _context.Categories.AnyAsync(c => c.Name.ToLower() == name.ToLower(), ct);
 
     public Task AddAsync(Category category, CancellationToken ct = default) =>
         _context.Categories.AddAsync(category, ct).AsTask();

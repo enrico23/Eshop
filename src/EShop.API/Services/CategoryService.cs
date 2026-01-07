@@ -44,7 +44,7 @@ public class CategoryService(
     }
 
     public async Task<bool> ExistsAsync(Guid id, CancellationToken ct = default) =>
-         await _categoryRepository.ExistsAsync(id, ct);
+         await _categoryRepo.ExistsAsync(id, ct);
     
     public async Task<CategoryDto?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {

@@ -1,6 +1,4 @@
-﻿using EShop.Domain.Catalog;
-
-namespace EShop.Data.Repositories;
+﻿namespace EShop.Data.Repositories;
 
 public interface IProductRepository
 {
@@ -18,14 +16,6 @@ public interface IProductRepository
           int page, int pageSize, string orderBy, string orderDirection, 
           string? filter, 
           CancellationToken ct);
-
-    /// <summary>
-    /// Product exists
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    Task<bool> ExistsAsync(Guid id, CancellationToken ct);
 
     Task<bool> NameExistsAsync(string name, CancellationToken ct);
 
@@ -65,9 +55,6 @@ public sealed class ProductRepository :
 
         return new Shared.Representations.PagedResult<Product>(items, page, pageSize, total);
     }
-
-    public Task<bool> ExistsAsync(Guid id, CancellationToken ct) =>
-          _context.Products.AsNoTracking().AnyAsync(p => p.Id == id, ct);
 
     public Task<bool> NameExistsAsync(string name, CancellationToken ct) =>
          _context.Products.AnyAsync(p => p.Name.ToLower() == name.ToLower(), ct);

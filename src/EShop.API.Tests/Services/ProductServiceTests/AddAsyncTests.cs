@@ -55,7 +55,6 @@ public sealed class AddAsyncTests : ProductServiceTestBase
             File = FormFileHelpers.CreateFakeFormFile()
         };
 
-        _repo.NameExistsAsync(Arg.Any<string>(), ct).Returns(false);
         _imageStorage.UploadImageAsync(form.File, ct).Returns("https://cdn/new.png");
 
         // Capture the entity passed into AddAsync to assert it contains the image URL
