@@ -5,7 +5,6 @@ namespace EShop.Data.Tests.Repositories.ProductRepositoryTests;
 public abstract class ProductRepositoryTestBase 
     : RepositoryTestBase<Product, ExtendedProductRepository, CatalogDbContext, EfUnitOfWork>
 {
-
     protected override ExtendedProductRepository CreateRepository(CatalogDbContext context) =>
        new(context);
 

@@ -35,8 +35,7 @@ public interface IProductService
     Task<bool> DeleteAsync(Guid id, CancellationToken ct);
 }
 
-
-public class ProductService(
+public sealed class ProductService(
     IExtendedProductRepository productRepository,
     IRepository<Product, Guid, CatalogDbContext> productRepo,
     IMapper mapper,

@@ -1,6 +1,6 @@
 ﻿using EShop.Shared.Testing;
 
-namespace EShop.Data.Tests.CategoryTests;
+namespace EShop.Data.Tests.Repositories.CategoryTests;
 
 public abstract class CategoryRepositoryTestBase 
     : RepositoryTestBase<Category, ExtendedCategoryRepository, CatalogDbContext, EfUnitOfWork>

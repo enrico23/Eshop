@@ -3,6 +3,7 @@ using EShop.Data.Repositories;
 using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;
 using EShop.Shared.Exceptions;
+using EShop.Shared.Representations;
 using EShop.Shared.Representations.Category;
 using Mapster;
 using MapsterMapper;
@@ -10,7 +11,25 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EShop.API.Services;
 
-public class CategoryService(
+public interface ICategoryService
+{
+    Task<PagedResult<CategoryDto>> GetPagedAsync(int page, int pageSize,
+        string orderBy = "Name", string orderDirection = "asc", string? filter = null, CancellationToken ct = default);
+
+    Task<ICollection<CategoryDto>> GetAllAsync(CancellationToken ct);
+
+    Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
+
+    Task<CategoryDto?> GetByIdAsync(Guid id, CancellationToken ct = default);
+
+    Task<bool> UpdateAsync(Guid id, UpdateCategoryDto updateCategoryDto, CancellationToken ct);
+
+    Task<CategoryDto> AddAsync(CreateCategoryDto createCategoryDto, CancellationToken ct);
+
+    Task<bool> DeleteAsync(Guid id, CancellationToken ct);
+}
+
+public sealed class CategoryService(
     IExtendedCategoryRepository categoryRepository, 
     IRepository<Category, Guid, CatalogDbContext> categoryRepo, 
     IMapper mapper,
