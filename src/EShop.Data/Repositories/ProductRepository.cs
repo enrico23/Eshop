@@ -17,13 +17,11 @@ public interface IProductRepository
           string? filter, 
           CancellationToken ct);
 
-    Task<bool> NameExistsAsync(string name, CancellationToken ct);
-
     Task<bool> SkuInUseAsync(Sku sku, Guid? excludeId, CancellationToken ct);
 
-    Task AddAsync(Product product, CancellationToken ct);
+    //Task AddAsync(Product product, CancellationToken ct);
 
-    void Remove(Product product);
+    //void Remove(Product product);
 }
 
 public sealed class ProductRepository : 
@@ -31,10 +29,7 @@ public sealed class ProductRepository :
 {
     private readonly CatalogDbContext _context;
 
-    public ProductRepository(CatalogDbContext context) : base(context)
-    {
-        _context = context;
-    }
+    public ProductRepository(CatalogDbContext context) : base(context) => _context = context;
 
     public async Task<Shared.Representations.PagedResult<Product>> GetPagedAsync(
           int page, int pageSize, string orderBy, string orderDirection, string? filter, CancellationToken ct)
@@ -56,16 +51,13 @@ public sealed class ProductRepository :
         return new Shared.Representations.PagedResult<Product>(items, page, pageSize, total);
     }
 
-    public Task<bool> NameExistsAsync(string name, CancellationToken ct) =>
-         _context.Products.AnyAsync(p => p.Name.ToLower() == name.ToLower(), ct);
-
     public Task<bool> SkuInUseAsync(Sku sku, Guid? excludeId, CancellationToken ct) =>
          _context.Products.AnyAsync(p =>
              p.Sku == sku && (!excludeId.HasValue || p.Id != excludeId.Value), ct);
 
-    public Task AddAsync(Product product, CancellationToken ct) =>
-         _context.Products.AddAsync(product, ct).AsTask();
+    //public Task AddAsync(Product product, CancellationToken ct) =>
+    //     _context.Products.AddAsync(product, ct).AsTask();
 
-    public void Remove(Product product) => 
-        _context.Products.Remove(product);
+    //public void Remove(Product product) => 
+    //    _context.Products.Remove(product);
 }

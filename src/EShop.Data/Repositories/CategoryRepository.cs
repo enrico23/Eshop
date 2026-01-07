@@ -1,7 +1,4 @@
-﻿
-using EShop.Domain.Catalog;
-
-namespace EShop.Data.Repositories;
+﻿namespace EShop.Data.Repositories;
 
 public interface ICategoryRepository
 {
@@ -11,8 +8,6 @@ public interface ICategoryRepository
           CancellationToken ct);
 
     Task<ICollection<Category>> GetAllAsync(CancellationToken ct = default);
-
-    // Task<bool> NameExistsAsync(string name, CancellationToken ct = default);
 
     Task AddAsync(Category category, CancellationToken ct = default);
 
@@ -27,10 +22,7 @@ public sealed class CategoryRepository :
 {
     private readonly CatalogDbContext _context;
 
-    public CategoryRepository(CatalogDbContext context) : base(context)
-    {
-        _context = context;
-    }
+    public CategoryRepository(CatalogDbContext context) : base(context) => _context = context;
 
     public async Task<Shared.Representations.PagedResult<Category>> GetPagedAsync(
         int page, int pageSize, string orderBy, string orderDirection, string? filter, 
@@ -60,9 +52,6 @@ public sealed class CategoryRepository :
             .OrderBy(c => c.Name)
             .ToListAsync(ct);
     }
-
-    //public Task<bool> NameExistsAsync(string name, CancellationToken ct = default) =>
-    //    _context.Categories.AnyAsync(c => c.Name.ToLower() == name.ToLower(), ct);
 
     public Task AddAsync(Category category, CancellationToken ct = default) =>
         _context.Categories.AddAsync(category, ct).AsTask();

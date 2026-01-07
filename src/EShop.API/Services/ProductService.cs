@@ -87,7 +87,7 @@ public class ProductService(
 
         try
         {
-            await _productRepository.AddAsync(product, ct);
+            await _productRepo.AddAsync(product, ct);
             await _unitOfWork.SaveChangesAsync(ct);
 
             return _mapper.Map<ProductDto>(product);
@@ -172,7 +172,7 @@ public class ProductService(
             }
         }
 
-       _productRepository.Remove(entity);
+       _productRepo.Remove(entity);
         await _unitOfWork.SaveChangesAsync(ct);
 
         return true;

@@ -9,6 +9,10 @@ public interface IRepository<TEntity, TKey, TDbContext>
     Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
 
     Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken ct = default);
+
+    public Task AddAsync(TEntity entity, CancellationToken ct = default);
+
+    void Remove(TEntity entity);
 }
 
 public class EfRepository<TEntity, TKey, TDbContext> : IRepository<TEntity, TKey, TDbContext>
@@ -17,10 +21,7 @@ public class EfRepository<TEntity, TKey, TDbContext> : IRepository<TEntity, TKey
 {
     private readonly DbSet<TEntity> _set;
 
-    public EfRepository(TDbContext dbContext)
-    {
-        _set = dbContext.Set<TEntity>();
-    }
+    public EfRepository(TDbContext dbContext) => _set = dbContext.Set<TEntity>();
 
     public Task<TEntity?> GetByIdAsync(TKey id, bool track = false, CancellationToken ct = default)
     {
@@ -36,4 +37,10 @@ public class EfRepository<TEntity, TKey, TDbContext> : IRepository<TEntity, TKey
 
     public Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken ct = default)
        => _set.AsNoTracking().AnyAsync(predicate, ct);
+
+    public Task AddAsync(TEntity entity, CancellationToken ct = default)
+        => _set.AddAsync(entity, ct).AsTask();
+
+    public void Remove(TEntity entity)
+        => _set.Remove(entity);
 }
