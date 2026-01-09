@@ -1,4 +1,3 @@
-using EShop.Web;
 using EShop.Web.Components;
 using EShop.Web.Extensions;
 using Microsoft.AspNetCore.Authentication;
@@ -7,7 +6,6 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using MudBlazor.Services;
-using System.Text;
 
 // Web //
 var builder = WebApplication.CreateBuilder(args);
@@ -35,28 +33,27 @@ builder.Services.AddAuthentication(options =>
     realm: "eshop",
     options =>
     {
-        if (builder.Environment.IsDevelopment())
-        {
-            options.MetadataAddress = "http://keycloak:8080/realms/eshop/.well-known/openid-configuration";
-            options.ConfigurationManager =
-                new ConfigurationManager<OpenIdConnectConfiguration>(
-                    options.MetadataAddress,
-                    new OpenIdConnectConfigurationRetriever(),
-                    new HttpDocumentRetriever
-                    {
-                        RequireHttps = false
-                    })
-                {
-                    AutomaticRefreshInterval = TimeSpan.FromSeconds(30),
-                    RefreshInterval = TimeSpan.FromSeconds(10)
-                };
-        }
+        //if (builder.Environment.IsDevelopment())
+        //{
+        //    options.MetadataAddress = "http://keycloak:8080/realms/eshop/.well-known/openid-configuration";
+        //    options.ConfigurationManager =
+        //        new ConfigurationManager<OpenIdConnectConfiguration>(
+        //            options.MetadataAddress,
+        //            new OpenIdConnectConfigurationRetriever(),
+        //            new HttpDocumentRetriever
+        //            {
+        //                RequireHttps = false
+        //            })
+        //        {
+        //            AutomaticRefreshInterval = TimeSpan.FromMinutes(5),
+        //            RefreshInterval = TimeSpan.FromSeconds(10)
+        //        };
+        //}
 
         options.ClientId = "blazorui";
         options.ResponseType = OpenIdConnectResponseType.Code;
         options.ClientSecret = builder.Configuration["Keycloak:ClientSecret"];
         options.SaveTokens = true;
-        // options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Disable;
 
         if (builder.Environment.IsDevelopment())
         {

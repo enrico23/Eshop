@@ -1,4 +1,3 @@
-// using Aspire.Keycloak.DeterministicHttps.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
@@ -23,7 +22,7 @@ var blobStorageInitializer = builder.AddProject<Projects.EShop_BlobStorageInitia
 var databaseName = "CatalogDb";
 var password = builder.AddParameter("password", secret: true);
 var sql = builder.AddSqlServer("SqlServerInstance", port:14347, password: password)
-    .WithLifetime(ContainerLifetime.Persistent); ;
+    .WithLifetime(ContainerLifetime.Persistent);
 var db = sql.AddDatabase(databaseName);
 
 // EF MIGRATIONS
@@ -55,7 +54,7 @@ var keycloak = builder.AddKeycloak("keycloak", port: 8080, username, password)
     .WithDataVolume("keycloak");
 var realmConfigPath = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "realm-export.json");
 var realmConfig = File.Exists(realmConfigPath);
-if (realmConfig) { }
+if (realmConfig)
     keycloak.WithRealmImport(realmConfigPath);
 
 // APPLICATION PROJECTS
