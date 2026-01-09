@@ -67,6 +67,10 @@ layouts while staying within the .NET stack.
 - [Azure Blob Storage](docs/azure-blob-storage.md)
 - [Observability](docs/observability.md)
 
+## Keycloak
+
+[Realm setup](docs/keycloak/realm-setup.md)
+
 ## EF Core migrations
 
 See [EF Core migrations](docs/ef-core-migrations.md).

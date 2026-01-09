@@ -53,6 +53,10 @@ var username = builder.AddParameter("keycloak-username");
 var keyloakPassword = builder.AddParameter("keycloak-password", secret: true);
 var keycloak = builder.AddKeycloak("keycloak", port: 8080, username, password)
     .WithDataVolume("keycloak");
+var realmConfigPath = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "realm-export.json");
+var realmConfig = File.Exists(realmConfigPath);
+if (realmConfig) { }
+    keycloak.WithRealmImport(realmConfigPath);
 
 // APPLICATION PROJECTS
 if (!dependenciesOnly)
@@ -66,6 +70,7 @@ if (!dependenciesOnly)
            .WithReference(azureBlobStorage)
            .WaitFor(serviceBusQueue)
            .WithReference(serviceBusQueue)
+           .WaitFor(keycloak)
            .WithReference(keycloak);
 
     var gateway = builder.AddProject<Projects.EShop_Gateway>("Gateway")
@@ -81,6 +86,7 @@ if (!dependenciesOnly)
         frontend = frontend
             .WaitFor(gateway)
             .WithReference(gateway)
+            .WaitFor(keycloak)
             .WithReference(keycloak);
     }
 }

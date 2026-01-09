@@ -64,9 +64,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Domain.Tests", "EShop
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Data.Tests", "EShop.Data.Tests\EShop.Data.Tests.csproj", "{DDBF38B4-DC03-464E-AB27-E14C6BF38656}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "infra", "infra", "{B05FC872-CDF1-406A-BFD1-8DDEB0C00C6A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "keycloak", "keycloak", "{472CAD0E-A40C-423B-8D1A-9F7A3E9E86A4}"
 	ProjectSection(SolutionItems) = preProject
-		..\infra\realm-export.json = ..\infra\realm-export.json
+		..\docs\keycloak\realm-setup.md = ..\docs\keycloak\realm-setup.md
 	EndProjectSection
 EndProject
 Global
@@ -268,7 +268,7 @@ Global
 		{1CFF8CA6-A149-4AA5-BFC2-2E2897B4EFAE} = {695ED087-1418-4824-BC9F-03012F8EB976}
 		{2051EC59-68C2-4EEE-9785-169C0752010C} = {446DC99F-193C-4C32-AAFB-5213A81714AA}
 		{50B7C6BB-B82C-4C64-8835-77A06A38B0D4} = {2051EC59-68C2-4EEE-9785-169C0752010C}
-		{B05FC872-CDF1-406A-BFD1-8DDEB0C00C6A} = {446DC99F-193C-4C32-AAFB-5213A81714AA}
+		{472CAD0E-A40C-423B-8D1A-9F7A3E9E86A4} = {695ED087-1418-4824-BC9F-03012F8EB976}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {15E4314C-18A9-4A0E-88F4-96EA2D79E06A}
