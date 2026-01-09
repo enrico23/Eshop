@@ -1,8 +1,10 @@
 ﻿using EShop.Shared.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EShop.API.Controllers;
 
+[AllowAnonymous]
 [Route("api/[controller]")]
 [ApiController]
 public sealed class ImagesController(IImageStorageService imageStorageService) : ControllerBase

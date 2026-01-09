@@ -33,22 +33,22 @@ builder.Services.AddAuthentication(options =>
     realm: "eshop",
     options =>
     {
-        //if (builder.Environment.IsDevelopment())
-        //{
-        //    options.MetadataAddress = "http://keycloak:8080/realms/eshop/.well-known/openid-configuration";
-        //    options.ConfigurationManager =
-        //        new ConfigurationManager<OpenIdConnectConfiguration>(
-        //            options.MetadataAddress,
-        //            new OpenIdConnectConfigurationRetriever(),
-        //            new HttpDocumentRetriever
-        //            {
-        //                RequireHttps = false
-        //            })
-        //        {
-        //            AutomaticRefreshInterval = TimeSpan.FromMinutes(5),
-        //            RefreshInterval = TimeSpan.FromSeconds(10)
-        //        };
-        //}
+        if (builder.Environment.IsDevelopment())
+        {
+            options.MetadataAddress = "http://keycloak:8080/realms/eshop/.well-known/openid-configuration";
+            options.ConfigurationManager =
+                new ConfigurationManager<OpenIdConnectConfiguration>(
+                    options.MetadataAddress,
+                    new OpenIdConnectConfigurationRetriever(),
+                    new HttpDocumentRetriever
+                    {
+                        RequireHttps = false
+                    })
+                {
+                    AutomaticRefreshInterval = TimeSpan.FromMinutes(5),
+                    RefreshInterval = TimeSpan.FromSeconds(10)
+                };
+        }
 
         options.ClientId = "blazorui";
         options.ResponseType = OpenIdConnectResponseType.Code;

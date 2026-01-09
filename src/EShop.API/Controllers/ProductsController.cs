@@ -2,11 +2,12 @@
 using EShop.API.Services;
 using EShop.Shared.Representations;
 using EShop.Shared.Representations.Product;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EShop.API.Controllers;
 
-
+[AllowAnonymous]
 [Route("api/[controller]")]
 [ApiController]
 public class ProductsController(IProductService productService) : ControllerBase
