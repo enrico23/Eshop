@@ -1,6 +1,7 @@
 ﻿using EShop.API.Services;
 using EShop.Shared.Representations;
 using EShop.Shared.Representations.Category;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EShop.API.Controllers
@@ -17,6 +18,7 @@ namespace EShop.API.Controllers
         }
 
         // GET: api/categories?page=1&pageSize=20
+        [Authorize(Policy = "CatalogRead")]
         [HttpGet]
         [ProducesResponseType(typeof(PagedResult<CategoryDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetPagedAsync(
@@ -31,6 +33,7 @@ namespace EShop.API.Controllers
 
         // GET: api/categories/all
         // <snippet_GetAll>
+        [Authorize(Policy = "CatalogRead")]
         [HttpGet("all")]
         [ProducesResponseType(typeof(ICollection<CategoryDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult> GetAllAsync(CancellationToken ct = default)
@@ -43,6 +46,7 @@ namespace EShop.API.Controllers
 
         // GET: api/categories/{id:guid}
         // <snippet_GetByID>
+        [Authorize(Policy = "CatalogRead")]
         [HttpGet("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK)]
@@ -58,6 +62,7 @@ namespace EShop.API.Controllers
 
         // PUT: api/categories/{id:guid}
         // <snippet_Update>
+        [Authorize(Policy = "CatalogWrite")]
         [HttpPut("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -78,6 +83,7 @@ namespace EShop.API.Controllers
 
         // POST: api/categories
         // <snippet_Create>
+        [Authorize(Policy = "CatalogWrite")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -93,6 +99,7 @@ namespace EShop.API.Controllers
         // </snippet_Create>
 
         // DELETE: api/categories/{id:guid}
+        [Authorize(Policy = "CatalogWrite")]
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
