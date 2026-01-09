@@ -1,7 +1,9 @@
 ﻿@page "/categories"
+@attribute [Authorize]
 @using EShop.Web.Components.Pages.Categories
 @using EShop.Web.Components.Pages.Shared
 @using EShop.Web.Exceptions
+@using Microsoft.AspNetCore.Authorization
 @inherits CrudPageBase
 
 <MudPaper Class="pa-4">

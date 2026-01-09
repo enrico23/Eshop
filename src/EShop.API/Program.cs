@@ -3,20 +3,16 @@ using EShop.API.Exceptions;
 using EShop.API.Services;
 using EShop.Data;
 using EShop.Data.Repositories;
-using EShop.Domain;
 using EShop.Shared.Eventing;
 using EShop.Shared.Exceptions;
 using EShop.Shared.Observability.Correlation;
 using EShop.Shared.Services;
 using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System.Diagnostics;
 using System.Security.Claims;
-using System.Security.Principal;
 using System.Text.Json;
 
 public partial class Program
@@ -95,7 +91,6 @@ public partial class Program
                      options =>
                      {
                          options.Audience = "catalogapi";
-                         options.Authority = "https://localhost:8093/realms/eshop";
 
                          if (builder.Environment.IsDevelopment())
                          {
@@ -158,6 +153,20 @@ public partial class Program
         }
 
         app.MapControllers();
+
+        app.MapGet("/debug/token", (HttpContext ctx) =>
+        {
+            return Results.Json(new
+            {
+                HasAuthorizationHeader = ctx.Request.Headers.Authorization.Count > 0,
+                AuthorizationHeader = ctx.Request.Headers.Authorization.ToString(), // remove once done
+                IsAuthenticated = ctx.User.Identity?.IsAuthenticated ?? false,
+                Name = ctx.User.Identity?.Name,
+                Aud = ctx.User.Claims.Where(c => c.Type == "aud").Select(c => c.Value).ToArray(),
+                ResourceAccess = ctx.User.Claims.FirstOrDefault(c => c.Type == "resource_access")?.Value,
+                Roles = ctx.User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).Distinct().ToArray()
+            });
+        });
 
         app.Run();
     }

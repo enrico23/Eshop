@@ -1,9 +1,12 @@
+using EShop.Web;
 using EShop.Web.Components;
 using EShop.Web.Extensions;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using MudBlazor.Services;
+using System.Text;
 
 // Web //
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +20,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // Add CatalogApi Http Client
+builder.Services.AddHttpContextAccessor();
 builder.AddCatalogApiClient();
 
 builder.Services.AddAuthentication(options =>
@@ -34,6 +38,7 @@ builder.Services.AddAuthentication(options =>
         options.ResponseType = OpenIdConnectResponseType.Code;
         options.ClientSecret = builder.Configuration["Keycloak:ClientSecret"];
         options.SaveTokens = true;
+        // options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Disable;
 
         if (builder.Environment.IsDevelopment())
         {
@@ -44,6 +49,15 @@ builder.Services.AddAuthentication(options =>
         options.Scope.Add("openid");
         options.Scope.Add("profile");
         options.Scope.Add("email");
+
+        options.Events ??= new OpenIdConnectEvents();
+        options.Events.OnRedirectToIdentityProvider = ctx =>
+        {
+            var log = ctx.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("OIDC");
+            log.LogInformation("IssuerAddress: {IssuerAddress}", ctx.ProtocolMessage.IssuerAddress);
+            log.LogInformation("RedirectUri: {RedirectUri}", ctx.ProtocolMessage.RedirectUri);
+            return Task.CompletedTask;
+        };
     });
 
 builder.Services.AddAuthorization();
@@ -61,12 +75,29 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+app.MapGet("/login", async (HttpContext ctx, string? returnUrl) =>
+{
+    returnUrl = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
+    await ctx.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme,
+        new AuthenticationProperties { RedirectUri = returnUrl });
+});
+
+app.MapGet("/whoami", (HttpContext ctx) =>
+{
+    return Results.Json(new
+    {
+        IsAuthenticated = ctx.User?.Identity?.IsAuthenticated ?? false,
+        Name = ctx.User?.Identity?.Name,
+        Claims = ctx.User?.Claims.Select(c => new { c.Type, c.Value })
+    });
+});
 
 app.Run();

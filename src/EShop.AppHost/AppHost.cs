@@ -1,4 +1,4 @@
-using Aspire.Keycloak.DeterministicHttps.Extensions;
+// using Aspire.Keycloak.DeterministicHttps.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
@@ -51,7 +51,7 @@ var imagesQueueWorker = builder.AddProject<Projects.EShop_ImagesQueueWorker>("Im
 // KEYCLOAK
 var username = builder.AddParameter("keycloak-username");
 var keyloakPassword = builder.AddParameter("keycloak-password", secret: true);
-var keycloak = builder.AddKeycloakFixedHttpsPort("keycloak", httpPort: 8080, httpsPort: 8093, username, password)
+var keycloak = builder.AddKeycloak("keycloak", port: 8080, username, password)
     .WithDataVolume("keycloak");
 
 // APPLICATION PROJECTS
