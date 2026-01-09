@@ -4,6 +4,7 @@ using EShop.Web.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using MudBlazor.Services;
 using System.Text;
@@ -34,6 +35,23 @@ builder.Services.AddAuthentication(options =>
     realm: "eshop",
     options =>
     {
+        if (builder.Environment.IsDevelopment())
+        {
+            options.MetadataAddress = "http://keycloak:8080/realms/eshop/.well-known/openid-configuration";
+            options.ConfigurationManager =
+                new ConfigurationManager<OpenIdConnectConfiguration>(
+                    options.MetadataAddress,
+                    new OpenIdConnectConfigurationRetriever(),
+                    new HttpDocumentRetriever
+                    {
+                        RequireHttps = false
+                    })
+                {
+                    AutomaticRefreshInterval = TimeSpan.FromSeconds(30),
+                    RefreshInterval = TimeSpan.FromSeconds(10)
+                };
+        }
+
         options.ClientId = "blazorui";
         options.ResponseType = OpenIdConnectResponseType.Code;
         options.ClientSecret = builder.Configuration["Keycloak:ClientSecret"];
@@ -88,16 +106,6 @@ app.MapGet("/login", async (HttpContext ctx, string? returnUrl) =>
     returnUrl = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
     await ctx.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme,
         new AuthenticationProperties { RedirectUri = returnUrl });
-});
-
-app.MapGet("/whoami", (HttpContext ctx) =>
-{
-    return Results.Json(new
-    {
-        IsAuthenticated = ctx.User?.Identity?.IsAuthenticated ?? false,
-        Name = ctx.User?.Identity?.Name,
-        Claims = ctx.User?.Claims.Select(c => new { c.Type, c.Value })
-    });
 });
 
 app.Run();

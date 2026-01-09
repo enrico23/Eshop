@@ -11,6 +11,8 @@ using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System.Diagnostics;
 using System.Security.Claims;
 using System.Text.Json;
@@ -90,6 +92,23 @@ public partial class Program
                      realm: "eshop",
                      options =>
                      {
+                         if (builder.Environment.IsDevelopment())
+                         {
+                             options.MetadataAddress = "http://keycloak:8080/realms/eshop/.well-known/openid-configuration";
+                             options.ConfigurationManager =
+                                 new ConfigurationManager<OpenIdConnectConfiguration>(
+                                     options.MetadataAddress,
+                                     new OpenIdConnectConfigurationRetriever(),
+                                     new HttpDocumentRetriever
+                                     {
+                                         RequireHttps = false
+                                     })
+                                 {
+                                     AutomaticRefreshInterval = TimeSpan.FromSeconds(30),
+                                     RefreshInterval = TimeSpan.FromSeconds(10)
+                                 };
+                         }
+
                          options.Audience = "catalogapi";
 
                          if (builder.Environment.IsDevelopment())
