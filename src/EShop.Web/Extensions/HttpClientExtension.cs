@@ -8,9 +8,10 @@ public static class HttpClientExtension
 {
     public static WebApplicationBuilder AddCatalogApiClient(this WebApplicationBuilder builder)
     {
+        builder.Services.AddTransient<AccessTokenHandler>();
+
         var gateway = builder.Configuration.GetValue("services:Gateway:https:0", "http://localhost:5261");
         builder.Services.AddSingleton(new ApiClientConfig { BaseUrl = gateway });
-        builder.Services.AddTransient<AccessTokenHandler>();
         builder.Services.AddHttpClient<ICatalogApiClient, CatalogApiClient>(client =>
         {
             client.BaseAddress = new Uri(gateway, UriKind.Absolute);
