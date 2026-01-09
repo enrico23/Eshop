@@ -1,5 +1,8 @@
 using EShop.Web.Components;
 using EShop.Web.Extensions;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using MudBlazor.Services;
 
 // Web //
@@ -16,7 +19,39 @@ builder.Services.AddRazorComponents()
 // Add CatalogApi Http Client
 builder.AddCatalogApiClient();
 
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+})
+.AddCookie()
+.AddKeycloakOpenIdConnect(
+    serviceName: "keycloak",
+    realm: "eshop",
+    options =>
+    {
+        options.ClientId = "blazorui";
+        options.ResponseType = OpenIdConnectResponseType.Code;
+        options.ClientSecret = builder.Configuration["Keycloak:ClientSecret"];
+        options.SaveTokens = true;
+
+        if (builder.Environment.IsDevelopment())
+        {
+            options.RequireHttpsMetadata = false;
+        }
+
+        options.Scope.Clear();
+        options.Scope.Add("openid");
+        options.Scope.Add("profile");
+        options.Scope.Add("email");
+    });
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
