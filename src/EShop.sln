@@ -40,7 +40,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{695ED087-1
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{1CFF8CA6-A149-4AA5-BFC2-2E2897B4EFAE}"
 	ProjectSection(SolutionItems) = preProject
-		..\docs\efcore.md = ..\docs\efcore.md
+		..\docs\api\efcore.md = ..\docs\api\efcore.md
 		..\docs\api\errorhandling.md = ..\docs\api\errorhandling.md
 	EndProjectSection
 EndProject

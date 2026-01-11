@@ -27,25 +27,6 @@ This solution uses:
 - Blazor Server UI for the catalog experience
 - Orchestrated services via .NET Aspire with observability defaults
 
-## Project Structure
-
-- `.github/` - CI workflows and repo automation.
-- `docs/` - Developer guides and API references (see `docs/quickstart.md` for local setup).
-- `src/EShop.AppHost/` - Aspire orchestration for API, frontend, database, and supporting services.
-- `src/EShop.API/` - ASP.NET Core catalog API with controllers, services, and mapping profiles.
-- `src/EShop.API.Tests/` - API unit tests.
-- `src/EShop.BlobStorageInitializer/` - Initializes blob storage containers for local development.
-- `src/EShop.Web/` - Blazor Server frontend components, assets, and HTTP clients.
-- `src/EShop.Data/` - EF Core DbContext, entity configurations, and migrations.
-- `src/EShop.Domain/` - Domain entities and business logic abstractions.
-- `src/EShop.Gateway/` - YARP reverse proxy that fronts API calls.
-- `src/EShop.ImagesQueueWorker/` - Background worker for image processing queue.
-- `src/EShop.Shared/` - Shared representations and helpers consumed across projects.
-- `src/EShop.Shared.Tests/` - Shared library unit tests.
-- `src/EShop.ServiceDefaults/` - Cross-cutting host defaults (observability, health checks, etc.).
-- `src/EShop.MigrationService/` - Service to apply database migrations during orchestration.
-- `src/EShop.sln` - .NET solution tying together all projects.
-
 ## Quick Start
 
 EShop uses .NET Aspire to orchestrate backend, frontend, and database with a single command.
@@ -61,12 +42,13 @@ staying within the .NET stack.
 
 ## Catalog API
 
+- [EF Core Migrations](docs/api/efcore.md)
 - [Error Handling](docs/api/errorhandling.md)
 - [Azure Blob Storage](docs/azure-blob-storage.md)
 - [Observability](docs/observability.md
-- [EF Core Migrations](docs/api/efcore.md)
+
 
 ## Other Docs
 
-- [Scripts](docs/scripts/index.md)
 - [Roadmap](docs/roadmap.md)
+- [Scripts & Utilities](docs/scripts/index.md)
