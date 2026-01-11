@@ -11,8 +11,6 @@ using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Protocols;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System.Diagnostics;
 using System.Security.Claims;
 using System.Text.Json;
@@ -92,22 +90,22 @@ public partial class Program
                      realm: "eshop",
                      options =>
                      {
-                         if (builder.Environment.IsDevelopment())
-                         {
-                             options.MetadataAddress = "http://keycloak:8080/realms/eshop/.well-known/openid-configuration";
-                             options.ConfigurationManager =
-                                 new ConfigurationManager<OpenIdConnectConfiguration>(
-                                     options.MetadataAddress,
-                                     new OpenIdConnectConfigurationRetriever(),
-                                     new HttpDocumentRetriever
-                                     {
-                                         RequireHttps = false
-                                     })
-                                 {
-                                     AutomaticRefreshInterval = TimeSpan.FromMinutes(5),
-                                     RefreshInterval = TimeSpan.FromSeconds(10)
-                                 };
-                         }
+                         //if (builder.Environment.IsDevelopment())
+                         //{
+                         //    options.MetadataAddress = "http://keycloak:8080/realms/eshop/.well-known/openid-configuration";
+                         //    options.ConfigurationManager =
+                         //        new ConfigurationManager<OpenIdConnectConfiguration>(
+                         //            options.MetadataAddress,
+                         //            new OpenIdConnectConfigurationRetriever(),
+                         //            new HttpDocumentRetriever
+                         //            {
+                         //                RequireHttps = false
+                         //            })
+                         //        {
+                         //            AutomaticRefreshInterval = TimeSpan.FromMinutes(5),
+                         //            RefreshInterval = TimeSpan.FromSeconds(10)
+                         //        };
+                         //}
 
                          options.Audience = "catalogapi";
 
@@ -172,20 +170,6 @@ public partial class Program
         }
 
         app.MapControllers();
-
-        app.MapGet("/debug/token", (HttpContext ctx) =>
-        {
-            return Results.Json(new
-            {
-                HasAuthorizationHeader = ctx.Request.Headers.Authorization.Count > 0,
-                AuthorizationHeader = ctx.Request.Headers.Authorization.ToString(), // remove once done
-                IsAuthenticated = ctx.User.Identity?.IsAuthenticated ?? false,
-                Name = ctx.User.Identity?.Name,
-                Aud = ctx.User.Claims.Where(c => c.Type == "aud").Select(c => c.Value).ToArray(),
-                ResourceAccess = ctx.User.Claims.FirstOrDefault(c => c.Type == "resource_access")?.Value,
-                Roles = ctx.User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).Distinct().ToArray()
-            });
-        });
 
         app.Run();
     }

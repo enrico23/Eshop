@@ -33,22 +33,22 @@ builder.Services.AddAuthentication(options =>
     realm: "eshop",
     options =>
     {
-        if (builder.Environment.IsDevelopment())
-        {
-            options.MetadataAddress = "http://keycloak:8080/realms/eshop/.well-known/openid-configuration";
-            options.ConfigurationManager =
-                new ConfigurationManager<OpenIdConnectConfiguration>(
-                    options.MetadataAddress,
-                    new OpenIdConnectConfigurationRetriever(),
-                    new HttpDocumentRetriever
-                    {
-                        RequireHttps = false
-                    })
-                {
-                    AutomaticRefreshInterval = TimeSpan.FromMinutes(5),
-                    RefreshInterval = TimeSpan.FromSeconds(10)
-                };
-        }
+        //if (builder.Environment.IsDevelopment())
+        //{
+        //    options.MetadataAddress = "http://keycloak:8080/realms/eshop/.well-known/openid-configuration";
+        //    options.ConfigurationManager =
+        //        new ConfigurationManager<OpenIdConnectConfiguration>(
+        //            options.MetadataAddress,
+        //            new OpenIdConnectConfigurationRetriever(),
+        //            new HttpDocumentRetriever
+        //            {
+        //                RequireHttps = false
+        //            })
+        //        {
+        //            AutomaticRefreshInterval = TimeSpan.FromMinutes(5),
+        //            RefreshInterval = TimeSpan.FromSeconds(10)
+        //        };
+        //}
 
         options.ClientId = "blazorui";
         options.ResponseType = OpenIdConnectResponseType.Code;
@@ -64,15 +64,6 @@ builder.Services.AddAuthentication(options =>
         options.Scope.Add("openid");
         options.Scope.Add("profile");
         options.Scope.Add("email");
-
-        options.Events ??= new OpenIdConnectEvents();
-        options.Events.OnRedirectToIdentityProvider = ctx =>
-        {
-            var log = ctx.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("OIDC");
-            log.LogInformation("IssuerAddress: {IssuerAddress}", ctx.ProtocolMessage.IssuerAddress);
-            log.LogInformation("RedirectUri: {RedirectUri}", ctx.ProtocolMessage.RedirectUri);
-            return Task.CompletedTask;
-        };
     });
 
 builder.Services.AddAuthorization();

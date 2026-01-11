@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EShop.API.Controllers;
 
-[AllowAnonymous]
 [Route("api/[controller]")]
 [ApiController]
 public class ProductsController(IProductService productService) : ControllerBase

@@ -33,7 +33,7 @@ namespace EShop.API.Controllers
 
         // GET: api/categories/all
         // <snippet_GetAll>
-        [Authorize(Policy = "CatalogRead")]
+        // [Authorize(Policy = "CatalogRead")]
         [HttpGet("all")]
         [ProducesResponseType(typeof(ICollection<CategoryDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult> GetAllAsync(CancellationToken ct = default)
