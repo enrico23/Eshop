@@ -1,4 +1,4 @@
-﻿# EShop - Full-Stack .NET E-Commerce Demo
+﻿# Full-Stack .NET E-Commerce shop
 
 EShop is a clean, modern, full-stack e-commerce sample that highlights backend engineering, frontend development,
 cloud-native patterns, and developer experience.
@@ -14,6 +14,10 @@ This solution uses:
 - Azure Service Bus for image processing workflows
 - .NET Aspire for local orchestration and observability defaults
 
+## Achitecture
+
+[Architecture Overview](docs/architecture.md)
+
 ## Features
 
 - Product catalog with categories and images
@@ -25,6 +29,7 @@ This solution uses:
 
 ## Project Structure
 
+- `.github/` - CI workflows and repo automation.
 - `docs/` - Developer guides and API references (see `docs/quickstart.md` for local setup).
 - `src/EShop.AppHost/` - Aspire orchestration for API, frontend, database, and supporting services.
 - `src/EShop.API/` - ASP.NET Core catalog API with controllers, services, and mapping profiles.
@@ -47,31 +52,21 @@ EShop uses .NET Aspire to orchestrate backend, frontend, and database with a sin
 
 See the full guide here: [Quick Start](docs/quickstart.md)
 
-## EF Core migrations
+## Blazor Frontend
+The Blazor Server app in src/EShop.Web/ uses 
+MudBlazor for the UI layer, giving the 
+catalog a modern component set, consistent 
+theming, and responsive layouts while 
+staying within the .NET stack.
 
-Migrations live in the `EShop.Data` class library, while the API project provides the runtime services
-and configuration needed to build the model. Use the API project as the startup assembly when
-creating or applying migrations:
-
-```bash
-# from the repo root
-dotnet ef migrations add <MigrationName> -p src/EShop.Data -s src/EShop.API -o Migrations
-
-# apply the migrations to your configured database
-dotnet ef database update -p src/EShop.Data -s src/EShop.API
-```
-
-This ensures EF Core can locate the `CatalogDbContext` and any related configuration while keeping
-the migrations alongside the data layer.
-
-## API
+## Catalog API
 
 - [Error Handling](docs/api/errorhandling.md)
 - [Azure Blob Storage](docs/azure-blob-storage.md)
-- [Observability](docs/observability.md)
+- [Observability](docs/observability.md
+- [EF Core Migrations](docs/api/efcore.md)
 
-## Docs
+## Other Docs
 
-- [Documentation Index](docs/README.md)
-- [Architecture Overview](docs/architecture.md)
+- [Scripts](docs/scripts/index.md)
 - [Roadmap](docs/roadmap.md)
