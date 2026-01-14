@@ -1,4 +1,5 @@
 ﻿using EShop.Shared.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EShop.API.Controllers;
@@ -8,6 +9,7 @@ namespace EShop.API.Controllers;
 public sealed class ImagesController(IImageStorageService imageStorageService) : ControllerBase
 {
     // GET /api/images/{imageId}
+    [AllowAnonymous]
     [HttpGet("{imageId}")]
     public async Task<IActionResult> GetImageByIdAsync([FromRoute] string imageId, CancellationToken ct = default)
     {
