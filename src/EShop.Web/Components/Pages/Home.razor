@@ -16,6 +16,14 @@
                    OnClick="@(() => NavigationManager.NavigateTo("/login"))">
             Login
         </MudButton>
+
+        @* <form action="Account/Logout" method="post" class="mud-nav-item">
+            <AntiforgeryToken />
+            <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+            <button type="submit" class="mud-nav-link mud-ripple">
+                <MudIcon Icon="@Icons.Material.Filled.Logout" Color="Color.Info" Class="mr-3"></MudIcon> Logout
+            </button>
+        </form> *@
     </MudStack>
 
     <MudDivider Class="my-3" />

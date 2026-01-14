@@ -47,7 +47,8 @@ public class ProductsController(IProductService productService) : ControllerBase
 
     // POST: api/products
     // <snippet_Create>
-    [Authorize]
+    // [Authorize]
+    [Authorize(Policy = "CatalogWrite")]
     [HttpPost]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(StatusCodes.Status201Created)]
@@ -68,7 +69,8 @@ public class ProductsController(IProductService productService) : ControllerBase
 
     // PUT: api/products/{id:guid}
     // <snippet_Update>
-    [Authorize]
+    // [Authorize]
+    [Authorize(Policy = "CatalogWrite")]
     [HttpPut("{id:guid}")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -91,7 +93,8 @@ public class ProductsController(IProductService productService) : ControllerBase
     //</snippet_Update>
 
     // DELETE: api/products/{id:guid}
-    [Authorize]
+    // [Authorize]
+    [Authorize(Policy = "CatalogWrite")]
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

@@ -62,7 +62,8 @@ namespace EShop.API.Controllers
 
         // PUT: api/categories/{id:guid}
         // <snippet_Update>
-        [Authorize]
+        // [Authorize]
+        [Authorize(Policy = "CatalogWrite")]
         [HttpPut("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -83,8 +84,8 @@ namespace EShop.API.Controllers
 
         // POST: api/categories
         // <snippet_Create>
-        [Authorize]
-        [HttpPost]
+        // [Authorize]
+        [Authorize(Policy = "CatalogWrite")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<CategoryDto>> PostAsync(CreateCategoryDto createCategoryDto, CancellationToken ct = default)
@@ -99,7 +100,8 @@ namespace EShop.API.Controllers
         // </snippet_Create>
 
         // DELETE: api/categories/{id:guid}
-        [Authorize]
+        // [Authorize]
+        [Authorize(Policy = "CatalogWrite")]
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
