@@ -10,6 +10,7 @@ using EShop.Shared.Services;
 using Mapster;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 
 public partial class Program
@@ -82,6 +83,7 @@ public partial class Program
         builder.Services.AddOpenApi();
         builder.Services.AddControllers();
 
+        // Add Authentication
         builder.Services.AddAuthentication()
                 .AddKeycloakJwtBearer(
                     serviceName: "keycloak",
@@ -90,15 +92,23 @@ public partial class Program
                     {
 
                         options.Audience = "catalog-api";
-
                         // For development only - disable HTTPS metadata validation
                         // In production, use explicit Authority configuration instead
                         if (builder.Environment.IsDevelopment())
                         {
-                            options.Authority = "http://localhost:8080/realms/eshop/.well-known/openid-configuration";
+                            options.Authority = "http://localhost:8080/realms/eshop";
                             options.RequireHttpsMetadata = false;
                         }
+                        options.TokenValidationParameters = new TokenValidationParameters()
+                        {
+                            ValidateIssuer = true,
+                            ValidateAudience = true,
+                            ValidateLifetime = true,
+                            ValidateIssuerSigningKey = true
+                        };
                     });
+
+        builder.Services.AddAuthorizationBuilder();
 
         // API Correlation Id options
         builder.Services.Configure<CorrelationIdOptions>(options =>
@@ -108,8 +118,6 @@ public partial class Program
         });
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddScoped<ICorrelationIdAccessor, CorrelationIdAccessor>();
-
-        builder.Services.AddAuthorizationBuilder();
 
         var app = builder.Build();
 
