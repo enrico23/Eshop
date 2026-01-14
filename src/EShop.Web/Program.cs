@@ -83,6 +83,16 @@ app.MapGet("/login", async (HttpContext ctx, string? returnUrl) =>
         new AuthenticationProperties { RedirectUri = returnUrl });
 });
 
+app.MapGet("/logout", async (HttpContext ctx, string? returnUrl) =>
+{
+    returnUrl = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
+   
+    await ctx.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme,
+        new AuthenticationProperties { RedirectUri = returnUrl });
+
+    await ctx.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+});
+
 app.MapGet("/whoami", (HttpContext ctx) =>
 {
     return Results.Json(new
