@@ -1,5 +1,9 @@
 using EShop.Web.Components;
 using EShop.Web.Extensions;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using MudBlazor.Services;
 
 // Web //
@@ -13,10 +17,48 @@ builder.Services.AddMudServices();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// Add Authentication
+builder.Services
+    .AddAuthentication(options =>
+{
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+})
+.AddCookie()
+.AddKeycloakOpenIdConnect(
+    serviceName: "keycloak",
+    realm: "eshop",
+    options =>
+    {
+        options.Authority = "http://localhost:8080/realms/eshop";
+        options.ClientId = "blazor-ui";
+        options.ResponseType = OpenIdConnectResponseType.Code;
+        options.ClientSecret = builder.Configuration["Keycloak:ClientSecret"];
+        options.SaveTokens = true;
+
+        if (builder.Environment.IsDevelopment())
+        {
+            options.RequireHttpsMetadata = false;
+        }
+
+        options.Scope.Clear();
+        options.Scope.Add("blazor_api_scope");
+        options.Scope.Add("openid");
+        options.Scope.Add("profile");
+        options.Scope.Add("email");
+    }); 
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddHttpContextAccessor();
+
 // Add CatalogApi Http Client
 builder.AddCatalogApiClient();
 
 var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -33,5 +75,22 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+app.MapGet("/login", async (HttpContext ctx, string? returnUrl) =>
+{
+    returnUrl = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
+    await ctx.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme,
+        new AuthenticationProperties { RedirectUri = returnUrl });
+});
+
+app.MapGet("/whoami", (HttpContext ctx) =>
+{
+    return Results.Json(new
+    {
+        IsAuthenticated = ctx.User?.Identity?.IsAuthenticated ?? false,
+        Name = ctx.User?.Identity?.Name,
+        Claims = ctx.User?.Claims.Select(c => new { c.Type, c.Value })
+    });
+});
 
 app.Run();

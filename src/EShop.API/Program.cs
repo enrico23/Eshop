@@ -10,6 +10,7 @@ using EShop.Shared.Services;
 using Mapster;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 
 public partial class Program
@@ -43,6 +44,15 @@ public partial class Program
         builder.Services.AddDbContext<CatalogDbContext>(options =>
             options.UseSqlServer(connectionString));
 
+        // Add Persisence
+        builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+        builder.Services.AddScoped(typeof(IRepository<,,>), typeof(EfRepository<,,>));
+        builder.Services.AddScoped<IExtendedCategoryRepository, ExtendedCategoryRepository>();
+        builder.Services.AddScoped<ICategoryService, CategoryService>();
+        builder.Services.AddScoped<IExtendedProductRepository, ExtendedProductRepository>();
+        builder.Services.AddScoped<IProductService, ProductService>();
+        builder.Services.AddScoped<ISqlServerExceptionsHelper, SqlServerExceptionsHelper>();
+
         // BLOB FILE STORAGE
         var blobConnectionString = builder.Configuration.GetConnectionString("Blobs");
         var imageStorageServiceOptions = builder.Configuration.GetSection("AzureBlobStorage")
@@ -69,16 +79,36 @@ public partial class Program
         builder.Services.AddMapster();
         TypeAdapterConfig.GlobalSettings.Scan(typeof(Program).Assembly);
 
-        builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
-        builder.Services.AddScoped(typeof(IRepository<,,>), typeof(EfRepository<,,>));
-        builder.Services.AddScoped<IExtendedCategoryRepository, ExtendedCategoryRepository>();
-        builder.Services.AddScoped<ICategoryService, CategoryService>();
-        builder.Services.AddScoped<IExtendedProductRepository, ExtendedProductRepository>();
-        builder.Services.AddScoped<IProductService, ProductService>();
-        builder.Services.AddScoped<ISqlServerExceptionsHelper, SqlServerExceptionsHelper>();
-
+       
         builder.Services.AddOpenApi();
         builder.Services.AddControllers();
+
+        // Add Authentication
+        builder.Services.AddAuthentication()
+                .AddKeycloakJwtBearer(
+                    serviceName: "keycloak",
+                    realm: "eshop",
+                    options =>
+                    {
+
+                        options.Audience = "catalog-api";
+                        // For development only - disable HTTPS metadata validation
+                        // In production, use explicit Authority configuration instead
+                        if (builder.Environment.IsDevelopment())
+                        {
+                            options.Authority = "http://localhost:8080/realms/eshop";
+                            options.RequireHttpsMetadata = false;
+                        }
+                        options.TokenValidationParameters = new TokenValidationParameters()
+                        {
+                            ValidateIssuer = true,
+                            ValidateAudience = true,
+                            ValidateLifetime = true,
+                            ValidateIssuerSigningKey = true
+                        };
+                    });
+
+        builder.Services.AddAuthorizationBuilder();
 
         // API Correlation Id options
         builder.Services.Configure<CorrelationIdOptions>(options =>
@@ -90,6 +120,11 @@ public partial class Program
         builder.Services.AddScoped<ICorrelationIdAccessor, CorrelationIdAccessor>();
 
         var app = builder.Build();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        //builder.Services.AddAuthorizationBuilder();
 
         app.UseMiddleware<CorrelationIdMiddleware>();
 
