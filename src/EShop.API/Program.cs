@@ -3,7 +3,6 @@ using EShop.API.Exceptions;
 using EShop.API.Services;
 using EShop.Data;
 using EShop.Data.Repositories;
-using EShop.Domain;
 using EShop.Shared.Eventing;
 using EShop.Shared.Exceptions;
 using EShop.Shared.Observability.Correlation;
