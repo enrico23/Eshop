@@ -1,3 +1,4 @@
+using Aspire.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
@@ -47,6 +48,17 @@ var imagesQueueWorker = builder.AddProject<Projects.EShop_ImagesQueueWorker>("Im
     .WithReference(azureBlobStorage)
     .WaitFor(azureBlobStorage);
 
+// KEYCLOAK
+var keycloakUsername = builder.AddParameter("keycloak-username", "admin");
+var keycloakPassword = builder.AddParameter("keycloak-password", "admin");
+var keycloak = builder.AddKeycloak("keycloak", port: 8080, keycloakUsername, keycloakPassword)
+    .WithDataVolume()
+    .WithOtlpExporter();
+var realmConfigPath = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "realm-export.json");
+var realmConfig = File.Exists(realmConfigPath);
+if (realmConfig)
+    keycloak.WithRealmImport(realmConfigPath);
+
 // APPLICATION PROJECTS
 if (!dependenciesOnly)
 {
@@ -58,7 +70,9 @@ if (!dependenciesOnly)
            .WaitFor(azureBlobStorage)
            .WithReference(azureBlobStorage)
            .WaitFor(serviceBusQueue)
-           .WithReference(serviceBusQueue);
+           .WithReference(serviceBusQueue)
+           .WaitFor(keycloak)
+           .WithReference(keycloak);
 
     var gateway = builder.AddProject<Projects.EShop_Gateway>("Gateway")
         .WaitFor(catalogApi)
@@ -71,7 +85,9 @@ if (!dependenciesOnly)
             .WithExternalHttpEndpoints();
         frontend = frontend
             .WaitFor(gateway)
-            .WithReference(gateway);
+            .WithReference(gateway)
+            .WaitFor(keycloak)
+            .WithReference(keycloak);
     }
 }
 
