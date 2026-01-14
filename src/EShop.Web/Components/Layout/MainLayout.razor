@@ -1,4 +1,6 @@
-﻿@inherits LayoutComponentBase
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
 
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -9,6 +11,27 @@
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
         <MudSpacer />
+
+        <AuthorizeView>
+            <Authorized Context="auth">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    <MudText Typo="Typo.subtitle2">@auth.User.Identity?.Name</MudText>
+                    <MudButton Variant="Variant.Outlined"
+                               StartIcon="@Icons.Material.Filled.Logout"
+                               OnClick="@NavigateToLogout">
+                        Logout
+                    </MudButton>
+                </MudStack>
+            </Authorized>
+            <NotAuthorized>
+                <MudButton Variant="Variant.Outlined"
+                           StartIcon="@Icons.Material.Filled.Login"
+                           OnClick="@NavigateToLogin">
+                    Login
+                </MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
+
         <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
         <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
     </MudAppBar>
@@ -52,6 +75,18 @@
     private void DarkModeToggle()
     {
         _isDarkMode = !_isDarkMode;
+    }
+
+    private void NavigateToLogin()
+    {
+        var returnUrl = Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri));
+        NavigationManager.NavigateTo($"/login?returnUrl=/{returnUrl}", forceLoad: true);
+    }
+
+    private void NavigateToLogout()
+    {
+        var returnUrl = Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri));
+        NavigationManager.NavigateTo($"/logout?returnUrl=/{returnUrl}", forceLoad: true);
     }
 
     private readonly PaletteLight _lightPalette = new()
@@ -99,5 +134,4 @@
         false => Icons.Material.Outlined.DarkMode,
     };
 }
-
 

@@ -83,6 +83,16 @@ app.MapGet("/login", async (HttpContext ctx, string? returnUrl) =>
         new AuthenticationProperties { RedirectUri = returnUrl });
 });
 
+app.MapGet("/logout", async (HttpContext ctx, string? returnUrl) =>
+{
+    returnUrl = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl;
+   
+    await ctx.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme,
+        new AuthenticationProperties { RedirectUri = returnUrl });
+
+    await ctx.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+});
+
 app.MapGet("/whoami", (HttpContext ctx) =>
 {
     return Results.Json(new
@@ -92,5 +102,19 @@ app.MapGet("/whoami", (HttpContext ctx) =>
         Claims = ctx.User?.Claims.Select(c => new { c.Type, c.Value })
     });
 });
+
+app.MapGet("/debug/token", async (HttpContext ctx) =>
+{
+    var accessToken = await ctx.GetTokenAsync("access_token");
+    var idToken = await ctx.GetTokenAsync("id_token");
+
+    return Results.Json(new
+    {
+        HasAccessToken = !string.IsNullOrWhiteSpace(accessToken),
+        AccessToken = accessToken,
+        IdToken = idToken
+    });
+})
+.RequireAuthorization();
 
 app.Run();

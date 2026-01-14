@@ -4,7 +4,9 @@
 @using EShop.Web.Exceptions
 @using EShop.Web.Components.Pages.Shared
 @using EShop.Web.Models
+@using Microsoft.AspNetCore.Authorization
 @inherits CrudPageBase
+@attribute [Authorize]
 
 <MudPaper Class="pa-4">
     <GenericGrid TItem="ProductDto"

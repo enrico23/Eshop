@@ -8,10 +8,13 @@ using EShop.Shared.Exceptions;
 using EShop.Shared.Observability.Correlation;
 using EShop.Shared.Services;
 using Mapster;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
+using System.Security.Claims;
+using System.Text.Json;
 
 public partial class Program
 {
@@ -106,9 +109,30 @@ public partial class Program
                             ValidateLifetime = true,
                             ValidateIssuerSigningKey = true
                         };
+
+                        options.Events = new JwtBearerEvents
+                        {
+                            OnTokenValidated = ctx =>
+                            {
+                                if (ctx.Principal?.Identity is ClaimsIdentity id)
+                                {
+                                    AddKeycloakClientRolesAsRoleClaims(id, clientId: "catalog-api");
+                                }
+                                return Task.CompletedTask;
+                            },
+                            OnAuthenticationFailed = ctx =>
+                            {
+                                var log = ctx.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>()
+                                    .CreateLogger("JWT");
+                                log.LogError(ctx.Exception, "JWT authentication failed");
+                                return Task.CompletedTask;
+                            }
+                        };
                     });
 
-        builder.Services.AddAuthorizationBuilder();
+        builder.Services.AddAuthorizationBuilder()
+             .AddPolicy("CatalogRead", p => p.RequireRole("catalog.read"))
+             .AddPolicy("CatalogWrite", p => p.RequireRole("catalog.write"));
 
         // API Correlation Id options
         builder.Services.Configure<CorrelationIdOptions>(options =>
@@ -123,8 +147,6 @@ public partial class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
-
-        //builder.Services.AddAuthorizationBuilder();
 
         app.UseMiddleware<CorrelationIdMiddleware>();
 
@@ -154,5 +176,23 @@ public partial class Program
         app.MapControllers();
 
         app.Run();
+    }
+
+    private static void AddKeycloakClientRolesAsRoleClaims(ClaimsIdentity identity, string clientId)
+    {
+        var resourceAccess = identity.FindFirst("resource_access")?.Value;
+        if (string.IsNullOrWhiteSpace(resourceAccess))
+            return;
+
+        using var doc = JsonDocument.Parse(resourceAccess);
+        if (!doc.RootElement.TryGetProperty(clientId, out var clientObj)) return;
+        if (!clientObj.TryGetProperty("roles", out var roles)) return;
+
+        foreach (var r in roles.EnumerateArray())
+        {
+            var role = r.GetString();
+            if (!string.IsNullOrWhiteSpace(role))
+                identity.AddClaim(new Claim(ClaimTypes.Role, role));
+        }
     }
 }
