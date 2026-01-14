@@ -48,6 +48,19 @@ staying within the .NET stack.
 - [Observability](docs/observability.md
 
 
+## Authentication & Authorization
+
+Authentication and authorization are handled using an external identity provider
+and enforced at the application boundaries.
+
+The configuration is documented in two layers:
+
+- **Identity Provider configuration**
+  - [`Keycloak`](docs/security/keycloak/README.md)
+- **Application integration**
+  - [`Security`](docs/security/README.md)
+
+
 ## Other Docs
 
 - [Roadmap](docs/roadmap.md)
