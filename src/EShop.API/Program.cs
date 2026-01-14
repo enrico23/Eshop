@@ -96,7 +96,7 @@ public partial class Program
                         // In production, use explicit Authority configuration instead
                         if (builder.Environment.IsDevelopment())
                         {
-                            options.Authority = "http://localhost:8080/realms/eshop";
+                            // options.Authority = "http://localhost:8080/realms/eshop";
                             options.RequireHttpsMetadata = false;
                         }
                         options.TokenValidationParameters = new TokenValidationParameters()
@@ -123,8 +123,6 @@ public partial class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
-
-        //builder.Services.AddAuthorizationBuilder();
 
         app.UseMiddleware<CorrelationIdMiddleware>();
 
