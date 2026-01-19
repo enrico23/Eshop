@@ -1,139 +1,233 @@
 ﻿@page "/"
-@using EShop.Shared.Domain
-@using EShop.Web.Components.Pages.Categories
-@using EShop.Web.Exceptions
-@using EShop.Web.Components.Pages.Shared
-@using EShop.Web.Models
-@inherits CrudPageBase
+@rendermode InteractiveServer
 
-<MudPaper Class="pa-4">
-    <MudDivider Class="my-3" />
+<MudContainer MaxWidth="MaxWidth.False" Class="store-shell">
+    <MudPaper Elevation="0" Class="hero">
+        <MudContainer MaxWidth="MaxWidth.Large">
+            <MudStack Spacing="1">
+                <MudText Typo="Typo.h3" Class="hero-title">Store.</MudText>
+                <MudText Typo="Typo.h6" Color="Color.Secondary" Class="hero-sub">
+                    The best way to buy the products you love.
+                </MudText>
 
-    <GenericGrid TItem="ProductDto"
-                 @ref="_grid"
-                 ServerData="LoadProductAsync"
-                 DefaultPageSize="10"
-                 PageSizeOptions="new[] {5, 10, 25, 50 }"
-                 SearchPlaceholder="Search..."
-                >
-        <Columns>
-            <PropertyColumn T="ProductDto"
-                TProperty="string"
-                Property="x => x.Name" 
-                Sortable="true" Filterable="false"
-                             >
-                <CellTemplate Context="cellContext">
-                    @{
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="2" Class="hero-actions">
+                    <MudTextField @bind-Value="_search"
+                                  Placeholder="Search products"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  Class="hero-search" />
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" >
+                        Search
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </MudContainer>
+    </MudPaper>
 
-                        var editProductUrl = $"/products/{cellContext.Item.Id}/edit";
-                    }
-                    <MudLink Href=@editProductUrl>
-                        @cellContext.Item.Name
-                    </MudLink>
-                </CellTemplate>
-            </PropertyColumn>
+     <!-- CATEGORY TILES -->
+    <MudContainer MaxWidth="MaxWidth.Large" Class="section">
+        <MudGrid Spacing="2">
+            @foreach (var c in _categories)
+            {
+                <MudItem xs="6" sm="4" md="3" lg="2">
+                    <MudPaper Elevation="0" Class="category-tile" 
+                        @onclick="() => SelectCategory(c.Name)">
+                        <MudStack Spacing="0" Class="category-inner">
+                            @* <MudIcon Icon="@c.Icon" /> *@
+                            <MudText Typo="Typo.subtitle2">@c.Name</MudText>
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+            }
+        </MudGrid>
+    </MudContainer>
 
-            <PropertyColumn T="ProductDto"
-                            TProperty="decimal"
-                            Property="x => x.Price"
-                            Sortable="true" 
-                            Filterable="false"  />
+</MudContainer>
 
-            <PropertyColumn T="ProductDto"
-                            TProperty="int"
-                            Property="x => x.Stock"
-                            Sortable="true" 
-                            Filterable="false" />
+<MudPaper Class="pa-4 my-4" Elevation="1" Rounded="true">
+    <MudStack Row AlignItems="AlignItems.Center" JustifyContent="space-between" Class="mb-3">
+        <MudText Typo="Typo.h6">Element</MudText>
 
-            <PropertyColumn T="ProductDto"
-                            TProperty="string"
-                            Property="x => x.CategoryName"
-                            Title="Category"
-                            Sortable="true"
-                            Filterable="false" />
+        <MudButton Variant="Variant.Text" Color="Color.Primary" >
+            See all
+        </MudButton>
+    </MudStack>
 
-            <PropertyColumn T="ProductDto"
-                            TProperty="string"
-                            Property="x => x.Status.ToString()"
-                            Title="Status"
-                            Sortable="true"
-                            Filterable="false" />
-            <TemplateColumn T="ProductDto">
-                <HeaderTemplate>Image</HeaderTemplate>
-                 <CellTemplate Context="cellContext">
-                    @{
-                        var img = GetPrimaryOrFirstImage(cellContext.Item);
-                        var editProductUrl = $"/products/{cellContext.Item.Id}/edit";
-                    }
-                    <div class="img-frame img-frame--thumb">
-                        <MudLink Href="@editProductUrl">
-                            <div class="img-frame img-frame--thumb">
-                                @if (img is not null)
-                                {
-                                    <img src="@GetImageUrl(img.Url)" alt="@img.AltText" class="img-cover" />
-                                }
-                                else
-                                {
-                                    <div class="img-placeholder">No image</div>
-                                }
+    @if (_error is not null)
+    {
+        <MudAlert Severity="Severity.Error" Dense="true" Class="mb-3">
+            @_error
+            <MudButton Variant="Variant.Text" Color="Color.Inherit" Class="ml-2">
+                Retry
+            </MudButton>
+        </MudAlert>
+    }
+    <div class="rail-wrap">
+        <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft"
+                    Class="rail-nav rail-nav-left"
+                       Disabled="@(_isLoading)"
+                       OnClick="() => ScrollByAsync(-1)" />
+
+        <div class="rail" @ref="_railRef">
+            @if (_isLoading)
+            {
+                @for (var i = 0; i < _pageSize; i++)
+                {
+                    <MudCard Class="product-card">
+                        <MudSkeleton Height="140px" Width="100%" />
+                        <MudCardContent>
+                            <MudSkeleton Width="80%" />
+                            <MudSkeleton Width="40%" />
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudSkeleton Width="60%" Height="32px" />
+                        </MudCardActions>
+                    </MudCard>
+                }
+            }
+            else
+            {
+                @foreach (var p in _products)
+                {
+                    <MudCard Class="product-card">
+                        @{
+                            var img = GetPrimaryOrFirstImage(p);
+                            var editProductUrl = $"/products/{p.Id}/edit";
+                        }
+                        @if (img is not null)
+                        {
+                            <MudImage src="@GetImageUrl(img.Url)" alt="@img.AltText" Height="140" 
+                                ObjectFit="ObjectFit.Cover" />
+                        }
+                        else
+                        {
+                            <div class="img-placeholder">
+                                <MudIcon Icon="@Icons.Material.Filled.ImageNotSupported" Size="Size.Large" />
                             </div>
-                        </MudLink>
-                    </div>
-                </CellTemplate>
+                        }
 
-            </TemplateColumn>
-        </Columns>
-    </GenericGrid>
+                        <MudCardContent Class="pb-2">
+                            <MudText Typo="Typo.subtitle2" Class="line-clamp-2">@p.Name</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">@p.Price.ToString("C")</MudText>
+                        </MudCardContent>
+
+                        <MudCardActions Class="pt-0">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                                      
+                            >
+                                View
+                            </MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                }
+            }
+        </div>
+
+        <MudIconButton Icon="@Icons.Material.Filled.ChevronRight"
+                    Class="rail-nav rail-nav-right"
+                       Disabled="@(_isLoading)"
+                       OnClick="() => ScrollByAsync(1)"/>
+    </div>
 </MudPaper>
 
 @code {
     [Inject] protected ICatalogApiClient CatalogApiClient { get; set; } = null!;
-
-    private GenericGrid<ProductDto>? _grid;
-
     [Inject] protected ApiClientConfig ApiClientConfig { get; set; } = null!;
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+    [Inject] private NavigationManager Nav { get; set; } = null!;
 
-    protected override Task OnInitializedAsync()
+    private string _productDetailsBaseUrl { get; set; } = "/product";
+
+    private const string DefaultSortBy = "Name";
+    private const string DefaultSortDirection = "asc";
+    private const string DefaultSearchTerm = "";
+    private int _page = 1;
+    private int _pageSize = 10;
+    private  string _sortBy = DefaultSortBy;
+    private string _sortDirection = DefaultSortDirection;
+    private string _search = DefaultSearchTerm;
+
+    private string? _error;
+    private bool _isLoading;
+    private ElementReference _railRef;
+
+    private List<CategoryDto> _categories = new();
+    private List<ProductDto> _products = new();
+    private int? _totalCount;
+    private bool _canPrev => _page > 1;
+    private bool _canNext
+        => _totalCount is not null
+            ? _page < (int)Math.Ceiling(_totalCount.Value / (double)_pageSize)
+            : _products.Count == _pageSize;
+
+    protected override async Task OnInitializedAsync()
     {
-        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
-        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
-        var toast = query["error"];
-
-        if (toast == "notfound")
-            Snackbar.Add("Product not found.", Severity.Warning);
-        else if (toast == "failed")
-            Snackbar.Add("Failed to load product.", Severity.Error);
-        else if (toast == "catagories")
-            Snackbar.Add("Failed to load the categories.", Severity.Error);
-
-        return Task.CompletedTask;
+        _page = 1;
+        await LoadCategoriesAsync();
+        await LoadProductAsync();
     }
 
-    private async Task<GridData<ProductDto>> LoadProductAsync(GridState<ProductDto> state, string? searchText)
-      => await LoadGridAsync(
-          state,
-          searchText,
-          defaultSortBy: "Name",
-          loadPage: (page, pageSize, sortBy, sortDir, search, ct) =>
-              CatalogApiClient.GetPagedProductsAsync(page, pageSize, sortBy, sortDir, search, ct),
-          cancellationToken: CancellationToken.None);
-
-    private void NavigateToCreateProduct() =>
-        NavigationManager.NavigateTo("/products/create");
-
-    private void NavigateToEditProduct(ProductDto existing) =>
-        NavigationManager.NavigateTo($"/products/{existing.Id}/edit");
-
-    private async Task OpenDeleteDialogAsync(ProductDto item)
+    private async Task PrevPage()
     {
-        var deleted = await ConfirmDeleteAsync(
-            title: "Delete Product",
-            message: $"Are you sure you want to delete the product '{item.Name}'?",
-            deleteAction: ct => CatalogApiClient.DeleteProductAsync(item.Id, ct),
-            successMessage: $"Product '{item.Name}' deleted successfully.");
+        if (!_canPrev) return;
+        _page--;
 
-        if (deleted && _grid is not null)
-            await _grid.ReloadAsync();
+        await LoadProductAsync();
+    }
+
+    private async Task NextPage()
+    {
+        if (!_canNext) return;
+        _page++;
+
+        await LoadProductAsync();
+    }
+
+    private async Task Reload() => await LoadProductAsync();
+
+    private async Task LoadProductAsync(bool append = false)
+    {
+        _isLoading = true;
+        _error = null;
+
+        try
+        {
+            var result = await CatalogApiClient.GetPagedProductsAsync(
+                _page, _pageSize, _sortBy, _sortDirection, _search, CancellationToken.None);
+
+            _totalCount = result.Total;
+
+            if (append)
+                _products.AddRange(result.Items);
+            else
+                _products = result.Items.ToList();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+            if (!append) _products = new();
+            _totalCount = null;
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadCategoriesAsync()
+    {
+        try
+        {
+            _categories = await CatalogApiClient.GetAllCategoriesAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+            throw;
+        }
     }
 
     private static ProductImageDto? GetPrimaryOrFirstImage(ProductDto product)
@@ -146,4 +240,19 @@
     }
 
     private string GetImageUrl(string url) => $"{ApiClientConfig.BaseUrl}/api/images/{url}";
+
+    private async Task ScrollByAsync(int dir)
+    {
+        await JS.InvokeVoidAsync("railScrollByPage", _railRef, dir);
+    }
+
+    private void ViewProduct(Guid productId)
+    {
+        Nav.NavigateTo($"{_productDetailsBaseUrl}/{productId}");
+    }
+
+    private Task SelectCategory(string value)
+    {
+        return Task.CompletedTask;
+    }
 }
