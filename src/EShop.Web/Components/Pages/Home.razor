@@ -34,7 +34,7 @@
             {
                 <MudItem xs="6" sm="4" md="3" lg="2">
                     <MudPaper Elevation="0" Class="category-tile" 
-                        @onclick="() => SelectCategory(c.Name)">
+                        @onclick="() => SelectCategory(c.Id)">
                         <MudStack Spacing="0" Class="category-inner">
                             @* <MudIcon Icon="@c.Icon" /> *@
                             <MudText Typo="Typo.subtitle2">@c.Name</MudText>
@@ -45,24 +45,26 @@
         </MudGrid>
     </MudContainer>
 
-    <MudContainer MaxWidth="MaxWidth.Large" Class="section">
-        <MudPaper Class="pa-4 my-4" Elevation="1" Rounded="true">
-            @if (_error is not null)
-            {
+
+    @if (_error is not null)
+    {
+        <MudContainer MaxWidth="MaxWidth.Large" Class="section">
+            <MudPaper Class="pa-4 my-4" Elevation="1" Rounded="true">
+         
                 <MudAlert Severity="Severity.Error" Dense="true" Class="mb-3">
                     @_error
                     <MudButton Variant="Variant.Text" Color="Color.Inherit" Class="ml-2">
                         Retry
                     </MudButton>
                 </MudAlert>
-            }
-        </MudPaper>
-    </MudContainer>
+           
+            </MudPaper>
+        </MudContainer>
+    }
 
     <MudContainer MaxWidth="MaxWidth.Large" Class="section">
         @RailSection(title: "All Products")
     </MudContainer>
-
 </MudContainer>
 
 

@@ -23,7 +23,8 @@ public interface ICatalogApiClient
 
    
     Task<List<ProductDto>> GetAllProductsAsync(CancellationToken ct = default);
-    Task<PagedResult<ProductDto>> GetPagedProductsAsync(int page = 1, int pageSize = 20, string orderBy = "Name", string orderDirection = "asc", string? filter = null, CancellationToken ct = default);
+    Task<PagedResult<ProductDto>> GetPagedProductsAsync(int page = 1, int pageSize = 20, string orderBy = "Name", string orderDirection = "asc", 
+        string? filter = null, Guid? categoryId = null, CancellationToken ct = default);
     Task<ProductDto?> GetByIdAsync(Guid id, CancellationToken ct = default);
     Task CreateProductAsync(CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default);
     Task UpdateProductAsync(Guid id, CreateProductViewModel model, IBrowserFile? file, CancellationToken ct = default);
@@ -101,13 +102,15 @@ public sealed class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiCl
         string orderBy = "Name",
         string orderDirection = "asc",
         string? filter = null,
+        Guid? categoryId = null,
         CancellationToken ct = default)
     {
         var orderByEscaped = Uri.EscapeDataString(orderBy ?? "Name");
         var orderDirEscaped = Uri.EscapeDataString(orderDirection ?? "asc");
         var escapedFilter = Uri.EscapeDataString(filter ?? string.Empty);
 
-        var url = $"{ProductsEndpointsBasePath}?page={page}&pageSize={pageSize}&orderBy={orderByEscaped}&orderDirection={orderDirEscaped}&filter={escapedFilter}";
+        var url = $"{ProductsEndpointsBasePath}?page={page}&pageSize={pageSize}&orderBy={orderByEscaped}&orderDirection={orderDirEscaped}&filter={escapedFilter}" +
+            $"&categoryId={categoryId}";
         var result = await SendAsync<PagedResult<ProductDto>>(() => httpClient.GetAsync(url, ct), ct);
 
         if (result is null)

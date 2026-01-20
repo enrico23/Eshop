@@ -120,7 +120,7 @@
           searchText,
           defaultSortBy: "Name",
           loadPage: (page, pageSize, sortBy, sortDir, search, ct) =>
-              CatalogApiClient.GetPagedProductsAsync(page, pageSize, sortBy, sortDir, search, ct),
+              CatalogApiClient.GetPagedProductsAsync(page, pageSize, sortBy, sortDir, search, null, ct),
           cancellationToken: CancellationToken.None);
 
     private void NavigateToCreateProduct() => 

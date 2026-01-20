@@ -23,6 +23,7 @@ public abstract class HomeBase: ComponentBase
     protected string _sortBy = DefaultSortBy;
     protected string _sortDirection = DefaultSortDirection;
     protected string _search = DefaultSearchTerm;
+    protected Guid? _categoryId;
 
     protected string? _error;
     protected bool _isLoading;
@@ -84,7 +85,7 @@ public abstract class HomeBase: ComponentBase
         try
         {
             var result = await CatalogApiClient.GetPagedProductsAsync(
-                _page, _pageSize, _sortBy, _sortDirection, _search, CancellationToken.None);
+                _page, _pageSize, _sortBy, _sortDirection, _search, _categoryId, CancellationToken.None);
 
             _totalCount = result.Total;
 
@@ -127,8 +128,9 @@ public abstract class HomeBase: ComponentBase
         Nav.NavigateTo($"{_productDetailsBaseUrl}/{productId}");
     }
 
-    protected Task SelectCategory(string value)
+    protected Task SelectCategory(Guid id)
     {
+        _error = id.ToString();
         return Task.CompletedTask;
     }
 }
