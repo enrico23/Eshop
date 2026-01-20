@@ -1,5 +1,6 @@
 ﻿@page "/"
 @rendermode InteractiveServer
+@inherits HomeBase
 
 <MudContainer MaxWidth="MaxWidth.False" Class="store-shell">
     <MudPaper Elevation="0" Class="hero">
@@ -44,215 +45,98 @@
         </MudGrid>
     </MudContainer>
 
+    <MudContainer MaxWidth="MaxWidth.Large" Class="section">
+        <MudPaper Class="pa-4 my-4" Elevation="1" Rounded="true">
+            @if (_error is not null)
+            {
+                <MudAlert Severity="Severity.Error" Dense="true" Class="mb-3">
+                    @_error
+                    <MudButton Variant="Variant.Text" Color="Color.Inherit" Class="ml-2">
+                        Retry
+                    </MudButton>
+                </MudAlert>
+            }
+        </MudPaper>
+    </MudContainer>
+
+    <MudContainer MaxWidth="MaxWidth.Large" Class="section">
+        @RailSection(title: "All Products")
+    </MudContainer>
+
 </MudContainer>
 
-<MudPaper Class="pa-4 my-4" Elevation="1" Rounded="true">
-    <MudStack Row AlignItems="AlignItems.Center" JustifyContent="space-between" Class="mb-3">
-        <MudText Typo="Typo.h6">Element</MudText>
 
-        <MudButton Variant="Variant.Text" Color="Color.Primary" >
-            See all
-        </MudButton>
-    </MudStack>
 
-    @if (_error is not null)
+@code{
+
+    private RenderFragment RailSection(string title) => __builder =>
     {
-        <MudAlert Severity="Severity.Error" Dense="true" Class="mb-3">
-            @_error
-            <MudButton Variant="Variant.Text" Color="Color.Inherit" Class="ml-2">
-                Retry
-            </MudButton>
-        </MudAlert>
-    }
-    <div class="rail-wrap">
-        <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft"
-                    Class="rail-nav rail-nav-left"
-                       Disabled="@(_isLoading)"
-                       OnClick="() => ScrollByAsync(-1)" />
+        <MudPaper Elevation="0" Class="rail-section">
+            <div class="rail-wrap">
+                <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft"
+                               Class="rail-nav rail-nav-left"
+                               Disabled="@(_isLoading)"
+                               OnClick="() => ScrollByAsync(-1)" />
 
-        <div class="rail" @ref="_railRef">
-            @if (_isLoading)
-            {
-                @for (var i = 0; i < _pageSize; i++)
-                {
-                    <MudCard Class="product-card">
-                        <MudSkeleton Height="140px" Width="100%" />
-                        <MudCardContent>
-                            <MudSkeleton Width="80%" />
-                            <MudSkeleton Width="40%" />
-                        </MudCardContent>
-                        <MudCardActions>
-                            <MudSkeleton Width="60%" Height="32px" />
-                        </MudCardActions>
-                    </MudCard>
-                }
-            }
-            else
-            {
-                @foreach (var p in _products)
-                {
-                    <MudCard Class="product-card">
-                        @{
-                            var img = GetPrimaryOrFirstImage(p);
-                            var editProductUrl = $"/products/{p.Id}/edit";
-                        }
-                        @if (img is not null)
+                <div class="rail" @ref="_railRef">
+                    @if (_isLoading)
+                    {
+                        @for (var i = 0; i < _pageSize; i++)
                         {
-                            <MudImage src="@GetImageUrl(img.Url)" alt="@img.AltText" Height="140" 
-                                ObjectFit="ObjectFit.Cover" />
+                            <MudCard Class="product-card">
+                                <MudSkeleton Height="140px" Width="100%" />
+                                <MudCardContent>
+                                    <MudSkeleton Width="80%" />
+                                    <MudSkeleton Width="40%" />
+                                </MudCardContent>
+                                <MudCardActions>
+                                    <MudSkeleton Width="60%" Height="32px" />
+                                </MudCardActions>
+                            </MudCard>
                         }
-                        else
+                    }
+                    else
+                    {
+                        @foreach (var p in _products)
                         {
-                            <div class="img-placeholder">
-                                <MudIcon Icon="@Icons.Material.Filled.ImageNotSupported" Size="Size.Large" />
-                            </div>
+                            <MudCard Class="product-card">
+                                @{
+                                    var img = GetPrimaryOrFirstImage(p);
+                                    var editProductUrl = $"/products/{p.Id}/edit";
+                                }
+                                @if (img is not null)
+                                {
+                                    <MudImage src="@GetImageUrl(img.Url)" alt="@img.AltText" Height="140"
+                                              ObjectFit="ObjectFit.Cover" />
+                                }
+                                else
+                                {
+                                    <div class="img-placeholder">
+                                        <MudIcon Icon="@Icons.Material.Filled.ImageNotSupported" Size="Size.Large" />
+                                    </div>
+                                }
+
+                                <MudCardContent Class="pb-2">
+                                    <MudText Typo="Typo.subtitle2" Class="line-clamp-2">@p.Name</MudText>
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">@p.Price.ToString("C")</MudText>
+                                </MudCardContent>
+
+                                <MudCardActions Class="pt-0">
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small">
+                                        View
+                                    </MudButton>
+                                </MudCardActions>
+                            </MudCard>
                         }
+                    }
+                </div>
 
-                        <MudCardContent Class="pb-2">
-                            <MudText Typo="Typo.subtitle2" Class="line-clamp-2">@p.Name</MudText>
-                            <MudText Typo="Typo.body2" Color="Color.Secondary">@p.Price.ToString("C")</MudText>
-                        </MudCardContent>
+                <MudIconButton Icon="@Icons.Material.Filled.ChevronRight"
+                               Class="rail-nav rail-nav-right"
+                               Disabled="@(_isLoading)"
+                               OnClick="() => ScrollByAsync(1)" />
+            </div>
+        </MudPaper>
+    };
 
-                        <MudCardActions Class="pt-0">
-                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
-                                      
-                            >
-                                View
-                            </MudButton>
-                        </MudCardActions>
-                    </MudCard>
-                }
-            }
-        </div>
-
-        <MudIconButton Icon="@Icons.Material.Filled.ChevronRight"
-                    Class="rail-nav rail-nav-right"
-                       Disabled="@(_isLoading)"
-                       OnClick="() => ScrollByAsync(1)"/>
-    </div>
-</MudPaper>
-
-@code {
-    [Inject] protected ICatalogApiClient CatalogApiClient { get; set; } = null!;
-    [Inject] protected ApiClientConfig ApiClientConfig { get; set; } = null!;
-    [Inject] private IJSRuntime JS { get; set; } = default!;
-    [Inject] private NavigationManager Nav { get; set; } = null!;
-
-    private string _productDetailsBaseUrl { get; set; } = "/product";
-
-    private const string DefaultSortBy = "Name";
-    private const string DefaultSortDirection = "asc";
-    private const string DefaultSearchTerm = "";
-    private int _page = 1;
-    private int _pageSize = 10;
-    private  string _sortBy = DefaultSortBy;
-    private string _sortDirection = DefaultSortDirection;
-    private string _search = DefaultSearchTerm;
-
-    private string? _error;
-    private bool _isLoading;
-    private ElementReference _railRef;
-
-    private List<CategoryDto> _categories = new();
-    private List<ProductDto> _products = new();
-    private int? _totalCount;
-    private bool _canPrev => _page > 1;
-    private bool _canNext
-        => _totalCount is not null
-            ? _page < (int)Math.Ceiling(_totalCount.Value / (double)_pageSize)
-            : _products.Count == _pageSize;
-
-    protected override async Task OnInitializedAsync()
-    {
-        _page = 1;
-        await LoadCategoriesAsync();
-        await LoadProductAsync();
-    }
-
-    private async Task PrevPage()
-    {
-        if (!_canPrev) return;
-        _page--;
-
-        await LoadProductAsync();
-    }
-
-    private async Task NextPage()
-    {
-        if (!_canNext) return;
-        _page++;
-
-        await LoadProductAsync();
-    }
-
-    private async Task Reload() => await LoadProductAsync();
-
-    private async Task LoadProductAsync(bool append = false)
-    {
-        _isLoading = true;
-        _error = null;
-
-        try
-        {
-            var result = await CatalogApiClient.GetPagedProductsAsync(
-                _page, _pageSize, _sortBy, _sortDirection, _search, CancellationToken.None);
-
-            _totalCount = result.Total;
-
-            if (append)
-                _products.AddRange(result.Items);
-            else
-                _products = result.Items.ToList();
-        }
-        catch (Exception ex)
-        {
-            _error = ex.Message;
-            if (!append) _products = new();
-            _totalCount = null;
-        }
-        finally
-        {
-            _isLoading = false;
-            StateHasChanged();
-        }
-    }
-
-    private async Task LoadCategoriesAsync()
-    {
-        try
-        {
-            _categories = await CatalogApiClient.GetAllCategoriesAsync();
-        }
-        catch (Exception ex)
-        {
-            _error = ex.Message;
-            throw;
-        }
-    }
-
-    private static ProductImageDto? GetPrimaryOrFirstImage(ProductDto product)
-    {
-        if (product.Images is null || product.Images.Count == 0)
-            return null;
-
-        return product.Images.FirstOrDefault(i => i.IsPrimary)
-            ?? product.Images.OrderBy(i => i.SortOrder).First();
-    }
-
-    private string GetImageUrl(string url) => $"{ApiClientConfig.BaseUrl}/api/images/{url}";
-
-    private async Task ScrollByAsync(int dir)
-    {
-        await JS.InvokeVoidAsync("railScrollByPage", _railRef, dir);
-    }
-
-    private void ViewProduct(Guid productId)
-    {
-        Nav.NavigateTo($"{_productDetailsBaseUrl}/{productId}");
-    }
-
-    private Task SelectCategory(string value)
-    {
-        return Task.CompletedTask;
-    }
 }
