@@ -9,28 +9,6 @@
 
 <a class="skip-link" href="#main">Skip to content</a>
 
-@* <header class="site-header">
-    <nav class="container nav" aria-label="Primary">
-        <a class="wordmark" href="/">Store</a>
-        <NavMenu />
-        <div class="nav-icons" aria-label="Account">
-            <AuthorizeView>
-                <Authorized Context="auth">
-                    <span class="nav-user">@auth.User.Identity?.Name</span>
-                    <button class="button button-ghost" type="button" @onclick="NavigateToLogout">
-                        Logout
-                    </button>
-                </Authorized>
-                <NotAuthorized>
-                    <button class="button button-ghost" type="button" @onclick="NavigateToLogin">
-                        Login
-                    </button>
-                </NotAuthorized>
-            </AuthorizeView>
-        </div>
-    </nav>
-</header> *@
-
 <MudPaper Class="site-header" Elevation="0" Square="true">
     <MudContainer Class="container" MaxWidth="MaxWidth.False">
         <nav class="container nav" aria-label="Primary">
@@ -47,22 +25,22 @@
                 <AuthorizeView>
                     <Authorized Context="auth">
                         <span class="nav-user">@auth.User.Identity?.Name</span>
-                        <button class="button button-ghost" type="button" @onclick="NavigateToLogout">
+                        <MudButton class="button button-ghost" type="button" @onclick="NavigateToLogout">
                             Logout
-                        </button>
+                        </MudButton>
                     </Authorized>
                     <NotAuthorized>
-                        <button class="button button-ghost" type="button" @onclick="NavigateToLogin">
+                        <MudButton class="button button-ghost" type="button" @onclick="NavigateToLogin">
                             Login
-                        </button>
+                        </MudButton>
                     </NotAuthorized>
                 </AuthorizeView>
-                <button class="icon-button" aria-label="Search">
+                <MudButton class="icon-button" aria-label="Search">
                     <span class="icon-circle" aria-hidden="true"></span>
-                </button>
-                <button class="icon-button" aria-label="Cart">
+                </MudButton>
+                <MudButton class="icon-button" aria-label="Cart">
                     <span class="icon-square" aria-hidden="true"></span>
-                </button>
+                </MudButton>
             </div>
         </nav>
     </MudContainer>
