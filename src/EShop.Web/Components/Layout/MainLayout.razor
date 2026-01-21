@@ -31,27 +31,42 @@
     </nav>
 </header> *@
 
-<header class="site-header">
-    <nav class="container nav" aria-label="Primary">
-        <a class="wordmark" href="#">Nova</a>
-        <ul class="nav-links">
-            <li><a href="#featured">Featured</a></li>
-            <li><a href="#products">Products</a></li>
-            <li><a href="#studio">Studio</a></li>
-            <li><a href="#materials">Materials</a></li>
-            <li><a href="#support">Support</a></li>
-            <li><a href="#stories">Stories</a></li>
-        </ul>
-        <div class="nav-icons" aria-label="Tools">
-            <button class="icon-button" aria-label="Search">
-                <span class="icon-circle" aria-hidden="true"></span>
-            </button>
-            <button class="icon-button" aria-label="Cart">
-                <span class="icon-square" aria-hidden="true"></span>
-            </button>
-        </div>
-    </nav>
-</header>
+<MudPaper Class="site-header" Elevation="0" Square="true">
+    <MudContainer Class="container" MaxWidth="MaxWidth.False">
+        <nav class="container nav" aria-label="Primary">
+            <a class="wordmark" href="#">Nova</a>
+            <ul class="nav-links">
+                <li><a href="#featured">Featured</a></li>
+                <li><a href="#products">Products</a></li>
+                <li><a href="#studio">Studio</a></li>
+                <li><a href="#materials">Materials</a></li>
+                <li><a href="#support">Support</a></li>
+                <li><a href="#stories">Stories</a></li>
+            </ul>
+            <div class="nav-icons" aria-label="Tools">
+                <AuthorizeView>
+                    <Authorized Context="auth">
+                        <span class="nav-user">@auth.User.Identity?.Name</span>
+                        <button class="button button-ghost" type="button" @onclick="NavigateToLogout">
+                            Logout
+                        </button>
+                    </Authorized>
+                    <NotAuthorized>
+                        <button class="button button-ghost" type="button" @onclick="NavigateToLogin">
+                            Login
+                        </button>
+                    </NotAuthorized>
+                </AuthorizeView>
+                <button class="icon-button" aria-label="Search">
+                    <span class="icon-circle" aria-hidden="true"></span>
+                </button>
+                <button class="icon-button" aria-label="Cart">
+                    <span class="icon-square" aria-hidden="true"></span>
+                </button>
+            </div>
+        </nav>
+    </MudContainer>
+</MudPaper>
 
 <main id="main">
     @Body
