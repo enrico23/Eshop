@@ -1,12 +1,11 @@
-﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 
-<MudNavMenu>
-    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+<ul class="nav-links">
+    <li><NavLink href="" Match="NavLinkMatch.All">Home</NavLink></li>
     <AuthorizeView>
         <Authorized>
-            <MudNavLink Href="categories" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Categories</MudNavLink>
-            <MudNavLink Href="products" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Products</MudNavLink>
+            <li><NavLink href="categories" Match="NavLinkMatch.Prefix">Categories</NavLink></li>
+            <li><NavLink href="products" Match="NavLinkMatch.Prefix">Products</NavLink></li>
         </Authorized>
     </AuthorizeView>
-</MudNavMenu>
-
+</ul>

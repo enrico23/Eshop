@@ -6,39 +6,102 @@
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
-<MudLayout>
-    <MudAppBar Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudText Typo="Typo.h5" Class="ml-3">Store</MudText>
-        <MudSpacer />
-        <AuthorizeView>
-            <Authorized Context="auth">
-                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                    <MudText Typo="Typo.subtitle2">@auth.User.Identity?.Name</MudText>
-                    <MudButton Variant="Variant.Outlined"
-                               StartIcon="@Icons.Material.Filled.Logout"
-                               OnClick="@NavigateToLogout">
-                        Logout
-                    </MudButton>
-                </MudStack>
-            </Authorized>
-            <NotAuthorized>
-                <MudButton Variant="Variant.Outlined"
-                           StartIcon="@Icons.Material.Filled.Login"
-                           OnClick="@NavigateToLogin">
-                    Login
-                </MudButton>
-            </NotAuthorized>
-        </AuthorizeView>
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
-    </MudAppBar>
-    <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+@* <header class="site-header">
+    <nav class="container nav" aria-label="Primary">
+        <a class="wordmark" href="/">Store</a>
         <NavMenu />
-    </MudDrawer>
-    <MudMainContent>
-        @Body
-    </MudMainContent>
-</MudLayout>
+        <div class="nav-icons" aria-label="Account">
+            <AuthorizeView>
+                <Authorized Context="auth">
+                    <span class="nav-user">@auth.User.Identity?.Name</span>
+                    <button class="button button-ghost" type="button" @onclick="NavigateToLogout">
+                        Logout
+                    </button>
+                </Authorized>
+                <NotAuthorized>
+                    <button class="button button-ghost" type="button" @onclick="NavigateToLogin">
+                        Login
+                    </button>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+    </nav>
+</header> *@
+
+<header class="site-header">
+    <nav class="container nav" aria-label="Primary">
+        <a class="wordmark" href="#">Nova</a>
+        <ul class="nav-links">
+            <li><a href="#featured">Featured</a></li>
+            <li><a href="#products">Products</a></li>
+            <li><a href="#studio">Studio</a></li>
+            <li><a href="#materials">Materials</a></li>
+            <li><a href="#support">Support</a></li>
+            <li><a href="#stories">Stories</a></li>
+        </ul>
+        <div class="nav-icons" aria-label="Tools">
+            <button class="icon-button" aria-label="Search">
+                <span class="icon-circle" aria-hidden="true"></span>
+            </button>
+            <button class="icon-button" aria-label="Cart">
+                <span class="icon-square" aria-hidden="true"></span>
+            </button>
+        </div>
+    </nav>
+</header>
+
+<main id="main">
+    @Body
+</main>
+
+<footer class="site-footer" id="support">
+    <div class="container">
+        <div class="row">
+            <div class="col col-12 col-md-6 col-lg-3">
+                <h3>Shop</h3>
+                <ul>
+                    <li><a href="#">All products</a></li>
+                    <li><a href="#">New arrivals</a></li>
+                    <li><a href="#">Limited editions</a></li>
+                    <li><a href="#">Gift cards</a></li>
+                </ul>
+            </div>
+            <div class="col col-12 col-md-6 col-lg-3">
+                <h3>Company</h3>
+                <ul>
+                    <li><a href="#">About Nova</a></li>
+                    <li><a href="#">Sustainability</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Press</a></li>
+                </ul>
+            </div>
+            <div class="col col-12 col-md-6 col-lg-3">
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="#">Help center</a></li>
+                    <li><a href="#">Warranty</a></li>
+                    <li><a href="#">Shipping</a></li>
+                    <li><a href="#">Returns</a></li>
+                </ul>
+            </div>
+            <div class="col col-12 col-md-6 col-lg-3">
+                <h3>Connect</h3>
+                <ul>
+                    <li><a href="#">Newsletter</a></li>
+                    <li><a href="#">Studio sessions</a></li>
+                    <li><a href="#">Events</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Nova. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
@@ -47,13 +110,6 @@
 </div>
 
 @code {
-    private bool _drawerOpen = false;
-
-    private void DrawerToggle()
-    {
-        _drawerOpen = !_drawerOpen;
-    }
-
     private void NavigateToLogin()
     {
         var returnUrl = Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri));
