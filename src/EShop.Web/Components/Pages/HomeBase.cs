@@ -28,6 +28,7 @@ public abstract class HomeBase: ComponentBase
     protected string? _error;
     protected bool _isLoading;
     protected ElementReference _railRef;
+    protected ElementReference _categoryRailRef;
 
     protected List<CategoryDto> _categories = [];
     protected List<ProductDto> _products = [];
@@ -121,6 +122,23 @@ public abstract class HomeBase: ComponentBase
     protected async Task ScrollByAsync(int dir)
     {
         await JS.InvokeVoidAsync("railScrollByPage", _railRef, dir);
+    }
+
+    protected async Task ScrollCategoriesByAsync(int dir)
+    {
+        await JS.InvokeVoidAsync("railScrollByPage", _categoryRailRef, dir);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        await JS.InvokeVoidAsync(
+            "railInitButtons",
+            "category-rail-track",
+            "category-rail-left",
+            "category-rail-right");
     }
 
     protected void ViewProduct(Guid productId)

@@ -1,5 +1,6 @@
 @page "/"
 @rendermode InteractiveServer
+@inherits HomeBase
 
 <main id="main">
     <section class="hero" aria-labelledby="hero-title">
@@ -33,6 +34,38 @@
                         </svg>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CATEGORY TILES -->
+    <section class="category-rail">
+        <div class="container">
+            <div class="rail-wrap">
+                <MudIconButton id="category-rail-left"
+                               Icon="@Icons.Material.Filled.ChevronLeft"
+                               Class="rail-nav rail-nav-left"
+                               OnClick="() => ScrollCategoriesByAsync(-1)"
+                               AriaLabel="Scroll categories left" />
+                <div id="category-rail-track" class="category-rail-track" role="list" @ref="_categoryRailRef">
+                    @foreach (var c in _categories)
+                    {
+                        <div class="category-rail-item" role="listitem">
+                            <MudPaper Elevation="0" Class="category-tile category-tile--rail"
+                                      @onclick="() => SelectCategory(c.Id)">
+                                <MudStack Spacing="0" Class="category-inner">
+                                    @* <MudIcon Icon="@c.Icon" /> *@
+                                    <MudText Typo="Typo.subtitle2">@c.Name</MudText>
+                                </MudStack>
+                            </MudPaper>
+                        </div>
+                    }
+                </div>
+                <MudIconButton id="category-rail-right"
+                               Icon="@Icons.Material.Filled.ChevronRight"
+                               Class="rail-nav rail-nav-right"
+                               OnClick="() => ScrollCategoriesByAsync(1)"
+                               AriaLabel="Scroll categories right" />
             </div>
         </div>
     </section>
