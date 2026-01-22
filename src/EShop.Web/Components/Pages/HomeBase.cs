@@ -34,6 +34,7 @@ public abstract class HomeBase: ComponentBase
     protected List<ProductDto> _products = [];
 
     private int? _totalCount;
+    private bool _categoryRailInitialized;
     protected bool _canPrev => _page > 1;
     protected bool _canNext
         => _totalCount is not null
@@ -131,7 +132,7 @@ public abstract class HomeBase: ComponentBase
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender)
+        if (_categoryRailInitialized || _categories.Count == 0)
             return;
 
         await JS.InvokeVoidAsync(
@@ -139,6 +140,7 @@ public abstract class HomeBase: ComponentBase
             "category-rail-track",
             "category-rail-left",
             "category-rail-right");
+        _categoryRailInitialized = true;
     }
 
     protected void ViewProduct(Guid productId)

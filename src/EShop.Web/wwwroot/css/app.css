@@ -530,12 +530,15 @@ h1 {
 }
 
 .category-rail-track {
-  display: flex;
-  gap: var(--space-16);
-  overflow-x: auto;
-  padding: var(--space-8) var(--rail-button-space) var(--space-16);
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
+    --rail-button-space: 64px;
+    padding: var(--space-8) var(--rail-button-space) var(--space-16);
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--rail-button-space);
+    display: flex;
+    gap: var(--space-16);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
 }
 
 .category-rail-track::-webkit-scrollbar {
