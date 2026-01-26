@@ -242,9 +242,7 @@ a {
     border-radius: 4px;
 }
 
-.hero {
-    padding: var(--space-64) 0 var(--space-48);
-}
+
 
 
 .eyebrow {
@@ -320,12 +318,7 @@ h1 {
         color: var(--color-muted);
     }
 
-.hero-visual {
-    background: linear-gradient(140deg, #ffffff, #e7ecf2);
-    border-radius: var(--radius-24);
-    padding: var(--space-24);
-    box-shadow: var(--shadow-soft);
-}
+
 
 .featured {
     padding: var(--space-48) 0;

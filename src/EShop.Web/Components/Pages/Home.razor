@@ -5,47 +5,15 @@
 <SiteStrip 
     PillText="Free Delivery" 
     ClaimText="New for 2026: precision-tuned accessories with trade-in credit."
-    FeatureText="See Highlights">
-</SiteStrip>
+    FeatureText="See Highlights" />
+
+<SiteHero />
 
 <MudContainer MaxWidth="MaxWidth.False" Class="store-shell">
-   <MudPaper Elevation="0" Class="hero">
-        <MudContainer MaxWidth="MaxWidth.Large">
-            <MudStack Spacing="1">
-                <MudText Typo="Typo.h3" Class="hero-title">Store.</MudText>
-                <MudText Typo="Typo.h6" Color="Color.Secondary" Class="hero-sub">
-                    The best way to buy the products you love.
-                </MudText>
-
-                <MudStack Row AlignItems="AlignItems.Center" Spacing="2" Class="hero-actions">
-                    <MudTextField @bind-Value="_search"
-                                  Placeholder="Search products"
-                                  Variant="Variant.Outlined"
-                                  Margin="Margin.Dense"
-                                  Adornment="Adornment.Start"
-                                  AdornmentIcon="@Icons.Material.Filled.Search"
-                                  Class="hero-search" />
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" >
-                        Search
-                    </MudButton>
-                </MudStack>
-            </MudStack>
-        </MudContainer>
-    </MudPaper>
-
      <!-- CATEGORY TILES -->
     <MudContainer MaxWidth="MaxWidth.Large" Class="section">
         <section id="products-premium" class="products" aria-labelledby="products-premium-title">
             <div class="container">
-                <div class="row">
-                    <div class="col col-12">
-                        <div class="section-head">
-                            <h2 id="products-premium-title">Premium lineup</h2>
-                            <p>Higher spec, same design language.</p>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="pr-rail"
                      data-pr-rail
                      data-pr-scroll-ratio="0.85"
@@ -126,7 +94,8 @@
                                 <button class="button button-ghost">Buy</button>
                               </div>
                             </article>
-                                                }
+                        
+                        }
                         else
                         {
                             foreach (var p in _products)

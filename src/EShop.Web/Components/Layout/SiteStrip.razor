@@ -1,17 +1,20 @@
-﻿<section class="site-strip" aria-label="Store highlights">
-    <div class="container strip-inner">
-        @if (!string.IsNullOrWhiteSpace(PillText))
-        {
-            <span class="strip-pill">@PillText</span>
-            <span class="strip-divider" aria-hidden="true"></span>
-        }
-        <p class="strip-text">@ClaimText</p>
+﻿
+<section class="site-strip" aria-label="Store highlights">
+    <MudContainer Class="container" MaxWidth="MaxWidth.False">
+        <div class="container strip-inner">
+            @if (!string.IsNullOrWhiteSpace(PillText))
+            {
+                <span class="strip-pill">@PillText</span>
+                <span class="strip-divider" aria-hidden="true"></span>
+            }
+            <p class="strip-text">@ClaimText</p>
 
-        @if (!string.IsNullOrWhiteSpace(FeatureText))
-        {
-            <a class="strip-link" href="#featured">@FeatureText</a>
-        }
-    </div>
+            @if (!string.IsNullOrWhiteSpace(FeatureText))
+            {
+                <a class="strip-link" href="#featured">@FeatureText</a>
+            }
+        </div>
+    </MudContainer>
 </section>
 
 
@@ -19,6 +22,7 @@
     .site-strip {
         background: var(--color-surface);
         border-bottom: 1px solid var(--color-line);
+        
     }
 
     .strip-inner {
