@@ -14,7 +14,7 @@
                         feels premium without the noise.
                     </p>
                     <div class="hero-actions">
-                        <a class="button button-primary" href="#products">Shop the line</a>
+                        <a class="button button-primary" href="#featured">Shop the line</a>
                         <a class="text-link" href="#featured">Explore the collection</a>
                     </div>
                 </div>
@@ -37,17 +37,18 @@
             </div>
         </div>
     </section>
+    <!--// end section -->
 
     <!-- CATEGORY TILES -->
-    <section class="category-rail">
+    <section class="category-rail js-rail">
         <div class="container">
             <div class="rail-wrap">
                 <MudIconButton id="category-rail-left"
                                Icon="@Icons.Material.Filled.ChevronLeft"
-                               Class="rail-nav rail-nav-left is-hidden"
+                               Class="rail-nav rail-nav-left js-rail-left is-hidden"
                                OnClick="() => ScrollCategoriesByAsync(-1)"
                                AriaLabel="Scroll categories left" />
-                <div id="category-rail-track" class="category-rail-track" role="list" @ref="_categoryRailRef">
+                <div id="category-rail-track" class="category-rail-track js-rail-track" role="list" @ref="_categoryRailRef">
                     @foreach (var c in _categories)
                     {
                         <div class="category-rail-item" role="listitem">
@@ -63,151 +64,15 @@
                 </div>
                 <MudIconButton id="category-rail-right"
                                Icon="@Icons.Material.Filled.ChevronRight"
-                               Class="rail-nav rail-nav-right"
+                               Class="rail-nav rail-nav-right js-rail-right"
                                OnClick="() => ScrollCategoriesByAsync(1)"
                                AriaLabel="Scroll categories right" />
             </div>
         </div>
     </section>
 
-    <section id="featured" class="featured">
-        <div class="container">
-            <div class="row">
-                <div class="col col-12">
-                    <div class="section-head">
-                        <h2>Featured capsules</h2>
-                        <p>Three premium statements in one quiet collection.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col col-12 col-md-6 col-lg-4">
-                    <article class="card card-premium">
-                        <div class="card-visual"></div>
-                        <h3>Obsidian Capsule</h3>
-                        <p>Deep matte finish with precision-milled edges.</p>
-                    </article>
-                </div>
-                <div class="col col-12 col-md-6 col-lg-4">
-                    <article class="card card-premium">
-                        <div class="card-visual"></div>
-                        <h3>Airline Edition</h3>
-                        <p>Ultralight build with brushed aluminum touch.</p>
-                    </article>
-                </div>
-                <div class="col col-12 col-md-6 col-lg-4">
-                    <article class="card card-premium">
-                        <div class="card-visual"></div>
-                        <h3>Studio Array</h3>
-                        <p>Balanced acoustics engineered for quiet rooms.</p>
-                    </article>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="products" class="products" aria-labelledby="products-title">
-        <div class="container">
-            <div class="row">
-                <div class="col col-12">
-                    <div class="section-head">
-                        <h2 id="products-title">The essentials lineup</h2>
-                        <p>Eight refined pieces, each built to last.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col col-12 col-md-6 col-lg-3">
-                    <article class="product">
-                        <div class="product-visual"></div>
-                        <h3>Nova One</h3>
-                        <p>Compact core for everyday clarity.</p>
-                        <div class="product-row">
-                            <span class="price">$129</span>
-                            <button class="button button-ghost">Buy</button>
-                        </div>
-                    </article>
-                </div>
-                <div class="col col-12 col-md-6 col-lg-3">
-                    <article class="product">
-                        <div class="product-visual"></div>
-                        <h3>Nova Air</h3>
-                        <p>Lightweight with a satin finish.</p>
-                        <div class="product-row">
-                            <span class="price">$159</span>
-                            <button class="button button-ghost">Buy</button>
-                        </div>
-                    </article>
-                </div>
-                <div class="col col-12 col-md-6 col-lg-3">
-                    <article class="product">
-                        <div class="product-visual"></div>
-                        <h3>Nova Studio</h3>
-                        <p>Balanced acoustics for focused spaces.</p>
-                        <div class="product-row">
-                            <span class="price">$219</span>
-                            <button class="button button-ghost">Buy</button>
-                        </div>
-                    </article>
-                </div>
-                <div class="col col-12 col-md-6 col-lg-3">
-                    <article class="product">
-                        <div class="product-visual"></div>
-                        <h3>Nova Pro</h3>
-                        <p>Extended range and refined tuning.</p>
-                        <div class="product-row">
-                            <span class="price">$299</span>
-                            <button class="button button-ghost">Buy</button>
-                        </div>
-                    </article>
-                </div>
-                <div class="col col-12 col-md-6 col-lg-3">
-                    <article class="product">
-                        <div class="product-visual"></div>
-                        <h3>Nova Mini</h3>
-                        <p>Minimal form, maximum focus.</p>
-                        <div class="product-row">
-                            <span class="price">$99</span>
-                            <button class="button button-ghost">Buy</button>
-                        </div>
-                    </article>
-                </div>
-                <div class="col col-12 col-md-6 col-lg-3">
-                    <article class="product">
-                        <div class="product-visual"></div>
-                        <h3>Nova Max</h3>
-                        <p>Immersive sound in a single slab.</p>
-                        <div class="product-row">
-                            <span class="price">$349</span>
-                            <button class="button button-ghost">Buy</button>
-                        </div>
-                    </article>
-                </div>
-                <div class="col col-12 col-md-6 col-lg-3">
-                    <article class="product">
-                        <div class="product-visual"></div>
-                        <h3>Nova Duo</h3>
-                        <p>Pairing-ready, always balanced.</p>
-                        <div class="product-row">
-                            <span class="price">$189</span>
-                            <button class="button button-ghost">Buy</button>
-                        </div>
-                    </article>
-                </div>
-                <div class="col col-12 col-md-6 col-lg-3">
-                    <article class="product">
-                        <div class="product-visual"></div>
-                        <h3>Nova Arc</h3>
-                        <p>Curved silhouette with soft touch.</p>
-                        <div class="product-row">
-                            <span class="price">$239</span>
-                            <button class="button button-ghost">Buy</button>
-                        </div>
-                    </article>
-                </div>
-            </div>
-        </div>
-    </section>
+    @RailSection(title: "All Products")
+    <!--// end section -->
 
     <section class="promo" aria-labelledby="promo-title">
         <div class="container">
@@ -224,4 +89,74 @@
             </div>
         </div>
     </section>
+    <!--// end section -->
 </main>
+
+
+@code {
+    private RenderFragment RailSection(string title) => __builder =>
+    {
+        <MudPaper Elevation="0" Class="featured">
+            <div class="container">
+                <div class="row">
+                    <div class="col col-12">
+                        <div class="section-head">
+                            <h2>Featured capsules</h2>
+                            <p>Three premium statements in one quiet collection.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="rail-wrap js-rail">
+                    <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft"
+                                   Class="rail-nav rail-nav-left js-rail-left is-hidden"
+                                   OnClick="() => ScrollRailByAsync(_featuredRailRef, -1)"
+                                   AriaLabel="Scroll featured capsules left" />
+
+                    <div class="category-rail-track js-rail-track" role="list" @ref="_featuredRailRef">
+                        @if (_isLoading)
+                        {
+                            @for (var i = 0; i < _pageSize; i++)
+                            {
+                                <div class="category-rail-item" role="listitem">
+                                    <article class="card card-premium">
+                                        <div class="card-visual"></div>
+                                        <h3>Obsidian Capsule</h3>
+                                        <p>Deep matte finish with precision-milled edges.</p>
+                                    </article>
+                                </div>
+                            }
+                        } else
+                        {
+                            @foreach (var product in _products) {
+                                var img = GetPrimaryOrFirstImage(product);
+                                var editProductUrl = $"/products/{product.Id}/edit";
+                                
+                                <div class="category-rail-item" role="listitem">
+                                    <article class="card card-premium">
+                                      @if (img is not null)
+                                        {
+                                        <div class="card-visual">
+                                          <MudImage src="@GetImageUrl(img.Url)" alt="@img.AltText" Height="140"
+                                              ObjectFit="ObjectFit.Cover" />
+                                        </div>
+                                        } else
+                                        {
+                                            <div class="card-visual">
+                                            </div>
+                                        }
+                                        <h3>@product.Name</h3>
+                                        <p>@product.Description</p>
+                                    </article>
+                                </div>
+                            }
+                        }
+                    </div>
+                    <MudIconButton Icon="@Icons.Material.Filled.ChevronRight"
+                                   Class="rail-nav rail-nav-right js-rail-right"
+                                   OnClick="() => ScrollRailByAsync(_featuredRailRef, 1)"
+                                   AriaLabel="Scroll featured capsules right" />
+                </div>
+            </div>
+        </MudPaper>
+    };
+}

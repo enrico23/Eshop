@@ -9,18 +9,14 @@
 
 <a class="skip-link" href="#main">Skip to content</a>
 
-<MudPaper Class="site-header" Elevation="0" Square="true">
+<NavMenu />
+
+@* <MudPaper Class="site-header" Elevation="0" Square="true">
     <MudContainer Class="container" MaxWidth="MaxWidth.False">
         <nav class="container nav" aria-label="Primary">
             <a class="wordmark" href="#">Nova</a>
-            <ul class="nav-links">
-                <li><a href="#featured">Featured</a></li>
-                <li><a href="#products">Products</a></li>
-                <li><a href="#studio">Studio</a></li>
-                <li><a href="#materials">Materials</a></li>
-                <li><a href="#support">Support</a></li>
-                <li><a href="#stories">Stories</a></li>
-            </ul>
+            <NavMenu />
+
             <div class="nav-icons" aria-label="Tools">
                 <AuthorizeView>
                     <Authorized Context="auth">
@@ -44,7 +40,7 @@
             </div>
         </nav>
     </MudContainer>
-</MudPaper>
+</MudPaper> *@
 
 <main id="main">
     @Body
@@ -102,7 +98,7 @@
     <span class="dismiss">🗙</span>
 </div>
 
-@code {
+@* @code {
     private void NavigateToLogin()
     {
         var returnUrl = Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri));
@@ -114,4 +110,4 @@
         var returnUrl = Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri));
         NavigationManager.NavigateTo($"/logout?returnUrl=/{returnUrl}", forceLoad: true);
     }
-}
+} *@

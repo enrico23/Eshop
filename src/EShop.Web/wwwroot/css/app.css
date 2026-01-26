@@ -336,54 +336,6 @@ h1 {
   box-shadow: var(--shadow-lift);
 }
 
-.products {
-  padding: var(--space-48) 0 var(--space-64);
-}
-
-.product {
-  background: var(--color-surface);
-  border-radius: var(--radius-16);
-  padding: var(--space-24);
-  border: 1px solid var(--color-line);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  display: grid;
-  gap: var(--space-12);
-  height: 100%;
-}
-
-.product-visual {
-  height: 120px;
-  border-radius: var(--radius-12);
-  background: linear-gradient(160deg, #f3f5f8, #e2e7ef);
-}
-
-.product h3 {
-  margin: 0;
-  font-size: var(--text-lg);
-}
-
-.product p {
-  margin: 0;
-  color: var(--color-muted);
-}
-
-.product-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: var(--space-8);
-}
-
-.price {
-  font-weight: 600;
-  font-size: var(--text-md);
-}
-
-.product:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lift);
-}
-
 .promo {
   padding: var(--space-64) 0;
   background: linear-gradient(120deg, #e9edf3, #ffffff);
@@ -504,7 +456,8 @@ h1 {
 
 .rail-wrap {
   position: relative;
-  overflow: visible;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 .rail-nav {
@@ -536,7 +489,7 @@ h1 {
     scroll-padding-inline: var(--rail-button-space);
     display: flex;
     gap: var(--space-16);
-    overflow-x: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     box-sizing: border-box;
 }

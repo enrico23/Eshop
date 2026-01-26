@@ -27,14 +27,14 @@ public abstract class HomeBase: ComponentBase
 
     protected string? _error;
     protected bool _isLoading;
-    protected ElementReference _railRef;
     protected ElementReference _categoryRailRef;
+    protected ElementReference _featuredRailRef;
 
     protected List<CategoryDto> _categories = [];
     protected List<ProductDto> _products = [];
 
     private int? _totalCount;
-    private bool _categoryRailInitialized;
+    private int _lastCategoryCount = -1;
     protected bool _canPrev => _page > 1;
     protected bool _canNext
         => _totalCount is not null
@@ -120,27 +120,23 @@ public abstract class HomeBase: ComponentBase
 
     protected string GetImageUrl(string url) => $"{ApiClientConfig.BaseUrl}/api/images/{url}";
 
-    protected async Task ScrollByAsync(int dir)
-    {
-        await JS.InvokeVoidAsync("railScrollByPage", _railRef, dir);
-    }
-
     protected async Task ScrollCategoriesByAsync(int dir)
     {
         await JS.InvokeVoidAsync("railScrollByPage", _categoryRailRef, dir);
     }
 
+    protected async Task ScrollRailByAsync(ElementReference railRef, int dir)
+    {
+        await JS.InvokeVoidAsync("railScrollByPage", railRef, dir);
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (_categoryRailInitialized || _categories.Count == 0)
+        if (_lastCategoryCount == _categories.Count)
             return;
 
-        await JS.InvokeVoidAsync(
-            "railInitButtons",
-            "category-rail-track",
-            "category-rail-left",
-            "category-rail-right");
-        _categoryRailInitialized = true;
+        await JS.InvokeVoidAsync("railInitAll");
+        _lastCategoryCount = _categories.Count;
     }
 
     protected void ViewProduct(Guid productId)
