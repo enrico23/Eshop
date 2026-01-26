@@ -1,0 +1,69 @@
+﻿<section class="site-strip" aria-label="Store highlights">
+    <div class="container strip-inner">
+        @if (!string.IsNullOrWhiteSpace(PillText))
+        {
+            <span class="strip-pill">@PillText</span>
+            <span class="strip-divider" aria-hidden="true"></span>
+        }
+        <p class="strip-text">@ClaimText</p>
+
+        @if (!string.IsNullOrWhiteSpace(FeatureText))
+        {
+            <a class="strip-link" href="#featured">@FeatureText</a>
+        }
+    </div>
+</section>
+
+
+<style type="text/css">
+    .site-strip {
+        background: var(--color-surface);
+        border-bottom: 1px solid var(--color-line);
+    }
+
+    .strip-inner {
+        display: flex;
+        align-items: center;
+        gap: var(--space-16);
+        padding: var(--space-12) 0;
+        font-size: var(--text-sm);
+        color: var(--color-muted);
+        flex-wrap: wrap;
+    }
+
+    .strip-pill {
+        background: #e8ecf2;
+        color: var(--color-ink);
+        font-weight: 600;
+        border-radius: var(--radius-pill);
+        padding: var(--space-4) var(--space-12);
+        font-size: var(--text-xs);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .strip-divider {
+        width: 1px;
+        height: 18px;
+        background: var(--color-line);
+    }
+
+    .strip-text {
+        margin: 0;
+        flex: 1 1 auto;
+    }
+
+    .strip-link {
+        font-weight: 600;
+        color: var(--color-ink);
+    }
+
+        .strip-link:hover {
+            color: var(--color-muted);
+        }
+</style>
+@code {
+    [Parameter] public string ClaimText { get; set; } = null!;
+    [Parameter] public string PillText { get; set; } = null!;
+    [Parameter] public string FeatureText { get; set; } = null!;
+}

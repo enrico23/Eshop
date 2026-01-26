@@ -1,7 +1,14 @@
 ﻿@page "/"
+@using EShop.Web.Components.Layout
 @rendermode InteractiveServer
 
-@* 
+<SiteStrip 
+    PillText="Free Delivery" 
+    ClaimText="New for 2026: precision-tuned accessories with trade-in credit."
+    FeatureText="See Highlights">
+</SiteStrip>
+
+
 <MudContainer MaxWidth="MaxWidth.False" Class="store-shell">
    <MudPaper Elevation="0" Class="hero">
         <MudContainer MaxWidth="MaxWidth.Large">
@@ -29,26 +36,63 @@
 
      <!-- CATEGORY TILES -->
     <MudContainer MaxWidth="MaxWidth.Large" Class="section">
-        <MudGrid Spacing="2">
-            @foreach (var c in _categories)
-            {
-                <MudItem xs="6" sm="4" md="3" lg="2">
-                    <MudPaper Elevation="0" Class="category-tile" 
-                        @onclick="() => SelectCategory(c.Name)">
-                        <MudStack Spacing="0" Class="category-inner">
-                             <MudIcon Icon="@c.Icon" /> 
-                            <MudText Typo="Typo.subtitle2">@c.Name</MudText>
-                        </MudStack>
-                    </MudPaper>
-                </MudItem>
-            }
-        </MudGrid>
+        <section id="products-premium" class="products" aria-labelledby="products-premium-title">
+            <div class="container">
+                <div class="row">
+                    <div class="col col-12">
+                        <div class="section-head">
+                            <h2 id="products-premium-title">Premium lineup</h2>
+                            <p>Higher spec, same design language.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pr-rail"
+                     data-pr-rail
+                     data-pr-scroll-ratio="0.85"
+                     data-pr-edge-threshold="1"
+                     style="--pr-item-width: 240px; --pr-item-height: 100px; --pr-media-height: 140px;"
+                     aria-label="Premium lineup">
+                    <button class="pr-rail__nav pr-rail__nav--left" type="button" data-pr-prev aria-label="Scroll left">
+                        <span class="pr-rail__icon" aria-hidden="true">‹</span>
+                    </button>
+
+                    <div class="pr-rail__viewport" data-pr-viewport tabindex="0">
+                        <div class="pr-rail__track" data-pr-track>
+                            @foreach (var c in _categories)
+                            {
+                                <article class="product pr-rail__item" data-pr-item>
+                                    <MudPaper Elevation="0" Class="category-tile" @onclick="() => SelectCategory(c.Name)">
+                                        <MudStack Spacing="0" Class="category-inner">
+                                             @* <MudIcon Icon="@c.Icon" />  *@
+                                            <MudText Typo="Typo.subtitle2">@c.Name</MudText>
+                                        </MudStack>
+                                    </MudPaper>
+                                </article>
+                            }
+                        </div>
+                    </div>
+
+                    <button class="pr-rail__nav pr-rail__nav--right" type="button" data-pr-next aria-label="Scroll right">
+                        <span class="pr-rail__icon" aria-hidden="true">›</span>
+                    </button>
+                </div>
+            </div>
+        </section>
     </MudContainer>
 
 </MudContainer>
- *@
 
 <MudPaper Class="pa-4 my-4" Elevation="1" Rounded="true">
+    @if (_error is not null)
+    {
+        <MudAlert Severity="Severity.Error" Dense="true" Class="mb-3">
+            @_error
+            <MudButton Variant="Variant.Text" Color="Color.Inherit" Class="ml-2">
+                Retry
+            </MudButton>
+        </MudAlert>
+    }
     <section id="products-premium" class="products" aria-labelledby="products-premium-title">
         <div class="container">
             <div class="row">
@@ -64,7 +108,7 @@
                  data-pr-rail
                  data-pr-scroll-ratio="0.85"
                  data-pr-edge-threshold="1"
-                 style="--pr-item-width: 240px; --pr-item-height: 380px; --pr-media-height: 140px;"
+                 style="--pr-item-width: 300px; --pr-item-height: 380px; --pr-media-height: 140px;"
                  aria-label="Premium lineup">
                 <button class="pr-rail__nav pr-rail__nav--left" type="button" data-pr-prev aria-label="Scroll left">
                     <span class="pr-rail__icon" aria-hidden="true">‹</span>
@@ -130,16 +174,6 @@
             </div>
         </div>
     </section>
-
-    @if (_error is not null)
-    {
-        <MudAlert Severity="Severity.Error" Dense="true" Class="mb-3">
-            @_error
-            <MudButton Variant="Variant.Text" Color="Color.Inherit" Class="ml-2">
-                Retry
-            </MudButton>
-        </MudAlert>
-    }
 </MudPaper>
 
 @code {
@@ -161,7 +195,6 @@
 
     private string? _error;
     private bool _isLoading;
-    private ElementReference _railRef;
 
     private List<CategoryDto> _categories = new();
     private List<ProductDto> _products = new();
