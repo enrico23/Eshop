@@ -1,12 +1,51 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager NavigationManager
 
-<MudNavMenu>
-    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
-    <AuthorizeView>
-        <Authorized>
-            <MudNavLink Href="categories" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Categories</MudNavLink>
-            <MudNavLink Href="products" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Products</MudNavLink>
-        </Authorized>
-    </AuthorizeView>
-</MudNavMenu>
+<MudPaper Class="site-header" Elevation="0" Square="true">
+    <MudContainer Class="container" MaxWidth="MaxWidth.False">
+        <MudElement class="nav" aria-label="Primary">
+            <NavLink class="wordmark" href="#">
+                <img src="assets/logo_black.svg" alt="Nova" />
+            </NavLink>
+            <MudNavMenu class="nav-links">
+                <li><NavLink href="" Match="NavLinkMatch.All">Home</NavLink></li>
+                <AuthorizeView>
+                    <Authorized>
+                        <li><NavLink href="categories" Match="NavLinkMatch.Prefix">Categories</NavLink></li>
+                        <li><NavLink href="products" Match="NavLinkMatch.Prefix">Products</NavLink></li>
+                    </Authorized>
+                </AuthorizeView>
+            </MudNavMenu>
 
+            <div class="nav-icons" aria-label="Tools">
+                <AuthorizeView>
+                    <Authorized Context="auth">
+                        <span class="nav-user">@auth.User.Identity?.Name</span>
+                        <MudIconButton Class="button button-ghost" Icon="@Icons.Material.Rounded.Logout"
+                                       @onclick="NavigateToLogout" title="Logout" />
+                    </Authorized>
+                    <NotAuthorized>
+                        <MudIconButton Class="button button-ghost" Icon="@Icons.Material.Rounded.Login"
+                                       @onclick="NavigateToLogin" title="Login" />
+                    </NotAuthorized>
+                </AuthorizeView>
+                <MudIconButton Class="button button-ghost" Icon="@Icons.Material.Rounded.Search" title="Search" />
+                <MudIconButton Class="button button-ghost" Icon="@Icons.Material.Rounded.ShoppingCart" title="Cart" />
+            </div>
+        </MudElement>
+    </MudContainer>
+</MudPaper>
+
+@code {
+    private void NavigateToLogin()
+    {
+        var returnUrl = Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri));
+        NavigationManager.NavigateTo($"/login?returnUrl=/{returnUrl}", forceLoad: true);
+    }
+
+    private void NavigateToLogout()
+    {
+        var returnUrl = Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri));
+        NavigationManager.NavigateTo($"/logout?returnUrl=/{returnUrl}", forceLoad: true);
+    }
+}

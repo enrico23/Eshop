@@ -83,8 +83,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "keycloak", "keycloak", "{FB80257E-A49D-49E6-A760-FB802E00DBE7}"
 	ProjectSection(SolutionItems) = preProject
 		..\docs\oauth\keycloak\keycloak-realm-contract.md = ..\docs\oauth\keycloak\keycloak-realm-contract.md
-		..\docs\oauth\keycloak\README.md = ..\docs\oauth\keycloak\README.md
 		..\docs\oauth\keycloak\keycloak-setup.md = ..\docs\oauth\keycloak\keycloak-setup.md
+		..\docs\oauth\keycloak\README.md = ..\docs\oauth\keycloak\README.md
 	EndProjectSection
 EndProject
 Global

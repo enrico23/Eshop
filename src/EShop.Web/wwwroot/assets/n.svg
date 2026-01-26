@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="153px" height="162px" viewBox="0 0 153 162" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Group</title>
+    <defs>
+        <linearGradient x1="50%" y1="-8.85110375e-14%" x2="50%" y2="46.7644462%" id="linearGradient-1">
+            <stop stop-color="#19DFDF" offset="0%"></stop>
+            <stop stop-color="#28AED8" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group" transform="translate(-258, -29)">
+            <g id="NOVA" transform="translate(258, 26.0082)">
+                <g id="Group" transform="translate(0, 2.9918)">
+                    <polyline id="Path" fill="url(#linearGradient-1)" fill-rule="nonzero" points="0 0 35.5707899 0 117.42921 99.274242 117.42921 0 153 0 153 161.164865 131.173818 161.164865 36.0268256 46.4373339 35.5707899 46.4373339 35.5707899 161.164865 0 161.164865"></polyline>
+                    <polygon id="Path" fill="#FFFFFF" points="35.5707899 0 35.7779434 46.4310907 117.42921 144.588176 117.42921 99.274242"></polygon>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,39 @@
+﻿<MudPaper Elevation="0" Class="hero">
+    <MudContainer MaxWidth="MaxWidth.False" Class="container">
+        <MudStack Spacing="1">
+            <MudText Typo="Typo.h3" Class="hero-title">Store.</MudText>
+            <MudText Typo="Typo.h6" Color="Color.Secondary" Class="hero-sub">
+                The best way to buy the products you love.
+            </MudText>
+
+            <MudStack Row AlignItems="AlignItems.Center" Spacing="2" Class="hero-actions">
+                @* <MudTextField @bind-Value="_search"
+                              Placeholder="Search products"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Class="hero-search" /> *@
+                <MudButton Variant="Variant.Filled" Color="Color.Primary">
+                    Search
+                </MudButton>
+            </MudStack>
+        </MudStack>
+    </MudContainer>
+</MudPaper>
+
+<style type="text/css">
+    .hero {
+        padding: var(--space-64) 0 var(--space-48);
+    }
+
+    .hero-visual {
+        background: linear-gradient(140deg, #ffffff, #e7ecf2);
+        border-radius: var(--radius-24);
+        padding: var(--space-24);
+        box-shadow: var(--shadow-soft);
+    }
+</style>
+@code {
+
+}
