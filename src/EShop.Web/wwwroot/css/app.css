@@ -183,9 +183,19 @@ a {
 }
 
 .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-8);
     font-weight: 600;
     font-size: var(--text-lg);
     letter-spacing: -0.02em;
+}
+
+.wordmark img {
+    width: auto;
+    height: clamp(28px, 3vw, 40px);
+    max-height: 100%;
+    display: block;
 }
 
 .nav-links {

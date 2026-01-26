@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="188px" height="190px" viewBox="0 0 188 190" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Group</title>
+    <defs>
+        <linearGradient x1="50%" y1="-8.85110375e-14%" x2="50%" y2="46.7644462%" id="linearGradient-1">
+            <stop stop-color="#19DFDF" offset="0%"></stop>
+            <stop stop-color="#28AED8" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="50%" y1="-8.85110375e-14%" x2="50%" y2="46.7644462%" id="linearGradient-2">
+            <stop stop-color="#19DFDF" offset="0%"></stop>
+            <stop stop-color="#28AED8" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group" fill="url(#linearGradient-2)" fill-rule="nonzero">
+            <g transform="translate(-4, 0)" id="Path-2">
+                <path d="M87.1057283,120.743807 L155.171512,189.984495 L84.0753126,156 L34,189.984495 L87.1057283,120.743807 Z M4,33 L139.517855,102.279764 L192,87.7285069 L149.113085,129.129464 L170.640121,189 L4,33 Z M4,48.8913019 L78.8904792,116.445651 L20.2801651,189 L40.5,119.5 L4,48.8913019 Z M127,0 L127,88.0040751 L90.324474,69.1875332 L127,0 Z"></path>
+            </g>
+        </g>
+    </g>
+</svg>
