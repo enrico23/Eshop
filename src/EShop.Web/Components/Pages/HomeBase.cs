@@ -109,6 +109,7 @@ public abstract class HomeBase: ComponentBase
         }
     }
 
+
     protected static ProductImageDto? GetPrimaryOrFirstImage(ProductDto product)
     {
         if (product.Images is null || product.Images.Count == 0)
@@ -144,9 +145,10 @@ public abstract class HomeBase: ComponentBase
         Nav.NavigateTo($"{_productDetailsBaseUrl}/{productId}");
     }
 
-    protected Task SelectCategory(Guid id)
+    protected async Task SelectCategory(Guid? id)
     {
-        _error = id.ToString();
-        return Task.CompletedTask;
+        _categoryId = id;
+        await LoadProductAsync(false);
+       //  _error = $"Category is {_categoryId}";
     }
 }

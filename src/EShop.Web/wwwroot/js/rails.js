@@ -12,6 +12,7 @@ const railInitTrack = (track, left, right) => {
     track._railAbort = new AbortController();
     const { signal } = track._railAbort;
     track._railResize?.disconnect();
+    track._railMutation?.disconnect();
 
     const update = () => {
         const maxScroll = track.scrollWidth - track.clientWidth;
@@ -26,7 +27,6 @@ const railInitTrack = (track, left, right) => {
     requestAnimationFrame(update);
     requestAnimationFrame(update);
 
-    // `load` is fine, but only if you don't accumulate handlers (signal solves that)
     window.addEventListener("load", update, { signal });
     track.addEventListener("scroll", update, { passive: true, signal });
     window.addEventListener("resize", update, { signal });
@@ -35,6 +35,12 @@ const railInitTrack = (track, left, right) => {
         const ro = new ResizeObserver(() => update());
         ro.observe(track);
         track._railResize = ro;
+    }
+
+    if (window.MutationObserver) {
+        const mo = new MutationObserver(() => update());
+        mo.observe(track, { childList: true, subtree: true });
+        track._railMutation = mo;
     }
 };
 

@@ -1,6 +1,13 @@
 @page "/"
+@using EShop.Web.Components.Layout
 @rendermode InteractiveServer
 @inherits HomeBase
+
+<SiteStrip 
+    PillText="Free Delivery" 
+    ClaimText="New for 2026: precision-tuned accessories with trade-in credit."
+    FeatureText="See Highlights">
+</SiteStrip>
 
 <main id="main">
     <section class="hero" aria-labelledby="hero-title">
@@ -49,17 +56,30 @@
                                OnClick="() => ScrollCategoriesByAsync(-1)"
                                AriaLabel="Scroll categories left" />
                 <div id="category-rail-track" class="category-rail-track js-rail-track" role="list" @ref="_categoryRailRef">
-                    @foreach (var c in _categories)
+                    @if(_categories != null)
                     {
                         <div class="category-rail-item" role="listitem">
                             <MudPaper Elevation="0" Class="category-tile category-tile--rail"
-                                      @onclick="() => SelectCategory(c.Id)">
+                                      @onclick="() => SelectCategory(null)">
                                 <MudStack Spacing="0" Class="category-inner">
                                     @* <MudIcon Icon="@c.Icon" /> *@
-                                    <MudText Typo="Typo.subtitle2">@c.Name</MudText>
+                                    <MudText Typo="Typo.subtitle2">All</MudText>
                                 </MudStack>
                             </MudPaper>
                         </div>
+                    
+                        @foreach (var c in _categories)
+                        {
+                            <div class="category-rail-item" role="listitem">
+                                <MudPaper Elevation="0" Class="category-tile category-tile--rail"
+                                          @onclick="() => SelectCategory(c.Id)">
+                                    <MudStack Spacing="0" Class="category-inner">
+                                        @* <MudIcon Icon="@c.Icon" /> *@
+                                        <MudText Typo="Typo.subtitle2">@c.Name</MudText>
+                                    </MudStack>
+                                </MudPaper>
+                            </div>
+                        }
                     }
                 </div>
                 <MudIconButton id="category-rail-right"
@@ -70,6 +90,9 @@
             </div>
         </div>
     </section>
+
+    <SiteAlert ErrorText="@_error">
+</SiteAlert>
 
     @RailSection(title: "All Products")
     <!--// end section -->

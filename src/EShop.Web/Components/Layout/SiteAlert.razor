@@ -1,0 +1,16 @@
+﻿@if (!string.IsNullOrEmpty(ErrorText)){
+    <MudContainer MaxWidth="MaxWidth.Large" Class="section">
+        <MudPaper Class="pa-4 my-4" Elevation="1" Rounded="true">
+            <MudAlert Severity="Severity.Error" Dense="true" Class="mb-3">
+                @ErrorText
+                <MudButton Variant="Variant.Text" Color="Color.Inherit" Class="ml-2">
+                    Retry
+                </MudButton>
+            </MudAlert>
+
+        </MudPaper>
+    </MudContainer>
+}
+@code {
+    [Parameter] public string ErrorText { get; set; } = string.Empty;
+}

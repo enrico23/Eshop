@@ -83,8 +83,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "keycloak", "keycloak", "{FB80257E-A49D-49E6-A760-FB802E00DBE7}"
 	ProjectSection(SolutionItems) = preProject
 		..\docs\oauth\keycloak\keycloak-realm-contract.md = ..\docs\oauth\keycloak\keycloak-realm-contract.md
-		..\docs\oauth\keycloak\README.md = ..\docs\oauth\keycloak\README.md
 		..\docs\oauth\keycloak\keycloak-setup.md = ..\docs\oauth\keycloak\keycloak-setup.md
+		..\docs\oauth\keycloak\README.md = ..\docs\oauth\keycloak\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "template", "template", "{2E951E09-C756-454E-A839-8DCCFFEDC674}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\templatedock\content3.css = ..\..\templatedock\content3.css
+		..\..\templatedock\content3.html = ..\..\templatedock\content3.html
 	EndProjectSection
 EndProject
 Global
@@ -290,6 +296,7 @@ Global
 		{F811386A-1A64-4F61-8103-1AC90B5EA82A} = {446DC99F-193C-4C32-AAFB-5213A81714AA}
 		{7AE16D0A-473D-4F8A-A0B5-A53D1D72B43A} = {695ED087-1418-4824-BC9F-03012F8EB976}
 		{FB80257E-A49D-49E6-A760-FB802E00DBE7} = {7AE16D0A-473D-4F8A-A0B5-A53D1D72B43A}
+		{2E951E09-C756-454E-A839-8DCCFFEDC674} = {446DC99F-193C-4C32-AAFB-5213A81714AA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {15E4314C-18A9-4A0E-88F4-96EA2D79E06A}
