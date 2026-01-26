@@ -3,9 +3,9 @@
 
 <MudPaper Class="site-header" Elevation="0" Square="true">
     <MudContainer Class="container" MaxWidth="MaxWidth.False">
-        <nav class="container nav" aria-label="Primary">
-            <a class="wordmark" href="#">Nova</a>
-            <ul class="nav-links">
+        <MudElement class="container nav" aria-label="Primary">
+            <NavLink class="wordmark" href="#">Nova</NavLink>
+            <MudNavMenu class="nav-links">
                 <li><NavLink href="" Match="NavLinkMatch.All">Home</NavLink></li>
                 <AuthorizeView>
                     <Authorized>
@@ -13,7 +13,7 @@
                         <li><NavLink href="products" Match="NavLinkMatch.Prefix">Products</NavLink></li>
                     </Authorized>
                 </AuthorizeView>
-            </ul>
+            </MudNavMenu>
 
             <div class="nav-icons" aria-label="Tools">
                 <AuthorizeView>
@@ -27,14 +27,10 @@
                         @onclick="NavigateToLogin" title="Login" />
                     </NotAuthorized>
                 </AuthorizeView>
-                <MudButton class="icon-button" aria-label="Search">
-                    <span class="icon-circle" aria-hidden="true"></span>
-                </MudButton>
-                <MudButton class="icon-button" aria-label="Cart">
-                    <span class="icon-square" aria-hidden="true"></span>
-                </MudButton>
+                <MudIconButton Class="button button-ghost" Icon="@Icons.Material.Rounded.Search" title="Search" />
+                <MudIconButton Class="button button-ghost" Icon="@Icons.Material.Rounded.ShoppingCart" title="Cart" />
             </div>
-        </nav>
+        </MudElement>
     </MudContainer>
 </MudPaper>
 
