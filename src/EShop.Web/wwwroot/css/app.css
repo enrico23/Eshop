@@ -195,26 +195,3 @@ h1 {
     min-height: 54px;
     justify-content: center;
 }
-
-.rail-wrap {
-    position: relative;
-    overflow-x: hidden;
-    overflow-y: visible;
-}
-
-.rail-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 2;
-    background: rgba(0, 0, 0, 0.22);
-    backdrop-filter: blur(8px);
-}
-
-.rail-nav-left {
-    left: 0;
-}
-
-.rail-nav-right {
-    right: 0;
-}

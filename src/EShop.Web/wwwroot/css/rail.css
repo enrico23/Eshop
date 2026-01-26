@@ -1,0 +1,90 @@
+﻿/* =========================
+   Product Rail (generic)
+   ========================= */
+
+[data-pr-rail] {
+    /* defaults (override per rail via inline style or CSS) */
+    --pr-gap: 16px;
+    --pr-side-padding: 56px;
+    --pr-item-width: 280px;
+    --pr-item-height: auto;
+    --pr-btn-size: 44px;
+    position: relative;
+    max-width: 100%;
+}
+
+/* Viewport scroll container */
+[data-pr-viewport] {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    padding: 8px 0;
+}
+
+    [data-pr-viewport]::-webkit-scrollbar {
+        display: none;
+    }
+
+/* Track */
+[data-pr-track] {
+    display: flex;
+    gap: var(--pr-gap);
+    padding: 0 var(--pr-side-padding);
+    scroll-snap-type: x proximity;
+}
+
+/* Items */
+[data-pr-item] {
+    flex: 0 0 auto;
+    width: var(--pr-item-width);
+    height: var(--pr-item-height);
+    scroll-snap-align: start;
+}
+
+/* =========================
+   Arrows (generic)
+   ========================= */
+
+[data-pr-prev],
+[data-pr-next] {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: var(--pr-btn-size);
+    height: var(--pr-btn-size);
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    z-index: 2;
+    padding: 0;
+}
+
+[data-pr-prev] {
+    left: 8px;
+}
+
+[data-pr-next] {
+    right: 8px;
+}
+
+    /* Hide state */
+    [data-pr-prev].is-hidden,
+    [data-pr-next].is-hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    /* Optional: icon sizing (if you use text arrows) */
+    [data-pr-prev] > span,
+    [data-pr-next] > span {
+        font-size: 26px;
+        line-height: 1;
+        color: rgba(0, 0, 0, 0.75);
+    }

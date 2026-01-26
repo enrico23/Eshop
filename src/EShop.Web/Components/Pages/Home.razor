@@ -1,8 +1,9 @@
 ﻿@page "/"
 @rendermode InteractiveServer
 
+@* 
 <MudContainer MaxWidth="MaxWidth.False" Class="store-shell">
-    <MudPaper Elevation="0" Class="hero">
+   <MudPaper Elevation="0" Class="hero">
         <MudContainer MaxWidth="MaxWidth.Large">
             <MudStack Spacing="1">
                 <MudText Typo="Typo.h3" Class="hero-title">Store.</MudText>
@@ -35,7 +36,7 @@
                     <MudPaper Elevation="0" Class="category-tile" 
                         @onclick="() => SelectCategory(c.Name)">
                         <MudStack Spacing="0" Class="category-inner">
-                            @* <MudIcon Icon="@c.Icon" /> *@
+                             <MudIcon Icon="@c.Icon" /> 
                             <MudText Typo="Typo.subtitle2">@c.Name</MudText>
                         </MudStack>
                     </MudPaper>
@@ -45,15 +46,90 @@
     </MudContainer>
 
 </MudContainer>
+ *@
 
 <MudPaper Class="pa-4 my-4" Elevation="1" Rounded="true">
-    <MudStack Row AlignItems="AlignItems.Center" JustifyContent="space-between" Class="mb-3">
-        <MudText Typo="Typo.h6">Element</MudText>
+    <section id="products-premium" class="products" aria-labelledby="products-premium-title">
+        <div class="container">
+            <div class="row">
+                <div class="col col-12">
+                    <div class="section-head">
+                        <h2 id="products-premium-title">Premium lineup</h2>
+                        <p>Higher spec, same design language.</p>
+                    </div>
+                </div>
+            </div>
 
-        <MudButton Variant="Variant.Text" Color="Color.Primary" >
-            See all
-        </MudButton>
-    </MudStack>
+            <div class="pr-rail"
+                 data-pr-rail
+                 data-pr-scroll-ratio="0.85"
+                 data-pr-edge-threshold="1"
+                 style="--pr-item-width: 240px; --pr-item-height: 380px; --pr-media-height: 140px;"
+                 aria-label="Premium lineup">
+                <button class="pr-rail__nav pr-rail__nav--left" type="button" data-pr-prev aria-label="Scroll left">
+                    <span class="pr-rail__icon" aria-hidden="true">‹</span>
+                </button>
+
+                <div class="pr-rail__viewport" data-pr-viewport tabindex="0">
+                    <div class="pr-rail__track" data-pr-track>
+                        @if (_isLoading)
+                        {
+                            <article class="product pr-rail__item" data-pr-item>
+                              <div class="product-visual"></div>
+                              <h3>Nova Mini</h3>
+                              <p>Minimal form, maximum focus.</p>
+                              <div class="product-row">
+                                <span class="price">$99</span>
+                                <button class="button button-ghost">Buy</button>
+                              </div>
+                            </article>
+                                                }
+                        else
+                        {
+                            foreach (var p in _products)
+                            {
+                                <MudCard Class="product-card pr-rail__item" data-pr-item>
+                                    @{
+                                        var img = GetPrimaryOrFirstImage(p);
+                                        var editProductUrl = $"/products/{p.Id}/edit";
+                                    }
+                                    @if (img is not null)
+                                    {
+                                    <MudImage src="@GetImageUrl(img.Url)" alt="@img.AltText" Height="140"
+                                              ObjectFit="ObjectFit.Cover" />
+                                    }
+                                    else
+                                    {
+                                    <div class="img-placeholder">
+                                        <MudIcon Icon="@Icons.Material.Filled.ImageNotSupported" Size="Size.Large" />
+                                    </div>
+                                    }
+                                    <MudCardContent Class="pb-2">
+                                        <MudText Typo="Typo.subtitle2" Class="line-clamp-2">@p.Name</MudText>
+                                        <MudText Typo="Typo.body2" Color="Color.Secondary">@p.Price.ToString("C")</MudText>
+
+                                        <div class="product-row">
+                                            <span class="price">@p.Price</span>
+                                            <button class="button button-ghost">Buy</button>
+                                        </div>
+                                   </MudCardContent>
+                                    <MudCardActions Class="pt-0">
+                                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small">
+                                            View
+                                        </MudButton>
+                                    </MudCardActions>
+                                </MudCard>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <button class="pr-rail__nav pr-rail__nav--right" type="button" data-pr-next aria-label="Scroll right">
+                    <span class="pr-rail__icon" aria-hidden="true">›</span>
+                </button>
+            </div>
+        </div>
+    </section>
 
     @if (_error is not null)
     {
@@ -64,72 +140,6 @@
             </MudButton>
         </MudAlert>
     }
-    <div class="rail-wrap">
-        <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft"
-                    Class="rail-nav rail-nav-left"
-                       Disabled="@(_isLoading)"
-                       OnClick="() => ScrollByAsync(-1)" />
-
-        <div class="rail" @ref="_railRef">
-            @if (_isLoading)
-            {
-                @for (var i = 0; i < _pageSize; i++)
-                {
-                    <MudCard Class="product-card">
-                        <MudSkeleton Height="140px" Width="100%" />
-                        <MudCardContent>
-                            <MudSkeleton Width="80%" />
-                            <MudSkeleton Width="40%" />
-                        </MudCardContent>
-                        <MudCardActions>
-                            <MudSkeleton Width="60%" Height="32px" />
-                        </MudCardActions>
-                    </MudCard>
-                }
-            }
-            else
-            {
-                @foreach (var p in _products)
-                {
-                    <MudCard Class="product-card">
-                        @{
-                            var img = GetPrimaryOrFirstImage(p);
-                            var editProductUrl = $"/products/{p.Id}/edit";
-                        }
-                        @if (img is not null)
-                        {
-                            <MudImage src="@GetImageUrl(img.Url)" alt="@img.AltText" Height="140" 
-                                ObjectFit="ObjectFit.Cover" />
-                        }
-                        else
-                        {
-                            <div class="img-placeholder">
-                                <MudIcon Icon="@Icons.Material.Filled.ImageNotSupported" Size="Size.Large" />
-                            </div>
-                        }
-
-                        <MudCardContent Class="pb-2">
-                            <MudText Typo="Typo.subtitle2" Class="line-clamp-2">@p.Name</MudText>
-                            <MudText Typo="Typo.body2" Color="Color.Secondary">@p.Price.ToString("C")</MudText>
-                        </MudCardContent>
-
-                        <MudCardActions Class="pt-0">
-                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
-                                      
-                            >
-                                View
-                            </MudButton>
-                        </MudCardActions>
-                    </MudCard>
-                }
-            }
-        </div>
-
-        <MudIconButton Icon="@Icons.Material.Filled.ChevronRight"
-                    Class="rail-nav rail-nav-right"
-                       Disabled="@(_isLoading)"
-                       OnClick="() => ScrollByAsync(1)"/>
-    </div>
 </MudPaper>
 
 @code {
@@ -167,6 +177,14 @@
         _page = 1;
         await LoadCategoriesAsync();
         await LoadProductAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initProductRails");
+        }
     }
 
     private async Task PrevPage()
@@ -240,11 +258,6 @@
     }
 
     private string GetImageUrl(string url) => $"{ApiClientConfig.BaseUrl}/api/images/{url}";
-
-    private async Task ScrollByAsync(int dir)
-    {
-        await JS.InvokeVoidAsync("railScrollByPage", _railRef, dir);
-    }
 
     private void ViewProduct(Guid productId)
     {
