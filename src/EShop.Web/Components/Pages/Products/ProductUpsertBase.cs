@@ -28,7 +28,7 @@ public abstract class ProductUpsertBase : ComponentBase
     protected string? _previewPrimaryImageUrl;
 
     protected ProductDto? Product = null!;
-    protected CreateProductViewModel UpsertModel = null!;
+    protected ProductUpsertViewModel UpsertModel = null!;
     protected List<CategoryDto> Categories = new();
     protected MudForm UpsertForm = null!;
 
@@ -51,7 +51,7 @@ public abstract class ProductUpsertBase : ComponentBase
             return;
         }
 
-        UpsertModel = new CreateProductViewModel
+        UpsertModel = new ProductUpsertViewModel
         {
             Name = "",
             Description = "",
@@ -69,7 +69,7 @@ public abstract class ProductUpsertBase : ComponentBase
         {
             try
             {
-                Product = await CatalogApiClient.GetByIdAsync(Id!.Value);
+                Product = await CatalogApiClient.GetProductByIdAsync(Id!.Value);
 
                 if (Product is null)
                 {
@@ -80,7 +80,7 @@ public abstract class ProductUpsertBase : ComponentBase
 
                 PageTitle = $"Edit Product {Product.Name}";
 
-                UpsertModel = new CreateProductViewModel()
+                UpsertModel = new ProductUpsertViewModel()
                 {
                     Name = Product.Name,
                     Description = Product.Description ?? string.Empty,

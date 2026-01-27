@@ -2,6 +2,7 @@
 @using EShop.Web.Components.Pages.Categories
 @using EShop.Web.Components.Pages.Shared
 @using EShop.Web.Exceptions
+@using EShop.Web.Models
 @using Microsoft.AspNetCore.Authorization
 @inherits CrudPageBase
 @attribute [Authorize]
@@ -45,52 +46,55 @@
 
     private async Task OpenCreateDialogAsync()
     {
-        var createCategoryDto = new CreateCategoryDto { Name = string.Empty };
-        var dialogParameters = new DialogParameters
-        {
-            ["Category"] = createCategoryDto
-        };
+        // var createCategoryDto = new CreateCategoryDto { Name = string.Empty };
+        // var dialogParameters = new DialogParameters
+        // {
+        //     ["Category"] = createCategoryDto
+        // };
 
-        var (saved, returned) = await ShowUpsertDialogAsync<CategoryUpsertDialog, CreateCategoryDto>(
-            title: "Create Category",
-            parameters: dialogParameters);
+        // var (saved, returned) = await ShowUpsertDialogAsync<CategoryUpsertDialog, CreateCategoryDto>(
+        //     title: "Create Category",
+        //     parameters: dialogParameters);
 
-        if (!saved || returned is null || _grid is null) return;
+        // if (!saved || returned is null || _grid is null) return;
 
-        var ok = await SaveWithFeedbackAsync(
-            returned,
-            saveAction: (m, ct) => 
-            CatalogApiClient.CreateCategoryAsync(new CreateCategoryDto { Name = m.Name }, ct),
-            successMessageFactory: m => $"Category '{m.Name}' successfully created.");
+        // var ok = await SaveWithFeedbackAsync(
+        //     returned,
+        //     saveAction: (m, ct) => 
+        //     CatalogApiClient.CreateCategoryAsync(new CategoryUpsertViewModel { Name = m.Name }, null, ct),
+        //     successMessageFactory: m => $"Category '{m.Name}' successfully created.");
 
-        if (ok) await _grid.ReloadAsync();
+        // if (ok) await _grid.ReloadAsync();
+
+        NavigationManager.NavigateTo("/categories/create");
     }
 
     private async Task OpenEditDialogAsync(CategoryDto existing)
     {
-        var updateCategoryDto = new UpdateCategoryDto { Name = existing.Name };
+        // var updateCategoryDto = new UpdateCategoryDto { Name = existing.Name };
 
-        var parameters = new DialogParameters
-        {
-            ["Category"] = updateCategoryDto
-        };
+        // var parameters = new DialogParameters
+        // {
+        //     ["Category"] = updateCategoryDto
+        // };
 
-        var (saved, returned) = await ShowUpsertDialogAsync<CategoryUpsertDialog, UpdateCategoryDto>(
-            title: "Update Category",
-            parameters: parameters);
+        // var (saved, returned) = await ShowUpsertDialogAsync<CategoryUpsertDialog, UpdateCategoryDto>(
+        //     title: "Update Category",
+        //     parameters: parameters);
 
-        if (!saved || returned is null || _grid is null) return;
+        // if (!saved || returned is null || _grid is null) return;
 
-        var ok = await SaveWithFeedbackAsync(
-            returned,
-            saveAction: (m, ct) => 
-            CatalogApiClient.UpdateCategoryAsync(
-                existing.Id,
-                new UpdateCategoryDto { Name = m.Name, },
-                ct),
-            successMessageFactory: m => $"Category '{m.Name}' successfully updated.");
+        // var ok = await SaveWithFeedbackAsync(
+        //     returned,
+        //     saveAction: (m, ct) => 
+        //     CatalogApiClient.UpdateCategoryAsync(
+        //         existing.Id,
+        //         new CategoryUpsertViewModel { Name = m.Name, }, null, ct),
+        //     successMessageFactory: m => $"Category '{m.Name}' successfully updated.");
 
-        if (ok) await _grid.ReloadAsync();
+        // if (ok) await _grid.ReloadAsync();
+
+        NavigationManager.NavigateTo($"/categories/{existing.Id}/edit");
     }
 
     private async Task OpenDeleteDialogAsync(CategoryDto item)

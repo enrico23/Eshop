@@ -2,11 +2,11 @@
 
 public sealed record FilePart(Stream Content, string Name, string? ContentType);
 
-/// <summary>
-/// Build Multipart Data Content
-/// </summary>
 public static class MultipartFormBuilder
 {
+    /// <summary>
+    /// Build Multipart Data Content
+    /// </summary>
     public static MultipartFormDataContent Build<T>(
         T model,
         FilePart? file,
