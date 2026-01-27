@@ -22,6 +22,9 @@ public sealed class ExtendedProductRepository :
     {
         IQueryable<Product> query = _context.Products.AsNoTracking();
 
+        if (categoryId != null)
+            query = query.Where(p => p.CategoryId == categoryId);
+
         if (!string.IsNullOrWhiteSpace(filter))
             query = query.Where("Name.ToLower().Contains(@0)", filter.ToLower());
 
