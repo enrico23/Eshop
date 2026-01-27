@@ -22,9 +22,6 @@ public partial class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        if (builder.Environment.IsDevelopment())
-            builder.Configuration.AddUserSecrets<Program>();
-
         builder.AddServiceDefaults();
 
         builder.Services.AddExceptionHandler<DomainExceptionHandler>();
