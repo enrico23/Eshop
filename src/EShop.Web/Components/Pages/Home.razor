@@ -29,7 +29,7 @@
                             @foreach (var c in _categories)
                             {
                                 <article class="product pr-rail__item" data-pr-item>
-                                    <MudPaper Elevation="0" Class="category-tile" @onclick="() => SelectCategory(c.Name)">
+                                    <MudPaper Elevation="0" Class="category-tile" @onclick="() => SelectCategory(c.Id)">
                                         <MudStack Spacing="0" Class="category-inner">
                                              @* <MudIcon Icon="@c.Icon" />  *@
                                             <MudText Typo="Typo.subtitle2">@c.Name</MudText>
@@ -177,6 +177,7 @@
     private  string _sortBy = DefaultSortBy;
     private string _sortDirection = DefaultSortDirection;
     private string _search = DefaultSearchTerm;
+    protected Guid? _categoryId;
 
     private string? _error;
     private bool _isLoading;
@@ -231,7 +232,7 @@
         try
         {
             var result = await CatalogApiClient.GetPagedProductsAsync(
-                _page, _pageSize, _sortBy, _sortDirection, _search, CancellationToken.None);
+                _page, _pageSize, _sortBy, _sortDirection, _search, _categoryId, CancellationToken.None);
 
             _totalCount = result.Total;
 
@@ -282,8 +283,9 @@
         Nav.NavigateTo($"{_productDetailsBaseUrl}/{productId}");
     }
 
-    private Task SelectCategory(string value)
+    private async Task SelectCategory(Guid? id)
     {
-        return Task.CompletedTask;
+        _categoryId = id;
+        await LoadProductAsync(false);
     }
 }
