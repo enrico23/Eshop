@@ -77,14 +77,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{F811
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "security", "security", "{7AE16D0A-473D-4F8A-A0B5-A53D1D72B43A}"
 	ProjectSection(SolutionItems) = preProject
-		..\docs\security\README.md = ..\docs\security\README.md
+		..\docs\security\index.md = ..\docs\security\index.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "keycloak", "keycloak", "{FB80257E-A49D-49E6-A760-FB802E00DBE7}"
 	ProjectSection(SolutionItems) = preProject
-		..\docs\oauth\keycloak\keycloak-realm-contract.md = ..\docs\oauth\keycloak\keycloak-realm-contract.md
-		..\docs\oauth\keycloak\keycloak-setup.md = ..\docs\oauth\keycloak\keycloak-setup.md
-		..\docs\oauth\keycloak\README.md = ..\docs\oauth\keycloak\README.md
+		..\docs\security\keycloak\index.md = ..\docs\security\keycloak\index.md
+		..\docs\security\keycloak\keycloak-realm-contract.md = ..\docs\security\keycloak\keycloak-realm-contract.md
+		..\docs\security\keycloak\keycloak-setup.md = ..\docs\security\keycloak\keycloak-setup.md
 	EndProjectSection
 EndProject
 Global

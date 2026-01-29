@@ -56,9 +56,9 @@ and enforced at the application boundaries.
 The configuration is documented in two layers:
 
 - **Identity Provider configuration**
-  - [`Keycloak`](docs/security/keycloak/README.md)
+  - [`Keycloak`](docs/security/keycloak/index.md)
 - **Application integration**
-  - [`Security`](docs/security/README.md)
+  - [`Security`](docs/security/index.md)
 
 
 ## Other Docs
