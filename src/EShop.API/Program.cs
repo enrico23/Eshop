@@ -5,6 +5,7 @@ using EShop.Data;
 using EShop.Data.Repositories;
 using EShop.Shared.Eventing;
 using EShop.Shared.Exceptions;
+using EShop.Shared.Extensions;
 using EShop.Shared.Observability.Correlation;
 using EShop.Shared.Services;
 using Mapster;
@@ -55,17 +56,11 @@ public partial class Program
 
         // BLOB FILE STORAGE
         var blobConnectionString = builder.Configuration.GetConnectionString("Blobs");
-        var imageStorageServiceOptions = builder.Configuration.GetSection("AzureBlobStorage")
-                .Get<ImageStorageServiceOptions>() 
-                ?? throw new InvalidOperationException("ImageStorageServiceOptions configuration section is missing or invalid.");
-        builder.Services.AddSingleton(_ => new BlobServiceClient(blobConnectionString));
-        builder.Services.AddSingleton(imageStorageServiceOptions);
-        builder.Services.AddSingleton(sp =>
+
+        builder.Services.AddAzureBlobStorage(blobConnectionString!, options =>
         {
-            var serviceClient = sp.GetRequiredService<BlobServiceClient>();
-            return serviceClient.GetBlobContainerClient("product-images");
+            builder.Configuration.GetSection("AzureBlobStorage").Bind(options);
         });
-        builder.Services.AddSingleton<IImageStorageService, ImageStorageService>();
 
         // Service Bus Client
         builder.AddAzureServiceBusClient("images-queue");

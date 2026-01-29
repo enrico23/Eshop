@@ -13,7 +13,7 @@ public sealed class ImagesController(IImageStorageService imageStorageService) :
     [HttpGet("{imageId}")]
     public async Task<IActionResult> GetImageByIdAsync([FromRoute] string imageId, CancellationToken ct = default)
     {
-        var result = await imageStorageService.GetImageAsync(imageId, ct);
+        var result = await imageStorageService.GetImageAsync(ImageStoragePurpose.CustomerContent, imageId, ct);
         return File(result.Stream, result.ContentType);
     }
 }

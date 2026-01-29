@@ -1,6 +1,4 @@
-﻿using EShop.Shared.Eventing;
-
-namespace EShop.API.Tests.Services.ProductServiceTests;
+﻿namespace EShop.API.Tests.Services.ProductServiceTests;
 
 public sealed class UpdateAsyncTests : ProductServiceTestBase
 {
@@ -77,7 +75,7 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
         form.File = FormFileHelpers.CreateFakeFormFile();
         form.Sku = "SKU-1";
 
-        _imageStorage.UploadImageAsync(form.File, ct).Returns("https://cdn/new.png");
+        _imageStorage.UploadImageAsync(ImageStoragePurpose.CustomerContent, form.File, ct).Returns("https://cdn/new.png");
 
         var sut = CreateSut();
 
@@ -91,7 +89,7 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
            ct);
 
         
-        await _imageStorage.Received(1).UploadImageAsync(form.File, ct);
+        await _imageStorage.Received(1).UploadImageAsync(ImageStoragePurpose.CustomerContent, form.File, ct);
 
         await _repo.DidNotReceiveWithAnyArgs().SkuInUseAsync(default!, default, default);
 

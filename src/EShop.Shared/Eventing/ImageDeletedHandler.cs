@@ -5,9 +5,11 @@ using System.Text.Json;
 
 namespace EShop.Shared.Eventing;
 
-public sealed record DeleteImageRequest(string Url);
+public sealed record DeleteImageRequest(ImageStoragePurpose Purpose, string Url);
 
-public class ImageDeletedHandler(IImageStorageService imageStorageService, ILogger<ImageDeletedHandler> logger) : IEventHandler
+public class ImageDeletedHandler(
+    IImageStorageService imageStorageService, 
+    ILogger<ImageDeletedHandler> logger) : IEventHandler
 {
     private readonly IImageStorageService _imageStorageService = imageStorageService;
 
@@ -40,7 +42,7 @@ public class ImageDeletedHandler(IImageStorageService imageStorageService, ILogg
 
         activity?.AddEvent(new ActivityEvent("image.delete.start"));
 
-        await _imageStorageService.DeleteImageAsync(payload.Url, ct);
+        await _imageStorageService.DeleteImageAsync(payload.Purpose, payload.Url, ct);
 
         _imageDeletedLog(_logger, payload.Url, null);
 

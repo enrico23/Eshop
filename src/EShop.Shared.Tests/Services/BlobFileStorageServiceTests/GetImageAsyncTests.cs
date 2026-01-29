@@ -1,4 +1,6 @@
-﻿namespace EShop.Shared.Tests.Services.BlobFileStorageServiceTests;
+﻿using EShop.Shared.Services;
+
+namespace EShop.Shared.Tests.Services.BlobFileStorageServiceTests;
 
 public sealed class GetImageAsyncTests : ImageStorageServiceTestBase
 {
@@ -10,7 +12,7 @@ public sealed class GetImageAsyncTests : ImageStorageServiceTestBase
 
         // Act & Assert
         await Assert.ThrowsAsync<BadRequestException>(async () =>
-            await blobFileStorage.GetImageAsync(string.Empty, CancellationToken.None));
+            await blobFileStorage.GetImageAsync(ImageStoragePurpose.CustomerContent, string.Empty, CancellationToken.None));
     }
 
     [Fact]
@@ -24,7 +26,7 @@ public sealed class GetImageAsyncTests : ImageStorageServiceTestBase
 
         // Act & Assert
         await Assert.ThrowsAsync<FileNotFoundException>(async () =>
-            await blobFileStorage.GetImageAsync("fakename.jpg", CancellationToken.None));
+            await blobFileStorage.GetImageAsync(ImageStoragePurpose.CustomerContent, "fakename.jpg", CancellationToken.None));
     }
 
     [Fact]
@@ -51,7 +53,7 @@ public sealed class GetImageAsyncTests : ImageStorageServiceTestBase
         var sut = CreateSut();
 
         // Act
-        var (stream, contentType) = await sut.GetImageAsync("image.png", CancellationToken.None);
+        var (stream, contentType) = await sut.GetImageAsync(ImageStoragePurpose.CustomerContent, "image.png", CancellationToken.None);
 
         // Assert
         Assert.Same(expectedStream, stream);
