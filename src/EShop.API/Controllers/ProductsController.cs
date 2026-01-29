@@ -74,7 +74,9 @@ public class ProductsController(IProductService productService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> PutAsync([FromRoute] Guid id, [FromForm] ProductFormDto form,
+    public async Task<IActionResult> PutAsync(
+        [FromRoute] Guid id, 
+        [FromForm] ProductFormDto form,
         CancellationToken ct = default)
     {
         if (!ModelState.IsValid)

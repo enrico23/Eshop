@@ -1,17 +1,18 @@
 ﻿using AutoFixture;
 using EShop.Data;
 using EShop.Shared.Exceptions;
+using EShop.Shared.Testing;
 
 namespace EShop.API.Tests.Services.CategoryServiceTests;
 
 public abstract class CategoryServiceTestBase
 {
-    internal IExtendedCategoryRepository _repo = Substitute.For<IExtendedCategoryRepository>();
-    internal IRepository<Category, Guid, CatalogDbContext> _repo2 = Substitute.For<IRepository<Category, Guid, CatalogDbContext>>();
-    internal IMapper _mapper = Substitute.For<IMapper>();
-    internal IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
-    internal ISqlServerExceptionsHelper _sqlServerExceptionsHelper = Substitute.For<ISqlServerExceptionsHelper>();
-    internal IFixture Fixture = new Fixture();
+    internal readonly IExtendedCategoryRepository _repo = Substitute.For<IExtendedCategoryRepository>();
+    internal readonly IRepository<Category, Guid, CatalogDbContext> _repo2 = Substitute.For<IRepository<Category, Guid, CatalogDbContext>>();
+    internal readonly IMapper _mapper = Substitute.For<IMapper>();
+    internal readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
+    internal readonly ISqlServerExceptionsHelper _sqlServerExceptionsHelper = Substitute.For<ISqlServerExceptionsHelper>();
+    internal IFixture Fixture = FixtureFactory.CreateWithFormFile();
 
     protected Task TestAsync(
        Func<TestScope, Task> testBody) =>
@@ -34,10 +35,7 @@ public abstract class CategoryServiceTestBase
 
     protected sealed class TestScope : IAsyncDisposable
     {
-        internal TestScope(CategoryService service)
-        {
-            Sut = service;
-        }
+        internal TestScope(CategoryService service) => Sut = service;
 
         public CategoryService Sut { get; }
       

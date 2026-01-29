@@ -1,4 +1,5 @@
-﻿using EShop.API.Services;
+﻿using EShop.API.Models;
+using EShop.API.Services;
 using EShop.Shared.Representations;
 using EShop.Shared.Representations.Category;
 using Microsoft.AspNetCore.Authorization;
@@ -8,14 +9,9 @@ namespace EShop.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoriesController : ControllerBase
+    public class CategoriesController(ICategoryService categoryService) : ControllerBase
     {
-        private readonly ICategoryService _categoryService;
-
-        public CategoriesController(ICategoryService categoryService)
-        {
-            _categoryService = categoryService;
-        }
+        private readonly ICategoryService _categoryService = categoryService;
 
         // GET: api/categories?page=1&pageSize=20
         [AllowAnonymous]
@@ -62,20 +58,24 @@ namespace EShop.API.Controllers
 
         // PUT: api/categories/{id:guid}
         // <snippet_Update>
-        [Authorize(Policy = "CatalogWrite")]
+       // [Authorize(Policy = "CatalogWrite")]
         [HttpPut("{id:guid}")]
+        [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PutAsync(Guid id, UpdateCategoryDto updateCategoryDto, CancellationToken ct = default)
+        public async Task<IActionResult> PutAsync(
+            [FromRoute] Guid id, 
+            [FromForm] CategoryFormModel formDto, 
+            CancellationToken ct = default)
         {
-            if (updateCategoryDto is null)
+            if (formDto is null)
                 return BadRequest();
 
             if (!await _categoryService.ExistsAsync(id))
                 return NotFound();
 
-            await _categoryService.UpdateAsync(id, updateCategoryDto, ct);
+            await _categoryService.UpdateAsync(id, formDto, ct);
 
             return NoContent();
         }
@@ -83,15 +83,19 @@ namespace EShop.API.Controllers
 
         // POST: api/categories
         // <snippet_Create>
-        [Authorize(Policy = "CatalogWrite")]
+       // [Authorize(Policy = "CatalogWrite")]
+        [HttpPost]
+        [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<CategoryDto>> PostAsync(CreateCategoryDto createCategoryDto, CancellationToken ct = default)
+        public async Task<ActionResult<CategoryDto>> PostAsync(
+            [FromForm] CategoryFormModel formDto, 
+            CancellationToken ct = default)
         {
-            if (createCategoryDto is null)
+            if (formDto is null)
                 return BadRequest();
 
-            var categoryDto = await _categoryService.AddAsync(createCategoryDto, ct);
+            var categoryDto = await _categoryService.AddAsync(formDto, ct);
             var url = $"{Request.Scheme}://{Request.Host}/api/Categories/{categoryDto.Id}";
             return Created(url, categoryDto);
         }
