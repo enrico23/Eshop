@@ -84,13 +84,13 @@ public sealed class CatalogApiClient(HttpClient httpClient, ILogger<CatalogApiCl
     public async Task CreateCategoryAsync(CategoryUpsertViewModel model, IBrowserFile? file, CancellationToken ct = default)
     {
         using var form = BuildCategoryRequest(model, file);
-        await SendAsync(() => httpClient.PostAsJsonAsync(CategoriesEndpointsBasePath, model, ct), ct);
+        await SendAsync(() => httpClient.PostAsync($"{CategoriesEndpointsBasePath}", form, ct), ct);
     }
 
     public async Task UpdateCategoryAsync(Guid id, CategoryUpsertViewModel model, IBrowserFile? file, CancellationToken ct = default)
     {
         using var form = BuildCategoryRequest(model, file);
-        await SendAsync(() => httpClient.PutAsJsonAsync($"{CategoriesEndpointsBasePath}/{id}", model, ct), ct);
+        await SendAsync(() => httpClient.PutAsync($"{CategoriesEndpointsBasePath}/{id}", form, ct), ct);
     }
 
     public Task DeleteCategoryAsync(Guid id, CancellationToken ct = default) =>
