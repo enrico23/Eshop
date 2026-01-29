@@ -1,4 +1,4 @@
-# Authentication & Authorization Integration
+﻿# Authentication & Authorization Integration
 
 This document describes how application components integrate with
 the identity configuration defined in the Keycloak documentation.
@@ -26,6 +26,36 @@ Refer to:
 - `docs/keycloak/keycloak-realm-contract.md`
 
 ---
+
+## Keycloak Volume Reset Behavior (Important)
+
+Keycloak realm and client configuration is restored from a repository-managed import file at container startup.
+
+This results in **partial restoration** when the Keycloak data volume is deleted.
+
+### Restored automatically
+- Realm definition
+- Clients and client roles
+- Scopes and protocol configuration
+
+### Not restored
+- Users
+- Client secrets used by consuming applications
+
+### Operational impact
+- After a Keycloak volume reset, client secrets are regenerated
+- Applications using confidential clients will fail authentication with
+  `invalid_request` / `Authentication failed`
+- The Blazor UI is affected because it reads the client secret from **user secrets**
+
+### Required manual steps after volume deletion
+1. Open Keycloak Admin Console
+2. Navigate to:  
+   Realm → Clients → `blazor-ui` → **Credentials**
+3. Copy or regenerate the client secret
+4. Update Blazor user secrets:
+   ```bash
+   dotnet user-secrets set "Keycloak:ClientSecret" "<new-secret>"
 
 ## Architecture Overview
 
