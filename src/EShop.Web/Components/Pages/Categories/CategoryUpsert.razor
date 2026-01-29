@@ -1,0 +1,299 @@
+﻿@page "/categories/create"
+@page "/categories/{Id:guid}/edit"
+@using EShop.Web.Exceptions
+@using EShop.Web.Models
+@using System.Net
+
+<PageTitle>@PageTitle</PageTitle>
+
+@if (IsLoading)
+{
+    <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+}
+else
+{
+    <MudForm @ref="UpsertForm" Model="UpsertModel">
+          <MudPaper Class="pa-4">
+               <MudGrid AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
+                    <MudItem xs="12" md="6">
+                        <MudText Typo="Typo.h4">
+                            @PageTitle
+                        </MudText>
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudStack Row="true" JustifyContent="flex-end" AlignItems="AlignItems.Center" Spacing="2" Class="header-actions">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@IsSaving" OnClick="SubmitAsync">
+                                Save
+                            </MudButton>
+
+                            <MudButton Variant="Variant.Outlined" Color="Color.Default" Disabled="@IsSaving"
+                                       OnClick="@(()=> NavigationManager.NavigateTo("/categories"))">
+                                Cancel
+                            </MudButton>
+
+                            @if (IsSaving)
+                            {
+                                <MudProgressCircular Class="ml-2"
+                                                     Color="Color.Primary"
+                                                     Size="Size.Medium"
+                                                     Indeterminate="true" />
+                            }
+                        </MudStack>
+                    </MudItem>
+               </MudGrid>
+
+                <!-- Main layout: Left (tabs + form) / Right (sidebar cards) -->
+
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" md="8">
+                         <MudPaper Elevation="1" Class="pa-4">
+                               <MudTabs Rounded="true" Border="true" ApplyEffectsToContainer="true">
+                                    <MudTabPanel Text="Metadata" Icon="@Icons.Material.Filled.Info" >
+                                        <MudDivider Class="my-4"></MudDivider>
+                                        <MudItem xs="12" Class="mb-4">
+                                            <MudTextField @bind-Value="UpsertModel.Name" Label="Name" Required="true" For="@(() => UpsertModel.Name)" />
+                                        </MudItem>
+                                    </MudTabPanel>
+                                </MudTabs>
+                         </MudPaper>
+                    </MudItem>
+                    <!--// End left -->
+
+                    <!-- RIGHT SIDEBAR -->
+                    <MudItem xs="12" md="4">
+                          <MudStack Spacing="3">
+                               <MudPaper Elevation="1" Class="pa-4">
+                                    <MudStack Row="true" AlignItems="AlignItems.Center" JustifyContent="space-between" Class="mt-2">
+                                        <MudText Typo="Typo.h6">Primary image</MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary"> ( PNG JPG WEBP 5 MB )</MudText>
+                                        <MudTooltip Text="Upload primary image">
+                                            <MudFileUpload T="IBrowserFile" FilesChanged="UploadPrimaryImage"
+                                                           MaxFileSize="5_000_000"
+                                                           MaxItems="1"
+                                                           Accept=".png,.jpg,.jpeg,.webp">
+                                                <ActivatorContent>
+                                                    <MudButton Variant="Variant.Filled"
+                                                               Color="Color.Primary"
+                                                               StartIcon="@Icons.Material.Filled.CloudUpload">
+                                                        Upload Files
+                                                    </MudButton>
+                                                </ActivatorContent>
+                                            </MudFileUpload>
+                                        </MudTooltip>
+                                    </MudStack>
+                                    <MudGrid Spacing="2" Class="mt-2">
+                                        <MudItem xs="12">
+                                            <MudPaper Class="pa-3" Elevation="0" Outlined="true">
+                                                <MudText Typo="Typo.subtitle1" Class="mb-2">Primary Image</MudText>
+                                                @if (UpsertModel.Image != null)
+                                                {
+                                                    <MudGrid Spacing="2">
+                                                        
+                                                        
+                                                            <MudItem xs="6" sm="4" lg="3">
+                                                                <MudPaper Class="pa-2" Outlined="true">
+                                                                    <div class="img-frame">
+                                                                        <img src="@GetImage(UpsertModel.Image.Url)" alt="@UpsertModel.Image.AltText" class="img-cover" />
+                                                                    </div>
+                                                                </MudPaper>
+                                                            </MudItem>
+                                                        
+                                                    </MudGrid>
+                                                }
+                                                else
+                                                {
+                                                    <MudAlert Severity="Severity.Info" Dense="true" Variant="Variant.Outlined">
+                                                        No images uploaded yet.
+                                                    </MudAlert>
+                                                }
+                                            </MudPaper>
+                                        </MudItem>
+
+                                        <MudItem xs="12">
+                                            <MudPaper Class="pa-3" Elevation="0" Outlined="true">
+                                                <MudStack Spacing="2">
+
+                                                    <MudStack Row="true" AlignItems="AlignItems.Center" JustifyContent="space-between">
+                                                        <MudText Typo="Typo.subtitle1">Upload Preview</MudText>
+                                                    </MudStack>
+
+                                                    @if (PreviewPrimaryImage is not null)
+                                                    {
+                                                        <MudPaper Outlined="true" Class="pa-2">
+                                                            <div class="img-frame img-frame--wide">
+                                                                <img src="@_previewPrimaryImageUrl" alt="Preview" class="img-cover" />
+                                                            </div>
+
+                                                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="mt-2">
+                                                                <MudIcon Icon="@Icons.Material.Filled.AttachFile" Size="Size.Small" />
+                                                                <MudText Typo="Typo.subtitle2">@PreviewPrimaryImage.Name</MudText>
+                                                                <MudSpacer />
+                                                                <MudText Typo="Typo.caption"><code>@PreviewPrimaryImage.Size</code> bytes</MudText>
+                                                            </MudStack>
+                                                        </MudPaper>
+                                                    }
+                                                    else
+                                                    {
+                                                        <MudAlert Severity="Severity.Info" Dense="true" Variant="Variant.Outlined">
+                                                            Upload an image to preview it here.
+                                                        </MudAlert>
+                                                    }
+
+                                                </MudStack>
+                                            </MudPaper>
+                                        </MudItem>
+
+                                    </MudGrid>
+
+                               </MudPaper>
+                          </MudStack>
+                    </MudItem>
+                    <!--// End right -->
+                </MudGrid>
+          </MudPaper>
+    </MudForm>
+}
+
+
+@code {
+    [Parameter] public Guid? Id { get; set; }
+
+    [Inject] protected ICatalogApiClient CatalogApiClient { get; set; } = null!;
+    [Inject] protected NavigationManager NavigationManager { get; set; } = null!;
+    [Inject] protected ISnackbar Snackbar { get; set; } = null!;
+    [Inject] protected ApiClientConfig ApiClientConfig { get; set; } = null!;
+
+    protected string PageTitle = "";
+    protected bool IsCreate => !Id.HasValue;
+    protected bool IsLoading = true;
+    protected bool IsSaving;
+    protected IBrowserFile? PreviewPrimaryImage;
+    protected string? _previewPrimaryImageUrl;
+    
+    protected CategoryDto? Category = null!;
+    protected CategoryUpsertViewModel UpsertModel = null!;
+    protected MudForm UpsertForm = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (IsCreate)
+        {
+            PageTitle = "Create Category";
+            UpsertModel = new CategoryUpsertViewModel
+            {
+                Name = string.Empty
+            };
+        }
+        else
+        {
+            try
+            {
+                Category = await CatalogApiClient.GetCategoryByIdAsync(Id!.Value);
+
+                if (Category is null)
+                {
+                    IsLoading = false;
+                    NavigationManager.NavigateTo("/categories?error=notfound");
+                    return;
+                }
+
+                PageTitle = $"Edit Category {Category.Name}";
+
+                UpsertModel = new CategoryUpsertViewModel()
+                {
+                    Name = Category.Name
+                };
+
+            }
+            catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+            {
+                NavigationManager.NavigateTo("/categories?error=notfound");
+            }
+            catch (ApiException)
+            {
+                NavigationManager.NavigateTo("/categories?error=failed");
+            }
+            catch (Exception)
+            {
+                NavigationManager.NavigateTo("/categories?error=unexpected");
+            }
+        }
+
+        IsLoading = false;
+    }
+
+    protected async Task SubmitAsync()
+    {
+        IsSaving = true;
+
+        await UpsertForm.Validate();
+        if (!UpsertForm.IsValid)
+        {
+            IsSaving = false;
+            return;
+        }
+
+        try
+        {
+            if (IsCreate)
+            {
+                await CatalogApiClient.CreateCategoryAsync(UpsertModel, UpsertModel.File, CancellationToken.None);
+                Snackbar.Add($"Category '{UpsertModel.Name}' created successfully.", Severity.Success);
+            }
+            else
+            {
+                await CatalogApiClient.UpdateCategoryAsync(Id!.Value, UpsertModel, UpsertModel.File, CancellationToken.None);
+                Snackbar.Add($"Category '{UpsertModel.Name}' updated successfully.", Severity.Success);
+            }
+
+            NavigationManager.NavigateTo("/categories");
+        }
+        catch (ApiException ex) when (ex.StatusCode is HttpStatusCode.Conflict)
+        {
+            Snackbar.Add(ex.Message!, Severity.Error);
+        }
+        catch (ApiException ex)
+        {
+            Snackbar.Add(ex.FriendlyMessage!, Severity.Error);
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Unexpected error.", Severity.Error);
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    protected async Task UploadPrimaryImage(IBrowserFile file)
+    {
+        PreviewPrimaryImage = file;
+        UpsertModel.File = file;
+
+        try
+        {
+            using var stream = file.OpenReadStream(5_000_000);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            var bytes = ms.ToArray();
+
+            var base64 = Convert.ToBase64String(bytes);
+            var contentType = file.ContentType ?? "image/png";
+
+            _previewPrimaryImageUrl = $"data:{contentType};base64,{base64}";
+        }
+        catch (Exception)
+        {
+            _previewPrimaryImageUrl = null;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected string GetImage(string url)
+    {
+        var baseUrl = ApiClientConfig.BaseUrl;
+        return $"{baseUrl}/api/images/{url}";
+    }
+}

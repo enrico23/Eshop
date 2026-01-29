@@ -1,9 +1,9 @@
-﻿using EShop.Shared.Representations.Product;
+﻿using EShop.Shared.Representations.Category;
 using Microsoft.AspNetCore.Components.Forms;
 
 namespace EShop.Web.Models;
 
-public sealed class CreateProductViewModel : ProductUpsertDto
+public class CategoryUpsertViewModel : CategoryUpsertDto
 {
     public IBrowserFile? File { get; set; }
 }

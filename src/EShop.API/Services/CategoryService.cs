@@ -1,4 +1,5 @@
-﻿using EShop.Data;
+﻿using EShop.API.Models;
+using EShop.Data;
 using EShop.Data.Repositories;
 using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;
@@ -22,9 +23,9 @@ public interface ICategoryService
 
     Task<CategoryDto?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
-    Task<bool> UpdateAsync(Guid id, UpdateCategoryDto updateCategoryDto, CancellationToken ct);
+    Task<bool> UpdateAsync(Guid id, CategoryFormModel updateCategoryDto, CancellationToken ct);
 
-    Task<CategoryDto> AddAsync(CreateCategoryDto createCategoryDto, CancellationToken ct);
+    Task<CategoryDto> AddAsync(CategoryFormModel createCategoryDto, CancellationToken ct);
 
     Task<bool> DeleteAsync(Guid id, CancellationToken ct);
 }
@@ -71,33 +72,43 @@ public sealed class CategoryService(
         return category is null ? null : _mapper.Map<CategoryDto>(category);
      }
 
-    public async Task<bool> UpdateAsync(Guid id, UpdateCategoryDto updateCategoryDto, CancellationToken ct)
+    public async Task<bool> UpdateAsync(Guid id, CategoryFormModel categoryFormDto, CancellationToken ct)
     {
-        ArgumentNullException.ThrowIfNull(updateCategoryDto, nameof(updateCategoryDto));
+        ArgumentNullException.ThrowIfNull(categoryFormDto, nameof(categoryFormDto));
 
         var entity = await _categoryRepo.GetByIdAsync(id, true, ct);
         if (entity is null)
             return false;
 
-        var categoryName = updateCategoryDto.Name?.Trim();
+        var categoryName = categoryFormDto.Name?.Trim();
         if (string.IsNullOrWhiteSpace(categoryName))
             throw new DomainException("Category name is required.");
 
-        entity.ChangeName(updateCategoryDto.Name!);
+        entity.ChangeName(categoryFormDto.Name!);
+
+        if (categoryFormDto.File is not null)
+        {
+            //todo: add local image storage service
+        }
 
         await _unitOfWork.SaveChangesAsync(ct);
         return true;
     }
 
-    public async Task<CategoryDto> AddAsync(CreateCategoryDto createCategoryDto, CancellationToken ct)
+    public async Task<CategoryDto> AddAsync(CategoryFormModel categoryFormDto, CancellationToken ct)
     {
-        ArgumentNullException.ThrowIfNull(createCategoryDto, nameof(createCategoryDto));
+        ArgumentNullException.ThrowIfNull(categoryFormDto, nameof(categoryFormDto));
 
-        var categoryName = createCategoryDto.Name?.Trim();
+        var categoryName = categoryFormDto.Name?.Trim();
         if (string.IsNullOrWhiteSpace(categoryName))
             throw new DomainException("Category name is required.");
 
         var category = new Category(categoryName);
+
+        if (categoryFormDto.File is not null)
+        {
+            //todo: add local image storage service
+        }
 
         try
         {

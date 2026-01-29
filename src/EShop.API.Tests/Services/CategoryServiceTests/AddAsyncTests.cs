@@ -22,7 +22,7 @@ public sealed class AddAsyncTests : CategoryServiceTestBase
         await TestAsync(async t =>
         {
             var ct = CancellationToken.None;
-            var form = Fixture.Create<CreateCategoryDto>();
+            var form = Fixture.Create<CategoryFormModel>();
             
             var dbEx = new DbUpdateException("db fail", innerException: new Exception("inner"));
             _sqlServerExceptionsHelper.IsUniqueViolation(dbEx).Returns(true);
@@ -38,7 +38,7 @@ public sealed class AddAsyncTests : CategoryServiceTestBase
         await TestAsync(async t =>
         {
             var ct = CancellationToken.None;
-            var form = Fixture.Create<CreateCategoryDto>();
+            var form = Fixture.Create<CategoryFormModel>();
 
             Category? added = null;
             await _repo2.AddAsync(Arg.Do<Category>(p => added = p), ct);
