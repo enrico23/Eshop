@@ -1,7 +1,4 @@
-﻿using EShop.Domain;
-using EShop.Domain.Catalog;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EShop.Data.EntityConfigurations;
 
@@ -59,7 +56,6 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasOne(p => p.Category)
             .WithMany(c => c.Products)
             .HasForeignKey(p => p.CategoryId);
-
 
         builder.OwnsMany(p => p.Images, img =>
         {

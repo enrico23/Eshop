@@ -101,6 +101,45 @@ namespace EShop.Data.Migrations
                     b.ToTable("Products", (string)null);
                 });
 
+            modelBuilder.Entity("EShop.Domain.Catalog.Category", b =>
+                {
+                    b.OwnsMany("EShop.Domain.Catalog.CatalogImage", "Images", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("AltText")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b1.Property<Guid>("CategoryId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<bool>("IsPrimary")
+                                .HasColumnType("bit");
+
+                            b1.Property<int>("SortOrder")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("Url")
+                                .IsRequired()
+                                .HasMaxLength(1000)
+                                .HasColumnType("nvarchar(1000)");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("CategoryId");
+
+                            b1.ToTable("CatalogImages", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("CategoryId");
+                        });
+
+                    b.Navigation("Images");
+                });
+
             modelBuilder.Entity("Product", b =>
                 {
                     b.HasOne("EShop.Domain.Catalog.Category", "Category")
@@ -109,7 +148,7 @@ namespace EShop.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsMany("ProductImage", "Images", b1 =>
+                    b.OwnsMany("EShop.Domain.Catalog.CatalogImage", "Images", b1 =>
                         {
                             b1.Property<Guid>("Id")
                                 .HasColumnType("uniqueidentifier");

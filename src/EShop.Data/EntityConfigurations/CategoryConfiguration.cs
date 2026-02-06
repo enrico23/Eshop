@@ -1,5 +1,4 @@
-﻿using EShop.Domain.Catalog;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EShop.Data.EntityConfigurations;
 
@@ -20,6 +19,31 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
           .HasDefaultValueSql("SYSUTCDATETIME()");
 
         builder.Property(p => p.UpdatedUtc);
+
+        builder.OwnsMany(p => p.Images, img =>
+        {
+            img.ToTable("CatalogImages");
+
+            img.WithOwner().HasForeignKey("CategoryId");
+
+            img.HasKey(i => i.Id);
+
+            img.Property(i => i.Id)
+                .ValueGeneratedNever();
+
+            img.Property(i => i.Url)
+                .IsRequired()
+                .HasMaxLength(1000);
+
+            img.Property(i => i.AltText)
+                .HasMaxLength(500);
+
+            img.Property(i => i.SortOrder)
+                .IsRequired();
+
+            img.Property(i => i.IsPrimary)
+                .IsRequired();
+        });
 
         builder.HasIndex(p => p.Name).IsUnique();
     }

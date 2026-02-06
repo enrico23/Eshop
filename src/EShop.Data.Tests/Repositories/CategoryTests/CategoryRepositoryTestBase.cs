@@ -9,7 +9,7 @@ public abstract class CategoryRepositoryTestBase
         new(context);
 
     protected override void RegisterEntityFactory(IFixture fixture) =>
-        fixture.Register(() => new Category(fixture.Create<Guid>(), fixture.Create<string>()));
+        fixture.Register(() => Category.Create(fixture.Create<Guid>(), fixture.Create<string>()));
 
     protected override EfUnitOfWork CreateUnitOfWOrk(CatalogDbContext context) =>
          new(context);

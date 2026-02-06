@@ -66,14 +66,14 @@ public class MigratorService(
 
         var categories = new List<Category>()
         {
-            new(new Guid("a3b4f1de-8241-4ff0-9c5e-af4c4c7a1e10"), "Laptops"),
-            new(new Guid("c1e2d8ba-992f-4e8e-a0a9-5bcff3df8c77"), "Desktops"),
-            new(new Guid("f5e1a4cc-2b9b-4db9-9b52-6d3f72440365"), "Smartphones"),
-            new(new Guid("0b73b90f-9610-4f64-893e-37edc85c0a5f"), "Tablets"),
-            new(new Guid("49d2e88d-241d-4fdb-9d41-cf4a6c9ab3c9"), "Wearables"),
-            new(new Guid("7fb5c7d1-c2a4-4ff2-9f76-4e0b55a389b6"), "Audio"),
-            new(new Guid("d0c52f04-4cd2-4e47-bc9f-06b251f8eae9"), "Gaming"),
-            new(new Guid("3a4b77df-1a28-4f7e-b764-c4d62a6f6ed8"), "Cameras")
+            Category.Create(new Guid("a3b4f1de-8241-4ff0-9c5e-af4c4c7a1e10"), "Laptops"),
+            Category.Create(new Guid("c1e2d8ba-992f-4e8e-a0a9-5bcff3df8c77"), "Desktops"),
+            Category.Create(new Guid("f5e1a4cc-2b9b-4db9-9b52-6d3f72440365"), "Smartphones"),
+            Category.Create(new Guid("0b73b90f-9610-4f64-893e-37edc85c0a5f"), "Tablets"),
+            Category.Create(new Guid("49d2e88d-241d-4fdb-9d41-cf4a6c9ab3c9"), "Wearables"),
+            Category.Create(new Guid("7fb5c7d1-c2a4-4ff2-9f76-4e0b55a389b6"), "Audio"),
+            Category.Create(new Guid("d0c52f04-4cd2-4e47-bc9f-06b251f8eae9"), "Gaming"),
+            Category.Create(new Guid("3a4b77df-1a28-4f7e-b764-c4d62a6f6ed8"), "Cameras")
         };
 
         var rng = Random.Shared;

@@ -6,6 +6,7 @@ using EShop.Domain.Exceptions;
 using EShop.Shared.Exceptions;
 using EShop.Shared.Representations;
 using EShop.Shared.Representations.Category;
+using EShop.Shared.Services;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
@@ -35,7 +36,8 @@ public sealed class CategoryService(
     IRepository<Category, Guid, CatalogDbContext> categoryRepo, 
     IMapper mapper,
     IUnitOfWork unitOfWork,
-    ISqlServerExceptionsHelper sqlServerExceptionsHelper) 
+    ISqlServerExceptionsHelper sqlServerExceptionsHelper,
+    IImageStorageService imageStorageService) 
     : ICategoryService
 {
     private readonly IExtendedCategoryRepository _categoryRepository = categoryRepository;
@@ -43,6 +45,7 @@ public sealed class CategoryService(
     private readonly IMapper _mapper = mapper;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly ISqlServerExceptionsHelper _sqlServerExceptionsHelper = sqlServerExceptionsHelper;
+    private readonly IImageStorageService _imageStorageService = imageStorageService;
 
     public async Task<Shared.Representations.PagedResult<CategoryDto>> GetPagedAsync(
         int page, int pageSize,
@@ -72,23 +75,29 @@ public sealed class CategoryService(
         return category is null ? null : _mapper.Map<CategoryDto>(category);
      }
 
-    public async Task<bool> UpdateAsync(Guid id, CategoryFormModel categoryFormDto, CancellationToken ct)
+    public async Task<bool> UpdateAsync(Guid id, CategoryFormModel categoryFormModel, CancellationToken ct)
     {
-        ArgumentNullException.ThrowIfNull(categoryFormDto, nameof(categoryFormDto));
+        ArgumentNullException.ThrowIfNull(categoryFormModel, nameof(categoryFormModel));
 
         var entity = await _categoryRepo.GetByIdAsync(id, true, ct);
         if (entity is null)
             return false;
 
-        var categoryName = categoryFormDto.Name?.Trim();
+        var categoryName = categoryFormModel.Name?.Trim();
         if (string.IsNullOrWhiteSpace(categoryName))
             throw new DomainException("Category name is required.");
 
-        entity.ChangeName(categoryFormDto.Name!);
+        entity.ChangeName(categoryFormModel.Name!);
 
-        if (categoryFormDto.File is not null)
+        if (categoryFormModel.File is not null)
         {
-            //todo: add local image storage service
+            // todo: SendDeleteCommand for image
+
+            var newUrl = await _imageStorageService.UploadImageAsync(
+               ImageStoragePurpose.CustomerContent, categoryFormModel.File, ct);
+            
+            // todo: add to tracked EF entity
+            entity.AddImage(newUrl);
         }
 
         await _unitOfWork.SaveChangesAsync(ct);
@@ -103,7 +112,7 @@ public sealed class CategoryService(
         if (string.IsNullOrWhiteSpace(categoryName))
             throw new DomainException("Category name is required.");
 
-        var category = new Category(categoryName);
+        var category = new Category();
 
         if (categoryFormDto.File is not null)
         {

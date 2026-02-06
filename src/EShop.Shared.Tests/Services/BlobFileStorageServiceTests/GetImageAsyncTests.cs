@@ -39,7 +39,7 @@ public sealed class GetImageAsyncTests : ImageStorageServiceTestBase
 
         // Prepare download result
         var expectedContentType = "image/png";
-        var expectedStream = new MemoryStream(new byte[] { 1, 2, 3 });
+        var expectedStream = new MemoryStream([1, 2, 3]);
 
         // BlobDownloadInfo creation via factory
         var downloadInfo = BlobsModelFactory.BlobDownloadInfo(

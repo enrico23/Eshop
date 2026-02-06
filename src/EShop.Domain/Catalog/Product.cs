@@ -25,8 +25,8 @@ public sealed class Product : AuditableEntity, IEntity<Guid>
 
     public Category? Category { get; private set; }
 
-    private readonly List<ProductImage> _images = new();
-    public IReadOnlyCollection<ProductImage> Images => _images.AsReadOnly();
+    private readonly List<CatalogImage> _images = new();
+    public IReadOnlyCollection<CatalogImage> Images => _images.AsReadOnly();
 
     public Product()
     {
@@ -140,7 +140,7 @@ public sealed class Product : AuditableEntity, IEntity<Guid>
 
     #region Product Images
 
-    public ProductImage AddImage(string url, string? altText = null)
+    public CatalogImage AddImage(string url, string? altText = null)
     {
         if (_images.Any(i => i.Url == url))
             throw new DomainException("This image is already associated with the product.");
@@ -151,7 +151,7 @@ public sealed class Product : AuditableEntity, IEntity<Guid>
 
         var isPrimary = !_images.Any(i => i.IsPrimary);
 
-        var image = ProductImage.Create(url, altText, nextSortOrder, isPrimary);
+        var image = CatalogImage.Create(url, altText, nextSortOrder, isPrimary);
         _images.Add(image);
 
         return image;
@@ -215,7 +215,7 @@ public sealed class Product : AuditableEntity, IEntity<Guid>
         if (primaryCount > 1)
             throw new DomainException("Only one primary image is allowed.");
 
-        ProductImage? requestedPrimary = null;
+        CatalogImage? requestedPrimary = null;
 
         foreach (var spec in newImages)
         {

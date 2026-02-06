@@ -101,6 +101,7 @@ public sealed class ProductService(
         {
             var newUrl = await _imageStorageService.UploadImageAsync(
                 ImageStoragePurpose.CustomerContent, productFormDto.File, ct);
+
             product.AddImage(newUrl);
         }
 

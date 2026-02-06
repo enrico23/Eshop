@@ -1,4 +1,8 @@
-﻿public sealed class ProductImage
+﻿
+namespace EShop.Domain.Catalog;
+
+
+public sealed class CatalogImage
 {
     public Guid Id { get; private set; }
     public string Url { get; private set; } = null!;
@@ -6,9 +10,9 @@
     public int SortOrder { get; private set; }
     public bool IsPrimary { get; private set; }
 
-    private ProductImage() { } // EF
+    private CatalogImage() { } // EF
 
-    private ProductImage(string url, string? altText, int sortOrder, bool isPrimary)
+    private CatalogImage(string url, string? altText, int sortOrder, bool isPrimary)
     {
         Url = ValidateUrl(url);
         AltText = altText?.Trim() ?? string.Empty;
@@ -17,7 +21,7 @@
         Id = Guid.NewGuid();
     }
 
-    public static ProductImage Create(string url, string? altText, int sortOrder, bool isPrimary = false)
+    public static CatalogImage Create(string url, string? altText, int sortOrder, bool isPrimary = false)
         => new(url, altText, sortOrder, isPrimary);
 
     public void ChangeAltText(string? altText)
