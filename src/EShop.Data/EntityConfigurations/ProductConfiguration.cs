@@ -57,30 +57,21 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .WithMany(c => c.Products)
             .HasForeignKey(p => p.CategoryId);
 
-        builder.OwnsMany(p => p.Images, img =>
+        builder.Ignore(p => p.Images);
+
+        var productImages = builder.OwnsMany<CatalogImage>("_images", img =>
         {
             img.ToTable("ProductImages");
-
             img.WithOwner().HasForeignKey("ProductId");
-
             img.HasKey(i => i.Id);
-
-            img.Property(i => i.Id)
-                .ValueGeneratedNever();
-
-            img.Property(i => i.Url)
-                .IsRequired()
-                .HasMaxLength(1000);
-
-            img.Property(i => i.AltText)
-                .HasMaxLength(500);
-
-            img.Property(i => i.SortOrder)
-                .IsRequired();
-
-            img.Property(i => i.IsPrimary)
-                .IsRequired();
+            img.Property(i => i.Id).ValueGeneratedNever();
+            img.Property(i => i.Url).IsRequired().HasMaxLength(1000);
+            img.Property(i => i.AltText).HasMaxLength(500);
+            img.Property(i => i.SortOrder).IsRequired();
+            img.Property(i => i.IsPrimary).IsRequired();
         });
+
+        builder.Navigation("_images").UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasIndex(p => p.Name).IsUnique();
     }

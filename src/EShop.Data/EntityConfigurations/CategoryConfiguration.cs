@@ -20,30 +20,20 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 
         builder.Property(p => p.UpdatedUtc);
 
-        builder.OwnsMany(p => p.Images, img =>
+        builder.Ignore(c => c.Images);
+        var categoryImages = builder.OwnsMany<CatalogImage>("_images", img =>
         {
             img.ToTable("CatalogImages");
-
             img.WithOwner().HasForeignKey("CategoryId");
-
             img.HasKey(i => i.Id);
-
-            img.Property(i => i.Id)
-                .ValueGeneratedNever();
-
-            img.Property(i => i.Url)
-                .IsRequired()
-                .HasMaxLength(1000);
-
-            img.Property(i => i.AltText)
-                .HasMaxLength(500);
-
-            img.Property(i => i.SortOrder)
-                .IsRequired();
-
-            img.Property(i => i.IsPrimary)
-                .IsRequired();
+            img.Property(i => i.Id).ValueGeneratedNever();
+            img.Property(i => i.Url).IsRequired().HasMaxLength(1000);
+            img.Property(i => i.AltText).HasMaxLength(500);
+            img.Property(i => i.SortOrder).IsRequired();
+            img.Property(i => i.IsPrimary).IsRequired();
         });
+
+        builder.Navigation("_images").UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasIndex(p => p.Name).IsUnique();
     }

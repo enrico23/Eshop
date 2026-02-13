@@ -1,7 +1,6 @@
 ﻿using EShop.API.Models;
 using EShop.Data;
 using EShop.Data.Repositories;
-using EShop.Domain;
 using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;
 using EShop.Shared.Eventing;
