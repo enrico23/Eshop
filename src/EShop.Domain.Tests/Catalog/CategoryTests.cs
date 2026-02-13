@@ -5,7 +5,7 @@ public sealed class CategoryTests
     [Fact]
     public void Constructor_WithName_SetsIdAndTrimsName()
     {
-        var category = new Category("  Shoes  ");
+        var category = Category.Create("  Shoes  ");
 
         Assert.NotEqual(Guid.Empty, category.Id);
         Assert.Equal("Shoes", category.Name);
@@ -17,7 +17,7 @@ public sealed class CategoryTests
     {
         var id = Guid.NewGuid();
 
-        var category = new Category(id, "  Shirts  ");
+        var category =Category.Create(id, "  Shirts  ");
 
         Assert.Equal(id, category.Id);
         Assert.Equal("Shirts", category.Name);
@@ -30,13 +30,13 @@ public sealed class CategoryTests
     [InlineData("   ")]
     public void Constructor_WithInvalidName_ThrowsArgumentException(string? name)
     {
-        Assert.Throws<ArgumentException>(() => new Category(name!));
+        Assert.Throws<ArgumentException>(() => Category.Create(name!));
     }
 
     [Fact]
     public void ChangeName_TrimsAndUpdates()
     {
-        var category = new Category("Old");
+        var category = Category.Create("Old");
 
         category.ChangeName("  New  ");
 

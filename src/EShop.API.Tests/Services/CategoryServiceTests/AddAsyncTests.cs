@@ -1,4 +1,3 @@
-﻿using AutoFixture;
 using EShop.Shared.Representations.Category;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,8 +21,11 @@ public sealed class AddAsyncTests : CategoryServiceTestBase
         await TestAsync(async t =>
         {
             var ct = CancellationToken.None;
-            var form = Fixture.Create<CategoryFormModel>();
-            
+            var form = new CategoryFormModel(
+                Name: "Category A",
+                File: null,
+                ImageAltText: null);
+             
             var dbEx = new DbUpdateException("db fail", innerException: new Exception("inner"));
             _sqlServerExceptionsHelper.IsUniqueViolation(dbEx).Returns(true);
             _repo2.AddAsync(Arg.Any<Category>(), ct).Returns<Task>(_ => throw dbEx);
@@ -38,7 +40,15 @@ public sealed class AddAsyncTests : CategoryServiceTestBase
         await TestAsync(async t =>
         {
             var ct = CancellationToken.None;
-            var form = Fixture.Create<CategoryFormModel>();
+            var file = Substitute.For<Microsoft.AspNetCore.Http.IFormFile>();
+            var form = new CategoryFormModel(
+                Name: "Category A",
+                File: file,
+                ImageAltText: "Category A");
+
+            _imageStorageService
+                .UploadImageAsync(ImageStoragePurpose.Categories, form.File!, ct)
+                .Returns("https://cdn/new-category.png");
 
             Category? added = null;
             await _repo2.AddAsync(Arg.Do<Category>(p => added = p), ct);
@@ -50,9 +60,11 @@ public sealed class AddAsyncTests : CategoryServiceTestBase
             var result = await t.Sut.AddAsync(form, ct);
 
             Assert.NotNull(result);
-            
+            await _imageStorageService.Received(1).UploadImageAsync(ImageStoragePurpose.Categories, form.File!, ct);
+             
             await _repo2.Received(1).AddAsync(Arg.Any<Category>(), ct);
             Assert.NotNull(added);
+            Assert.Contains(added!.Images, i => i.Url == "https://cdn/new-category.png");
         });
     }
 }

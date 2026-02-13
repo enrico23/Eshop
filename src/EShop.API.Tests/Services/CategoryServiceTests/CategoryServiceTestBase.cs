@@ -12,6 +12,9 @@ public abstract class CategoryServiceTestBase
     internal readonly IMapper _mapper = Substitute.For<IMapper>();
     internal readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
     internal readonly ISqlServerExceptionsHelper _sqlServerExceptionsHelper = Substitute.For<ISqlServerExceptionsHelper>();
+    internal readonly IImageStorageService _imageStorageService = Substitute.For<IImageStorageService>();
+    private readonly IImageDeletionCommandPublisher _imageDeletionCommandPublisher = Substitute.For<IImageDeletionCommandPublisher>();
+
     internal IFixture Fixture = FixtureFactory.CreateWithFormFile();
 
     protected Task TestAsync(
@@ -20,7 +23,14 @@ public abstract class CategoryServiceTestBase
 
     private async Task CreateAsync(Func<TestScope, Task> testBody)
     {
-        var sut = new CategoryService(_repo, _repo2, _mapper, _unitOfWork, _sqlServerExceptionsHelper);
+        var sut = new CategoryService(
+            _repo, 
+            _repo2, 
+            _mapper, 
+            _unitOfWork, 
+            _sqlServerExceptionsHelper,
+            _imageStorageService,
+            _imageDeletionCommandPublisher);
        
         try
         {

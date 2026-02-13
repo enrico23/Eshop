@@ -29,6 +29,7 @@ public static class AzureBlobStorageExtensions
             var serviceClient = sp.GetRequiredService<BlobServiceClient>();
             return serviceClient.GetBlobContainerClient("product-images");
         });
+        services.AddSingleton<IBlobContainerResolver, BlobContainerResolver>();
         services.AddSingleton<IImageStorageService, ImageStorageService>();
 
         return services;

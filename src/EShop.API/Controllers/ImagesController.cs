@@ -11,9 +11,12 @@ public sealed class ImagesController(IImageStorageService imageStorageService) :
     // GET /api/images/{imageId}
     [AllowAnonymous]
     [HttpGet("{imageId}")]
-    public async Task<IActionResult> GetImageByIdAsync([FromRoute] string imageId, CancellationToken ct = default)
+    public async Task<IActionResult> GetImageByIdAsync(
+        [FromRoute] string imageId, 
+        [FromQuery] ImageStoragePurpose purpose = ImageStoragePurpose.Products, 
+        CancellationToken ct = default)
     {
-        var result = await imageStorageService.GetImageAsync(imageId, ct);
+        var result = await imageStorageService.GetImageAsync(purpose, imageId, ct);
         return File(result.Stream, result.ContentType);
     }
 }

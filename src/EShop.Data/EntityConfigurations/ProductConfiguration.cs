@@ -1,7 +1,4 @@
-﻿using EShop.Domain;
-using EShop.Domain.Catalog;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EShop.Data.EntityConfigurations;
 
@@ -10,21 +7,12 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
     public void Configure(EntityTypeBuilder<Product> builder)
     {
         builder.ToTable("Products");
-
         builder.HasKey(p => p.Id);
-        builder.Property(p => p.Id)
-         .ValueGeneratedOnAdd();
-
-        builder.Property(p => p.Name)
-            .IsRequired()
-            .HasMaxLength(200);
-
+        builder.Property(p => p.Id).ValueGeneratedOnAdd();
+        builder.Property(p => p.Name).IsRequired().HasMaxLength(200);
         builder.Property(p => p.Description)
-            .HasConversion(
-                v => v.Value, 
-                v => new Domain.Products.ProductDescription(v))
+            .HasConversion(v => v.Value, v => new Domain.Products.ProductDescription(v))
             .HasMaxLength(2000);
-
         builder.Property(p => p.Price)
             .HasPrecision(18, 2)
             .IsRequired()
@@ -60,31 +48,24 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .WithMany(c => c.Products)
             .HasForeignKey(p => p.CategoryId);
 
+        builder.Ignore(p => p.Images);
 
-        builder.OwnsMany(p => p.Images, img =>
+        var productImages = builder.OwnsMany<CatalogImage>("_images", img =>
         {
             img.ToTable("ProductImages");
-
             img.WithOwner().HasForeignKey("ProductId");
-
             img.HasKey(i => i.Id);
-
-            img.Property(i => i.Id)
-                .ValueGeneratedNever();
-
-            img.Property(i => i.Url)
-                .IsRequired()
-                .HasMaxLength(1000);
-
-            img.Property(i => i.AltText)
-                .HasMaxLength(500);
-
-            img.Property(i => i.SortOrder)
-                .IsRequired();
-
-            img.Property(i => i.IsPrimary)
-                .IsRequired();
+            img.Property(i => i.Id).ValueGeneratedNever();
+            img.Property(i => i.Url).IsRequired().HasMaxLength(1000);
+            img.Property(i => i.AltText).HasMaxLength(500);
+            img.Property(i => i.SortOrder).IsRequired();
+            img.Property(i => i.IsPrimary).IsRequired();
+            img.HasIndex("ProductId", nameof(CatalogImage.Url)).IsUnique();
+            img.HasIndex("ProductId", nameof(CatalogImage.IsPrimary)).IsUnique().HasFilter("[IsPrimary] = 1");
+            img.ToTable(t => t.HasCheckConstraint("CK_ProductImages_SortOrder_NonNegative", "[SortOrder] >= 0"));
         });
+
+        builder.Navigation("_images").UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasIndex(p => p.Name).IsUnique();
     }

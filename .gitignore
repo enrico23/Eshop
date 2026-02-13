@@ -47,3 +47,19 @@ nunit-*.xml
 # Visual Studio 2015
 .vs/
 .codex/
+
+# Visual Studio telemetry / traces
+*.trn
+*.etl
+*.diagsession
+
+# VS workspace
+.vs/
+ServiceHub/
+Diagnostics/
+
+# Local .NET CLI home (sentinels, telemetry, dev-certs state)
+.dotnet-home/
+
+# If you ever also store a local dotnet install here
+.dotnet/

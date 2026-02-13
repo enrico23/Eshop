@@ -14,6 +14,9 @@ public class BlobInitializerService(
         await blobServiceClient.GetBlobContainerClient("product-images")
           .CreateIfNotExistsAsync(Azure.Storage.Blobs.Models.PublicAccessType.None, null, stoppingToken);
 
+        await blobServiceClient.GetBlobContainerClient("category-images")
+         .CreateIfNotExistsAsync(Azure.Storage.Blobs.Models.PublicAccessType.None, null, stoppingToken);
+
         logger.LogInformation("Azure Blob Storage Initializer finsihed!");
 
         hostApplicationLifetime.StopApplication();

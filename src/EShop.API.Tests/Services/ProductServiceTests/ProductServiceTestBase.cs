@@ -10,12 +10,11 @@ public abstract class ProductServiceTestBase
     internal IRepository<Product, Guid, CatalogDbContext> _repo2 = Substitute.For<IRepository<Product, Guid, CatalogDbContext>>();
     internal IMapper _mapper = Substitute.For<IMapper>();
     internal IImageStorageService _imageStorage = Substitute.For<IImageStorageService>();
-    internal IEventPublisher _publisher = Substitute.For<IEventPublisher>();
-    internal ICorrelationIdAccessor _corr = Substitute.For<ICorrelationIdAccessor>();
+    internal IImageDeletionCommandPublisher _imageDeletionCommandPublisher = Substitute.For<IImageDeletionCommandPublisher>();
     internal IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
     internal ISqlServerExceptionsHelper _sqlServerExceptionsHelper = Substitute.For<ISqlServerExceptionsHelper>();
 
-    internal ProductService CreateSut() => new ProductService(_repo, _repo2, _mapper, _imageStorage, _publisher, _corr, _unitOfWork, _sqlServerExceptionsHelper);
+    internal ProductService CreateSut() => new ProductService(_repo, _repo2, _mapper, _imageStorage, _imageDeletionCommandPublisher, _unitOfWork, _sqlServerExceptionsHelper);
 
     internal static Product CreateProductWithImages(Guid id, string sku, string[] imageUrls)
     {
@@ -30,7 +29,7 @@ public abstract class ProductServiceTestBase
         if (imageUrls.Length > 0)
         {
             var specs = imageUrls
-                .Select((u, idx) => new ProductImageSpec(Url: u, AltText: "alt", IsPrimary: idx == 0))
+                .Select((u, idx) => new CatalogImageSpec(Url: u, AltText: "alt", IsPrimary: idx == 0))
                 .ToImmutableList();
 
             p.ReplaceImages(specs);

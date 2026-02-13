@@ -101,6 +101,53 @@ namespace EShop.Data.Migrations
                     b.ToTable("Products", (string)null);
                 });
 
+            modelBuilder.Entity("EShop.Domain.Catalog.Category", b =>
+                {
+                    b.OwnsMany("EShop.Domain.Catalog.CatalogImage", "_images", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("AltText")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b1.Property<Guid>("CategoryId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<bool>("IsPrimary")
+                                .HasColumnType("bit");
+
+                            b1.Property<int>("SortOrder")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("Url")
+                                .IsRequired()
+                                .HasMaxLength(1000)
+                                .HasColumnType("nvarchar(1000)");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("CategoryId", "IsPrimary")
+                                .IsUnique()
+                                .HasFilter("[IsPrimary] = 1");
+
+                            b1.HasIndex("CategoryId", "Url")
+                                .IsUnique();
+
+                            b1.ToTable("CatalogImages", null, t =>
+                                {
+                                    t.HasCheckConstraint("CK_CatalogImages_SortOrder_NonNegative", "[SortOrder] >= 0");
+                                });
+
+                            b1.WithOwner()
+                                .HasForeignKey("CategoryId");
+                        });
+
+                    b.Navigation("_images");
+                });
+
             modelBuilder.Entity("Product", b =>
                 {
                     b.HasOne("EShop.Domain.Catalog.Category", "Category")
@@ -109,7 +156,7 @@ namespace EShop.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsMany("ProductImage", "Images", b1 =>
+                    b.OwnsMany("EShop.Domain.Catalog.CatalogImage", "_images", b1 =>
                         {
                             b1.Property<Guid>("Id")
                                 .HasColumnType("uniqueidentifier");
@@ -135,9 +182,17 @@ namespace EShop.Data.Migrations
 
                             b1.HasKey("Id");
 
-                            b1.HasIndex("ProductId");
+                            b1.HasIndex("ProductId", "IsPrimary")
+                                .IsUnique()
+                                .HasFilter("[IsPrimary] = 1");
 
-                            b1.ToTable("ProductImages", (string)null);
+                            b1.HasIndex("ProductId", "Url")
+                                .IsUnique();
+
+                            b1.ToTable("ProductImages", null, t =>
+                                {
+                                    t.HasCheckConstraint("CK_ProductImages_SortOrder_NonNegative", "[SortOrder] >= 0");
+                                });
 
                             b1.WithOwner()
                                 .HasForeignKey("ProductId");
@@ -145,7 +200,7 @@ namespace EShop.Data.Migrations
 
                     b.Navigation("Category");
 
-                    b.Navigation("Images");
+                    b.Navigation("_images");
                 });
 
             modelBuilder.Entity("EShop.Domain.Catalog.Category", b =>

@@ -2,45 +2,72 @@
 using Azure.Storage.Blobs.Models;
 using EShop.Shared.Exceptions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 
 namespace EShop.Shared.Services;
 
-public interface IImageStorageService
+public enum ImageStoragePurpose
 {
-    Task<string> UploadImageAsync(IFormFile file, CancellationToken ct = default);
-
-    Task<bool> DeleteImageAsync(string imageId, CancellationToken ct = default);
-
-    Task<(Stream Stream, string ContentType)> GetImageAsync(string imageId, CancellationToken ct = default);
+    Categories = 0,
+    Products = 1
 }
 
-public sealed class ImageStorageService : IImageStorageService
+public interface IBlobContainerResolver
 {
-    private readonly BlobContainerClient _container;
-    private readonly long _maxUploadSizeBytes;
-    
-    public ImageStorageService(
-        BlobContainerClient container,
-        ImageStorageServiceOptions imageStorageServiceOptions)
-    {
-        _container = container;
-        _maxUploadSizeBytes = imageStorageServiceOptions.MaxUploadSizeBytes ?? 52428800;
-    }
+    BlobContainerClient Get(ImageStoragePurpose purpose);
+}
 
-    public async Task<string> UploadImageAsync(IFormFile file, CancellationToken ct = default)
+public sealed class BlobContainerResolver(
+    BlobServiceClient serviceClient,
+    IOptions<ImageStorageServiceOptions> options) : IBlobContainerResolver
+{
+    private readonly ImageStorageServiceOptions _opt = options.Value;
+
+    public BlobContainerClient Get(ImageStoragePurpose purpose) =>
+        purpose switch
+        {
+            ImageStoragePurpose.Products => serviceClient.GetBlobContainerClient(_opt.ProductImagesContainer),
+            ImageStoragePurpose.Categories => serviceClient.GetBlobContainerClient(_opt.CategoryImagesContainer),
+            _ => throw new ArgumentOutOfRangeException(nameof(purpose), purpose, "Unknown storage purpose.")
+        };
+}
+
+public interface IImageStorageService
+{
+    Task<string> UploadImageAsync(
+        ImageStoragePurpose purpose, IFormFile file, CancellationToken ct = default);
+
+    Task<bool> DeleteImageAsync(
+        ImageStoragePurpose purpose, string imageId, CancellationToken ct = default);
+
+    Task<(Stream Stream, string ContentType)> GetImageAsync(
+        ImageStoragePurpose purpose, string imageId, CancellationToken ct = default);
+}
+
+public sealed class ImageStorageService(
+        IBlobContainerResolver containers,
+        IOptions<ImageStorageServiceOptions> options) 
+    : IImageStorageService
+{
+    private readonly ImageStorageServiceOptions _opt = options.Value;
+
+    public async Task<string> UploadImageAsync(
+        ImageStoragePurpose purpose, IFormFile file, CancellationToken ct = default)
     {
         if (file is null || file.Length == 0)
             throw new BadRequestException("File is required.", StatusCodes.Status400BadRequest);
 
-        if (file.Length > _maxUploadSizeBytes)
-            throw new BadRequestException($"File is too large. Max {_maxUploadSizeBytes / (1024 * 1024)} MB.", StatusCodes.Status413PayloadTooLarge);
+        if (file.Length > _opt.MaxUploadSizeBytes)
+            throw new BadRequestException($"File is too large. Max {_opt.MaxUploadSizeBytes} MB.", StatusCodes.Status413PayloadTooLarge);
 
         if (string.IsNullOrWhiteSpace(file.ContentType) || !file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
             throw new BadRequestException("Only image files are allowed.", StatusCodes.Status400BadRequest);
 
+        var container = containers.Get(purpose);
+
         var blobName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
 
-        var blob = _container.GetBlobClient(blobName);
+        var blob = container.GetBlobClient(blobName);
 
         await using Stream stream = file.OpenReadStream();
 
@@ -52,24 +79,30 @@ public sealed class ImageStorageService : IImageStorageService
         return blobName;
     }
 
-    public async Task<bool> DeleteImageAsync(string imageId, CancellationToken ct = default)
+    public async Task<bool> DeleteImageAsync(
+        ImageStoragePurpose purpose, string imageId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(imageId))
             throw new BadRequestException("Image ID is required.", StatusCodes.Status400BadRequest);
 
-        var blobClient = _container.GetBlobClient(imageId);
+        var container = containers.Get(purpose);
+
+        var blobClient = container.GetBlobClient(imageId);
 
         var response = await blobClient.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots, cancellationToken: ct);
 
         return response.Value;
     }
 
-    public async Task<(Stream Stream, string ContentType)> GetImageAsync(string imageId, CancellationToken ct = default)
+    public async Task<(Stream Stream, string ContentType)> GetImageAsync(
+        ImageStoragePurpose purpose, string imageId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(imageId))
             throw new BadRequestException("Image ID is required.", StatusCodes.Status400BadRequest);
 
-        var blobClient = _container.GetBlobClient(imageId);
+        var container = containers.Get(purpose);
+
+        var blobClient = container.GetBlobClient(imageId);
 
         if (!await blobClient.ExistsAsync(ct))
             throw new FileNotFoundException($"Image '{imageId}' not found.");

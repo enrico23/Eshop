@@ -6,9 +6,7 @@ using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;
 using EShop.Domain.Products;
 using EShop.Shared.Domain;
-using EShop.Shared.Eventing;
 using EShop.Shared.Exceptions;
-using EShop.Shared.Observability.Correlation;
 using EShop.Shared.Representations;
 using EShop.Shared.Representations.Product;
 using EShop.Shared.Services;
@@ -23,15 +21,10 @@ public interface IProductService
     Task<PagedResult<ProductDto>> GetPagedAsync(int page, int pageSize,
         string orderBy = "Name", string orderDirection = "asc",
         string? filter = null, Guid? categoryId = null, CancellationToken ct = default);
-
     Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
-
     Task<ProductDto?> GetByIdAsync(Guid id, CancellationToken ct);
-
     Task<ProductDto> AddAsync(ProductFormDto productFormDto, CancellationToken ct);
-
     Task<bool> UpdateAsync(Guid id, ProductFormDto productFormDto, CancellationToken ct);
-
     Task<bool> DeleteAsync(Guid id, CancellationToken ct);
 }
 
@@ -40,8 +33,7 @@ public sealed class ProductService(
     IRepository<Product, Guid, CatalogDbContext> productRepo,
     IMapper mapper,
     IImageStorageService imageStorageService,
-    IEventPublisher eventPublisher,
-    ICorrelationIdAccessor correlationIdAccessor,
+    IImageDeletionCommandPublisher imageDeletionCommandPublisher,
     IUnitOfWork unitOfWork,
     ISqlServerExceptionsHelper sqlServerExceptionsHelper) 
     : IProductService
@@ -50,8 +42,7 @@ public sealed class ProductService(
     private readonly IRepository<Product, Guid, CatalogDbContext> _productRepo = productRepo;
     private readonly IMapper _mapper = mapper;
     private readonly IImageStorageService _imageStorageService = imageStorageService;
-    private readonly IEventPublisher _eventPublisher = eventPublisher;
-    private readonly ICorrelationIdAccessor _correlationIdAccessor = correlationIdAccessor;
+    private readonly IImageDeletionCommandPublisher _imageDeletionCommandPublisher = imageDeletionCommandPublisher;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly ISqlServerExceptionsHelper _sqlServerExceptionsHelper = sqlServerExceptionsHelper;
 
@@ -99,7 +90,9 @@ public sealed class ProductService(
 
         if(productFormDto.File is not null)
         {
-            var newUrl = await _imageStorageService.UploadImageAsync(productFormDto.File, ct);
+            var newUrl = await _imageStorageService.UploadImageAsync(
+                ImageStoragePurpose.Products, productFormDto.File, ct);
+
             product.AddImage(newUrl);
         }
 
@@ -155,17 +148,19 @@ public sealed class ProductService(
             throw new DomainException("Category is required.");
         product.ChangeCategory((Guid)productFormDto.CategoryId);
 
-
         if (productFormDto.File is not null)
         {
             foreach (var image in product.Images)
-                await SendDeleteCommandAsync(image.Url, ct);
+                await _imageDeletionCommandPublisher.PublishDeleteAsync(ImageStoragePurpose.Products, image.Url, ct);
 
-            var newUrl = await _imageStorageService.UploadImageAsync(productFormDto.File, ct);
+            var newUrl = await _imageStorageService.UploadImageAsync(
+                ImageStoragePurpose.Products, 
+                productFormDto.File, ct);
+
             product.AddImage(newUrl);
 
-            var newImages = new List<ProductImageSpec> {
-                new ProductImageSpec(Url: newUrl, AltText: productFormDto.Name, IsPrimary: true)
+            var newImages = new List<CatalogImageSpec> {
+                new(Url: newUrl, AltText: productFormDto.Name, IsPrimary: true)
             }.ToImmutableList();
 
             product.ReplaceImages(newImages!);
@@ -186,7 +181,7 @@ public sealed class ProductService(
         {
             foreach (var image in entity.Images)
             {
-                await SendDeleteCommandAsync(image.Url, ct);
+                await _imageDeletionCommandPublisher.PublishDeleteAsync(ImageStoragePurpose.Products, image.Url, ct);
             }
         }
 
@@ -194,18 +189,5 @@ public sealed class ProductService(
         await _unitOfWork.SaveChangesAsync(ct);
 
         return true;
-    }
-
-    private async Task SendDeleteCommandAsync(string imageUrl, CancellationToken ct)
-    {
-        {
-            await _eventPublisher.PublishAsync(
-                "images-queue",
-                new EventEnvelope<DeleteImageRequest>(
-                    Type: "image.deleted",
-                    Data: new DeleteImageRequest(imageUrl),
-                    CorrelationId: _correlationIdAccessor.CorrelationId,
-                    Source: "eshop.api"), ct);
-        }
     }
 }

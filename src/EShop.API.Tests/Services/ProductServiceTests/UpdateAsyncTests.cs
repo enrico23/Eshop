@@ -1,6 +1,4 @@
-﻿using EShop.Shared.Eventing;
-
-namespace EShop.API.Tests.Services.ProductServiceTests;
+﻿namespace EShop.API.Tests.Services.ProductServiceTests;
 
 public sealed class UpdateAsyncTests : ProductServiceTestBase
 {
@@ -64,8 +62,6 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
         var id = Guid.NewGuid();
         var ct = CancellationToken.None;
 
-        _corr.CorrelationId.Returns("corr-123");
-
         var product = CreateProductWithImages(
             id,
             sku: "SKU-1",
@@ -77,7 +73,7 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
         form.File = FormFileHelpers.CreateFakeFormFile();
         form.Sku = "SKU-1";
 
-        _imageStorage.UploadImageAsync(form.File, ct).Returns("https://cdn/new.png");
+        _imageStorage.UploadImageAsync(ImageStoragePurpose.Products, form.File, ct).Returns("https://cdn/new.png");
 
         var sut = CreateSut();
 
@@ -85,19 +81,16 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
 
         Assert.True(ok);
 
-        await _publisher.Received(2).PublishAsync(
-            "images-queue",
-           Arg.Any<EventEnvelope<DeleteImageRequest>>(),
-           ct);
+        await _imageDeletionCommandPublisher.Received(2)
+            .PublishDeleteAsync(ImageStoragePurpose.Products, Arg.Any<string>(), ct);
 
         
-        await _imageStorage.Received(1).UploadImageAsync(form.File, ct);
+        await _imageStorage.Received(1).UploadImageAsync(ImageStoragePurpose.Products, form.File, ct);
 
         await _repo.DidNotReceiveWithAnyArgs().SkuInUseAsync(default!, default, default);
 
         await _unitOfWork.Received(1).SaveChangesAsync(ct);
 
-    
         Assert.Contains(product.Images, i => i.Url == "https://cdn/new.png");
     }
 }

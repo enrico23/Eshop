@@ -6,9 +6,11 @@ using EShop.Domain.Exceptions;
 using EShop.Shared.Exceptions;
 using EShop.Shared.Representations;
 using EShop.Shared.Representations.Category;
+using EShop.Shared.Services;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Immutable;
 
 namespace EShop.API.Services;
 
@@ -16,17 +18,11 @@ public interface ICategoryService
 {
     Task<PagedResult<CategoryDto>> GetPagedAsync(int page, int pageSize,
         string orderBy = "Name", string orderDirection = "asc", string? filter = null, CancellationToken ct = default);
-
     Task<ICollection<CategoryDto>> GetAllAsync(CancellationToken ct);
-
     Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
-
     Task<CategoryDto?> GetByIdAsync(Guid id, CancellationToken ct = default);
-
     Task<bool> UpdateAsync(Guid id, CategoryFormModel updateCategoryDto, CancellationToken ct);
-
     Task<CategoryDto> AddAsync(CategoryFormModel createCategoryDto, CancellationToken ct);
-
     Task<bool> DeleteAsync(Guid id, CancellationToken ct);
 }
 
@@ -35,7 +31,9 @@ public sealed class CategoryService(
     IRepository<Category, Guid, CatalogDbContext> categoryRepo, 
     IMapper mapper,
     IUnitOfWork unitOfWork,
-    ISqlServerExceptionsHelper sqlServerExceptionsHelper) 
+    ISqlServerExceptionsHelper sqlServerExceptionsHelper,
+    IImageStorageService imageStorageService,
+    IImageDeletionCommandPublisher imageDeletionCommandPublisher) 
     : ICategoryService
 {
     private readonly IExtendedCategoryRepository _categoryRepository = categoryRepository;
@@ -43,6 +41,8 @@ public sealed class CategoryService(
     private readonly IMapper _mapper = mapper;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly ISqlServerExceptionsHelper _sqlServerExceptionsHelper = sqlServerExceptionsHelper;
+    private readonly IImageStorageService _imageStorageService = imageStorageService;
+    private readonly IImageDeletionCommandPublisher _imageDeletionCommandPublisher = imageDeletionCommandPublisher;
 
     public async Task<Shared.Representations.PagedResult<CategoryDto>> GetPagedAsync(
         int page, int pageSize,
@@ -72,23 +72,36 @@ public sealed class CategoryService(
         return category is null ? null : _mapper.Map<CategoryDto>(category);
      }
 
-    public async Task<bool> UpdateAsync(Guid id, CategoryFormModel categoryFormDto, CancellationToken ct)
+    public async Task<bool> UpdateAsync(Guid id, CategoryFormModel categoryFormModel, CancellationToken ct)
     {
-        ArgumentNullException.ThrowIfNull(categoryFormDto, nameof(categoryFormDto));
+        ArgumentNullException.ThrowIfNull(categoryFormModel, nameof(categoryFormModel));
 
         var entity = await _categoryRepo.GetByIdAsync(id, true, ct);
         if (entity is null)
             return false;
 
-        var categoryName = categoryFormDto.Name?.Trim();
+        var categoryName = categoryFormModel.Name?.Trim();
         if (string.IsNullOrWhiteSpace(categoryName))
             throw new DomainException("Category name is required.");
 
-        entity.ChangeName(categoryFormDto.Name!);
+        entity.ChangeName(categoryFormModel.Name!);
 
-        if (categoryFormDto.File is not null)
+        if (categoryFormModel.File is not null)
         {
-            //todo: add local image storage service
+            foreach (var image in entity.Images)
+                await _imageDeletionCommandPublisher.PublishDeleteAsync(ImageStoragePurpose.Categories, image.Url, ct);
+
+            var newUrl = await _imageStorageService.UploadImageAsync(
+               ImageStoragePurpose.Categories,
+               categoryFormModel.File, ct);
+
+            entity.AddImage(newUrl);
+
+            var newImages = new List<CatalogImageSpec> {
+                new(Url: newUrl, AltText: categoryFormModel.Name, IsPrimary: true)
+            }.ToImmutableList();
+
+            entity.ReplaceImages(newImages!);
         }
 
         await _unitOfWork.SaveChangesAsync(ct);
@@ -103,11 +116,15 @@ public sealed class CategoryService(
         if (string.IsNullOrWhiteSpace(categoryName))
             throw new DomainException("Category name is required.");
 
-        var category = new Category(categoryName);
+        var category = Category.Create(categoryName);
 
         if (categoryFormDto.File is not null)
         {
-            //todo: add local image storage service
+            var newUrl = await _imageStorageService.UploadImageAsync(
+               ImageStoragePurpose.Categories,
+               categoryFormDto.File, ct);
+
+            category.AddImage(newUrl);
         }
 
         try
@@ -131,6 +148,14 @@ public sealed class CategoryService(
         var hasProducts = await _categoryRepository.HasAnyProductsAsync(id, ct);
         if (hasProducts)
             throw new DomainException("Category cannot be deleted because it contains products.");
+
+        if (entity.Images.Count > 0)
+        {
+            foreach (var image in entity.Images)
+            {
+                await _imageDeletionCommandPublisher.PublishDeleteAsync(ImageStoragePurpose.Categories, image.Url, ct);
+            }
+        }
 
         _categoryRepo.Remove(entity);
         await _unitOfWork.SaveChangesAsync(ct);

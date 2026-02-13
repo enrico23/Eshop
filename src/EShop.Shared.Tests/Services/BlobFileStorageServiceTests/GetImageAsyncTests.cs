@@ -1,4 +1,6 @@
-﻿namespace EShop.Shared.Tests.Services.BlobFileStorageServiceTests;
+﻿using EShop.Shared.Services;
+
+namespace EShop.Shared.Tests.Services.BlobFileStorageServiceTests;
 
 public sealed class GetImageAsyncTests : ImageStorageServiceTestBase
 {
@@ -10,7 +12,7 @@ public sealed class GetImageAsyncTests : ImageStorageServiceTestBase
 
         // Act & Assert
         await Assert.ThrowsAsync<BadRequestException>(async () =>
-            await blobFileStorage.GetImageAsync(string.Empty, CancellationToken.None));
+            await blobFileStorage.GetImageAsync(ImageStoragePurpose.Products, string.Empty, CancellationToken.None));
     }
 
     [Fact]
@@ -24,7 +26,7 @@ public sealed class GetImageAsyncTests : ImageStorageServiceTestBase
 
         // Act & Assert
         await Assert.ThrowsAsync<FileNotFoundException>(async () =>
-            await blobFileStorage.GetImageAsync("fakename.jpg", CancellationToken.None));
+            await blobFileStorage.GetImageAsync(ImageStoragePurpose.Products, "fakename.jpg", CancellationToken.None));
     }
 
     [Fact]
@@ -37,11 +39,11 @@ public sealed class GetImageAsyncTests : ImageStorageServiceTestBase
 
         // Prepare download result
         var expectedContentType = "image/png";
-        var expectedStream = new MemoryStream(new byte[] { 1, 2, 3 });
+        var expectedStream = new MemoryStream([1, 2, 3]);
 
         // BlobDownloadInfo creation via factory
         var downloadInfo = BlobsModelFactory.BlobDownloadInfo(
-            content: expectedStream, 
+            content: expectedStream,
             contentType: expectedContentType);
 
         var downloadResponse = Substitute.For<Response>();
@@ -51,7 +53,7 @@ public sealed class GetImageAsyncTests : ImageStorageServiceTestBase
         var sut = CreateSut();
 
         // Act
-        var (stream, contentType) = await sut.GetImageAsync("image.png", CancellationToken.None);
+        var (stream, contentType) = await sut.GetImageAsync(ImageStoragePurpose.Products, "image.png", CancellationToken.None);
 
         // Assert
         Assert.Same(expectedStream, stream);

@@ -25,8 +25,6 @@ public sealed class DeleteAsyncTests : ProductServiceTestBase
         var id = Guid.NewGuid();
         var ct = CancellationToken.None;
 
-        _corr.CorrelationId.Returns("corr-999");
-
         var entity = CreateProductWithImages(
             id,
             sku: "SKU-1",
@@ -40,10 +38,8 @@ public sealed class DeleteAsyncTests : ProductServiceTestBase
 
         Assert.True(ok);
 
-        await _publisher.Received(1).PublishAsync(
-            "images-queue",
-            Arg.Any<EventEnvelope<DeleteImageRequest>>(),
-            ct);
+        await _imageDeletionCommandPublisher.Received(1)
+            .PublishDeleteAsync(ImageStoragePurpose.Products, "https://cdn/a.png", ct);
 
         _repo2.Received(1).Remove(entity);
         await _unitOfWork.Received(1).SaveChangesAsync(ct);
