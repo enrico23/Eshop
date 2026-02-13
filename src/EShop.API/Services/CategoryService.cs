@@ -1,6 +1,7 @@
 ﻿using EShop.API.Models;
 using EShop.Data;
 using EShop.Data.Repositories;
+using EShop.Domain;
 using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;
 using EShop.Shared.Exceptions;
@@ -93,11 +94,11 @@ public sealed class CategoryService(
         {
             // todo: SendDeleteCommand for image
 
-            var newUrl = await _imageStorageService.UploadImageAsync(
-               ImageStoragePurpose.CustomerContent, categoryFormModel.File, ct);
-            
-            // todo: add to tracked EF entity
-            entity.AddImage(newUrl);
+            //var newUrl = await _imageStorageService.UploadImageAsync(
+            //   ImageStoragePurpose.Categories, 
+            //   categoryFormModel.File, ct);
+
+            //entity.AddImage(newUrl);
         }
 
         await _unitOfWork.SaveChangesAsync(ct);
@@ -112,11 +113,15 @@ public sealed class CategoryService(
         if (string.IsNullOrWhiteSpace(categoryName))
             throw new DomainException("Category name is required.");
 
-        var category = new Category();
+        var category = Category.Create(categoryName);
 
         if (categoryFormDto.File is not null)
         {
-            //todo: add local image storage service
+            var newUrl = await _imageStorageService.UploadImageAsync(
+               ImageStoragePurpose.Categories,
+               categoryFormDto.File, ct);
+
+            category.AddImage(newUrl);
         }
 
         try

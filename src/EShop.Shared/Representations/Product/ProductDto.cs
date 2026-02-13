@@ -18,5 +18,5 @@ public class ProductDto : BaseEntityDto
     public string CategoryName { get; set; } = null!;
 
 
-    public List<ProductImageDto> Images { get; set; } = new();
+    public List<CatalogImageDto> Images { get; set; } = new();
 }

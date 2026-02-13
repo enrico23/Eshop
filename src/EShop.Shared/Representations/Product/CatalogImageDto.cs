@@ -1,6 +1,6 @@
 ﻿namespace EShop.Shared.Representations.Product;
 
-public sealed class ProductImageDto
+public sealed class CatalogImageDto
 {
     public Guid Id { get; set; }
 

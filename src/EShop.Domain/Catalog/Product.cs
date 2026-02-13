@@ -152,6 +152,7 @@ public sealed class Product : AuditableEntity, IEntity<Guid>
         var isPrimary = !_images.Any(i => i.IsPrimary);
 
         var image = CatalogImage.Create(url, altText, nextSortOrder, isPrimary);
+
         _images.Add(image);
 
         return image;
@@ -202,7 +203,7 @@ public sealed class Product : AuditableEntity, IEntity<Guid>
         }
     }
 
-    public void ReplaceImages(IReadOnlyList<ProductImageSpec> newImages)
+    public void ReplaceImages(IReadOnlyList<CatalogImageSpec> newImages)
     {
         ArgumentNullException.ThrowIfNull(newImages);
 
@@ -234,7 +235,7 @@ public sealed class Product : AuditableEntity, IEntity<Guid>
     #endregion
 }
 
-public sealed record ProductImageSpec(
+public sealed record CatalogImageSpec(
     string Url,
     string? AltText,
     bool IsPrimary);

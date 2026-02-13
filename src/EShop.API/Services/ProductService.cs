@@ -100,7 +100,7 @@ public sealed class ProductService(
         if(productFormDto.File is not null)
         {
             var newUrl = await _imageStorageService.UploadImageAsync(
-                ImageStoragePurpose.CustomerContent, productFormDto.File, ct);
+                ImageStoragePurpose.Products, productFormDto.File, ct);
 
             product.AddImage(newUrl);
         }
@@ -157,19 +157,19 @@ public sealed class ProductService(
             throw new DomainException("Category is required.");
         product.ChangeCategory((Guid)productFormDto.CategoryId);
 
-
         if (productFormDto.File is not null)
         {
             foreach (var image in product.Images)
                 await SendDeleteCommandAsync(image.Url, ct);
 
             var newUrl = await _imageStorageService.UploadImageAsync(
-                ImageStoragePurpose.CustomerContent, 
+                ImageStoragePurpose.Products, 
                 productFormDto.File, ct);
+
             product.AddImage(newUrl);
 
-            var newImages = new List<ProductImageSpec> {
-                new ProductImageSpec(Url: newUrl, AltText: productFormDto.Name, IsPrimary: true)
+            var newImages = new List<CatalogImageSpec> {
+                new(Url: newUrl, AltText: productFormDto.Name, IsPrimary: true)
             }.ToImmutableList();
 
             product.ReplaceImages(newImages!);
@@ -207,7 +207,7 @@ public sealed class ProductService(
                 "images-queue",
                 new EventEnvelope<DeleteImageRequest>(
                     Type: "image.deleted",
-                    Data: new DeleteImageRequest(ImageStoragePurpose.CustomerContent, imageUrl),
+                    Data: new DeleteImageRequest(ImageStoragePurpose.Products, imageUrl),
                     CorrelationId: _correlationIdAccessor.CorrelationId,
                     Source: "eshop.api"), ct);
         }

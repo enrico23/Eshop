@@ -1,4 +1,5 @@
-﻿using EShop.Domain.Validation;
+﻿using EShop.Domain.Exceptions;
+using EShop.Domain.Validation;
 
 namespace EShop.Domain.Catalog;
 
@@ -35,8 +36,23 @@ public sealed class  Category : AuditableEntity, IEntity<Guid>
 
     public void ChangeName(string newName) => Name = NameValidation.Validate(newName, 200, "Category name");
 
-    public void AddImage(string imageUrl, string? altText = null)
+    public void AddImage(string url, string? altText = null)
     {
-       // todo: create a new type CategoryImage
+        if (_images.Any(i => i.Url == url))
+            throw new DomainException("This image is already associated with the category.");
+
+        var nextSortOrder = _images.Count == 0
+            ? 0
+            : _images.Max(i => i.SortOrder) + 1;
+
+        var isPrimary = !_images.Any(i => i.IsPrimary);
+
+        var image = CatalogImage.Create(url, altText, nextSortOrder, isPrimary);
+        _images.Add(image);
     }
+
+    #region Catalog Images
+
+    // abstract in helper and use it on both category and product
+    #endregion
 }

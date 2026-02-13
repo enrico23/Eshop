@@ -32,5 +32,5 @@ public abstract class ProductUpsertDto
     [StringLength(50)]
     public string Sku { get; set; } = null!;
 
-    public ICollection<ProductImageDto>? Images { get; set; }
+    public ICollection<CatalogImageDto>? Images { get; set; }
 }
