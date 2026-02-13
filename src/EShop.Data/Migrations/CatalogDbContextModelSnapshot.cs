@@ -103,7 +103,7 @@ namespace EShop.Data.Migrations
 
             modelBuilder.Entity("EShop.Domain.Catalog.Category", b =>
                 {
-                    b.OwnsMany("EShop.Domain.Catalog.CatalogImage", "Images", b1 =>
+                    b.OwnsMany("EShop.Domain.Catalog.CatalogImage", "_images", b1 =>
                         {
                             b1.Property<Guid>("Id")
                                 .HasColumnType("uniqueidentifier");
@@ -129,15 +129,23 @@ namespace EShop.Data.Migrations
 
                             b1.HasKey("Id");
 
-                            b1.HasIndex("CategoryId");
+                            b1.HasIndex("CategoryId", "IsPrimary")
+                                .IsUnique()
+                                .HasFilter("[IsPrimary] = 1");
 
-                            b1.ToTable("CatalogImages", (string)null);
+                            b1.HasIndex("CategoryId", "Url")
+                                .IsUnique();
+
+                            b1.ToTable("CatalogImages", null, t =>
+                                {
+                                    t.HasCheckConstraint("CK_CatalogImages_SortOrder_NonNegative", "[SortOrder] >= 0");
+                                });
 
                             b1.WithOwner()
                                 .HasForeignKey("CategoryId");
                         });
 
-                    b.Navigation("Images");
+                    b.Navigation("_images");
                 });
 
             modelBuilder.Entity("Product", b =>
@@ -148,7 +156,7 @@ namespace EShop.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsMany("EShop.Domain.Catalog.CatalogImage", "Images", b1 =>
+                    b.OwnsMany("EShop.Domain.Catalog.CatalogImage", "_images", b1 =>
                         {
                             b1.Property<Guid>("Id")
                                 .HasColumnType("uniqueidentifier");
@@ -174,9 +182,17 @@ namespace EShop.Data.Migrations
 
                             b1.HasKey("Id");
 
-                            b1.HasIndex("ProductId");
+                            b1.HasIndex("ProductId", "IsPrimary")
+                                .IsUnique()
+                                .HasFilter("[IsPrimary] = 1");
 
-                            b1.ToTable("ProductImages", (string)null);
+                            b1.HasIndex("ProductId", "Url")
+                                .IsUnique();
+
+                            b1.ToTable("ProductImages", null, t =>
+                                {
+                                    t.HasCheckConstraint("CK_ProductImages_SortOrder_NonNegative", "[SortOrder] >= 0");
+                                });
 
                             b1.WithOwner()
                                 .HasForeignKey("ProductId");
@@ -184,7 +200,7 @@ namespace EShop.Data.Migrations
 
                     b.Navigation("Category");
 
-                    b.Navigation("Images");
+                    b.Navigation("_images");
                 });
 
             modelBuilder.Entity("EShop.Domain.Catalog.Category", b =>

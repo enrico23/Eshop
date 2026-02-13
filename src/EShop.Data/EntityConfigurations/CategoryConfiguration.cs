@@ -25,6 +25,9 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
             img.Property(i => i.AltText).HasMaxLength(500);
             img.Property(i => i.SortOrder).IsRequired();
             img.Property(i => i.IsPrimary).IsRequired();
+            img.HasIndex("CategoryId", nameof(CatalogImage.Url)).IsUnique();
+            img.HasIndex("CategoryId", nameof(CatalogImage.IsPrimary)).IsUnique().HasFilter("[IsPrimary] = 1");
+            img.ToTable(t => t.HasCheckConstraint("CK_CatalogImages_SortOrder_NonNegative", "[SortOrder] >= 0"));
         });
 
         builder.Navigation("_images").UsePropertyAccessMode(PropertyAccessMode.Field);

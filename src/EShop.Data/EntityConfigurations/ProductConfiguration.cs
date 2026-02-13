@@ -7,21 +7,12 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
     public void Configure(EntityTypeBuilder<Product> builder)
     {
         builder.ToTable("Products");
-
         builder.HasKey(p => p.Id);
-        builder.Property(p => p.Id)
-         .ValueGeneratedOnAdd();
-
-        builder.Property(p => p.Name)
-            .IsRequired()
-            .HasMaxLength(200);
-
+        builder.Property(p => p.Id).ValueGeneratedOnAdd();
+        builder.Property(p => p.Name).IsRequired().HasMaxLength(200);
         builder.Property(p => p.Description)
-            .HasConversion(
-                v => v.Value, 
-                v => new Domain.Products.ProductDescription(v))
+            .HasConversion(v => v.Value, v => new Domain.Products.ProductDescription(v))
             .HasMaxLength(2000);
-
         builder.Property(p => p.Price)
             .HasPrecision(18, 2)
             .IsRequired()
@@ -69,6 +60,9 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             img.Property(i => i.AltText).HasMaxLength(500);
             img.Property(i => i.SortOrder).IsRequired();
             img.Property(i => i.IsPrimary).IsRequired();
+            img.HasIndex("ProductId", nameof(CatalogImage.Url)).IsUnique();
+            img.HasIndex("ProductId", nameof(CatalogImage.IsPrimary)).IsUnique().HasFilter("[IsPrimary] = 1");
+            img.ToTable(t => t.HasCheckConstraint("CK_ProductImages_SortOrder_NonNegative", "[SortOrder] >= 0"));
         });
 
         builder.Navigation("_images").UsePropertyAccessMode(PropertyAccessMode.Field);
