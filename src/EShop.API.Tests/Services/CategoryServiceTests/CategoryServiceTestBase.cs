@@ -13,8 +13,7 @@ public abstract class CategoryServiceTestBase
     internal readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
     internal readonly ISqlServerExceptionsHelper _sqlServerExceptionsHelper = Substitute.For<ISqlServerExceptionsHelper>();
     internal readonly IImageStorageService _imageStorageService = Substitute.For<IImageStorageService>();
-    private readonly IEventPublisher _eventPublisher = Substitute.For<IEventPublisher>();
-    private readonly ICorrelationIdAccessor _correlationIdAccessor = Substitute.For<ICorrelationIdAccessor>();
+    private readonly IImageDeletionCommandPublisher _imageDeletionCommandPublisher = Substitute.For<IImageDeletionCommandPublisher>();
 
     internal IFixture Fixture = FixtureFactory.CreateWithFormFile();
 
@@ -31,8 +30,7 @@ public abstract class CategoryServiceTestBase
             _unitOfWork, 
             _sqlServerExceptionsHelper,
             _imageStorageService,
-            _eventPublisher,
-            _correlationIdAccessor);
+            _imageDeletionCommandPublisher);
        
         try
         {

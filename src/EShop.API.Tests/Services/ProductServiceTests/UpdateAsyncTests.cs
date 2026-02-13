@@ -62,8 +62,6 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
         var id = Guid.NewGuid();
         var ct = CancellationToken.None;
 
-        _corr.CorrelationId.Returns("corr-123");
-
         var product = CreateProductWithImages(
             id,
             sku: "SKU-1",
@@ -83,10 +81,8 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
 
         Assert.True(ok);
 
-        await _publisher.Received(2).PublishAsync(
-            "images-queue",
-           Arg.Any<EventEnvelope<DeleteImageRequest>>(),
-           ct);
+        await _imageDeletionCommandPublisher.Received(2)
+            .PublishDeleteAsync(ImageStoragePurpose.Products, Arg.Any<string>(), ct);
 
         
         await _imageStorage.Received(1).UploadImageAsync(ImageStoragePurpose.Products, form.File, ct);

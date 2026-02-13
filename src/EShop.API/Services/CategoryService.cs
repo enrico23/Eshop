@@ -3,9 +3,7 @@ using EShop.Data;
 using EShop.Data.Repositories;
 using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;
-using EShop.Shared.Eventing;
 using EShop.Shared.Exceptions;
-using EShop.Shared.Observability.Correlation;
 using EShop.Shared.Representations;
 using EShop.Shared.Representations.Category;
 using EShop.Shared.Services;
@@ -20,17 +18,11 @@ public interface ICategoryService
 {
     Task<PagedResult<CategoryDto>> GetPagedAsync(int page, int pageSize,
         string orderBy = "Name", string orderDirection = "asc", string? filter = null, CancellationToken ct = default);
-
     Task<ICollection<CategoryDto>> GetAllAsync(CancellationToken ct);
-
     Task<bool> ExistsAsync(Guid id, CancellationToken ct = default);
-
     Task<CategoryDto?> GetByIdAsync(Guid id, CancellationToken ct = default);
-
     Task<bool> UpdateAsync(Guid id, CategoryFormModel updateCategoryDto, CancellationToken ct);
-
     Task<CategoryDto> AddAsync(CategoryFormModel createCategoryDto, CancellationToken ct);
-
     Task<bool> DeleteAsync(Guid id, CancellationToken ct);
 }
 
@@ -41,8 +33,7 @@ public sealed class CategoryService(
     IUnitOfWork unitOfWork,
     ISqlServerExceptionsHelper sqlServerExceptionsHelper,
     IImageStorageService imageStorageService,
-    IEventPublisher eventPublisher,
-    ICorrelationIdAccessor correlationIdAccessor) 
+    IImageDeletionCommandPublisher imageDeletionCommandPublisher) 
     : ICategoryService
 {
     private readonly IExtendedCategoryRepository _categoryRepository = categoryRepository;
@@ -51,8 +42,7 @@ public sealed class CategoryService(
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly ISqlServerExceptionsHelper _sqlServerExceptionsHelper = sqlServerExceptionsHelper;
     private readonly IImageStorageService _imageStorageService = imageStorageService;
-    private readonly IEventPublisher _eventPublisher = eventPublisher;
-    private readonly ICorrelationIdAccessor _correlationIdAccessor = correlationIdAccessor;
+    private readonly IImageDeletionCommandPublisher _imageDeletionCommandPublisher = imageDeletionCommandPublisher;
 
     public async Task<Shared.Representations.PagedResult<CategoryDto>> GetPagedAsync(
         int page, int pageSize,
@@ -99,7 +89,7 @@ public sealed class CategoryService(
         if (categoryFormModel.File is not null)
         {
             foreach (var image in entity.Images)
-                await SendDeleteCommandAsync(image.Url, ct);
+                await _imageDeletionCommandPublisher.PublishDeleteAsync(ImageStoragePurpose.Categories, image.Url, ct);
 
             var newUrl = await _imageStorageService.UploadImageAsync(
                ImageStoragePurpose.Categories,
@@ -163,7 +153,7 @@ public sealed class CategoryService(
         {
             foreach (var image in entity.Images)
             {
-                await SendDeleteCommandAsync(image.Url, ct);
+                await _imageDeletionCommandPublisher.PublishDeleteAsync(ImageStoragePurpose.Categories, image.Url, ct);
             }
         }
 
@@ -171,18 +161,5 @@ public sealed class CategoryService(
         await _unitOfWork.SaveChangesAsync(ct);
 
         return true;
-    }
-
-    private async Task SendDeleteCommandAsync(string imageUrl, CancellationToken ct)
-    {
-        {
-            await _eventPublisher.PublishAsync(
-                "images-queue",
-                new EventEnvelope<DeleteImageRequest>(
-                    Type: "image.deleted",
-                    Data: new DeleteImageRequest(ImageStoragePurpose.Categories, imageUrl),
-                    CorrelationId: _correlationIdAccessor.CorrelationId,
-                    Source: "eshop.api"), ct);
-        }
     }
 }

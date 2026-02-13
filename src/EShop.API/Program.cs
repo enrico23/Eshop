@@ -52,6 +52,7 @@ public partial class Program
         builder.Services.AddScoped<ICategoryService, CategoryService>();
         builder.Services.AddScoped<IExtendedProductRepository, ExtendedProductRepository>();
         builder.Services.AddScoped<IProductService, ProductService>();
+        builder.Services.AddScoped<IImageDeletionCommandPublisher, ImageDeletionCommandPublisher>();
         builder.Services.AddScoped<ISqlServerExceptionsHelper, SqlServerExceptionsHelper>();
 
         // BLOB FILE STORAGE

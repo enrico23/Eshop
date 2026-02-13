@@ -9,15 +9,9 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.ToTable("Categories");
 
         builder.HasKey(c => c.Id);
-        builder.Property(p => p.Id)
-        .ValueGeneratedOnAdd();
-
+        builder.Property(p => p.Id).ValueGeneratedOnAdd();
         builder.Property(c => c.Name).IsRequired().HasMaxLength(200);
-
-        builder.Property(p => p.CreatedUtc)
-          .IsRequired()
-          .HasDefaultValueSql("SYSUTCDATETIME()");
-
+        builder.Property(p => p.CreatedUtc).IsRequired().HasDefaultValueSql("SYSUTCDATETIME()");
         builder.Property(p => p.UpdatedUtc);
 
         builder.Ignore(c => c.Images);
