@@ -57,3 +57,9 @@ nunit-*.xml
 .vs/
 ServiceHub/
 Diagnostics/
+
+# Local .NET CLI home (sentinels, telemetry, dev-certs state)
+.dotnet-home/
+
+# If you ever also store a local dotnet install here
+.dotnet/
