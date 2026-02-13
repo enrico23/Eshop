@@ -32,13 +32,12 @@ scope realistic while reflecting common enterprise requirements.
 - [ ] Order confirmation screen
 
 ## Identity & authorization
-- [ ] Add authentication (choose one)
-  - [ ] ASP.NET Core Identity (local)
-  - [ ] External OIDC (Azure AD / Keycloak) for enterprise realism
+- [X] Add authentication (choose one)
+  - [X] External OIDC (Azure AD / Keycloak) for enterprise realism
 - [ ] Roles/Policies
-  - [ ] `Admin` can access `/products`, `/categories`
-  - [ ] Customer screens public / customer-only where needed
-- [ ] Login/Logout buttons in app bar + user menu
+  - [X] `Admin` can access `/products`, `/categories`
+  - [X] Customer screens public / customer-only where needed
+- [X] Login/Logout buttons in app bar + user menu
 
 ## API enhancements (REST)
 - [ ] Stronger REST filtering model for products
