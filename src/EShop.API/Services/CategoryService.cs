@@ -160,6 +160,14 @@ public sealed class CategoryService(
         if (hasProducts)
             throw new DomainException("Category cannot be deleted because it contains products.");
 
+        if (entity.Images.Count > 0)
+        {
+            foreach (var image in entity.Images)
+            {
+                await SendDeleteCommandAsync(image.Url, ct);
+            }
+        }
+
         _categoryRepo.Remove(entity);
         await _unitOfWork.SaveChangesAsync(ct);
 
