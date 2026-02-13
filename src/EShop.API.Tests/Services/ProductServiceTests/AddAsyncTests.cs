@@ -55,7 +55,7 @@ public sealed class AddAsyncTests : ProductServiceTestBase
             File = FormFileHelpers.CreateFakeFormFile()
         };
 
-        _imageStorage.UploadImageAsync(ImageStoragePurpose.CustomerContent, form.File, ct).Returns("https://cdn/new.png");
+        _imageStorage.UploadImageAsync(ImageStoragePurpose.Products, form.File, ct).Returns("https://cdn/new.png");
 
         // Capture the entity passed into AddAsync to assert it contains the image URL
         Product? added = null;
@@ -70,7 +70,7 @@ public sealed class AddAsyncTests : ProductServiceTestBase
         var result = await sut.AddAsync(form, ct);
 
         Assert.NotNull(result);
-        await _imageStorage.Received(1).UploadImageAsync(ImageStoragePurpose.CustomerContent ,form.File, ct);
+        await _imageStorage.Received(1).UploadImageAsync(ImageStoragePurpose.Products ,form.File, ct);
         await _repo2.Received(1).AddAsync(Arg.Any<Product>(), ct);
         await _unitOfWork.Received(1).SaveChangesAsync(ct);
 

@@ -13,7 +13,7 @@ public sealed class DeleteImageAsyncTests : ImageStorageServiceTestBase
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<BadRequestException>(async () =>
-            await blobFileStorageService.DeleteImageAsync(ImageStoragePurpose.CustomerContent, string.Empty, CancellationToken.None));
+            await blobFileStorageService.DeleteImageAsync(ImageStoragePurpose.Products, string.Empty, CancellationToken.None));
         Assert.NotNull(ex);
         Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);
     }

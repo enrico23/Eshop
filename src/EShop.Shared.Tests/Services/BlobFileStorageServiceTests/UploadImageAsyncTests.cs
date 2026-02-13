@@ -12,7 +12,7 @@ public sealed class UploadImageAsyncTests : ImageStorageServiceTestBase
         var blobFileStorage = CreateSut();
 
         var ex = await Assert.ThrowsAsync<BadRequestException>(async () =>
-              await blobFileStorage.UploadImageAsync(ImageStoragePurpose.CustomerContent, null!, CancellationToken.None));
+              await blobFileStorage.UploadImageAsync(ImageStoragePurpose.Products, null!, CancellationToken.None));
 
         Assert.NotNull(ex);
         Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);
@@ -27,7 +27,7 @@ public sealed class UploadImageAsyncTests : ImageStorageServiceTestBase
         // Act & Assert
         var blobFileStorage = CreateSut();
         var ex = await Assert.ThrowsAsync<BadRequestException>(async () =>
-              await blobFileStorage.UploadImageAsync(ImageStoragePurpose.CustomerContent, emptyFile, CancellationToken.None));
+              await blobFileStorage.UploadImageAsync(ImageStoragePurpose.Products, emptyFile, CancellationToken.None));
 
         Assert.NotNull(ex);
         Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);
@@ -48,7 +48,7 @@ public sealed class UploadImageAsyncTests : ImageStorageServiceTestBase
         // Act & Assert
         var blobFileStorage = CreateSut();
         var ex = await Assert.ThrowsAsync<BadRequestException>(async () =>
-              await blobFileStorage.UploadImageAsync(ImageStoragePurpose.CustomerContent, tooLargeFile, CancellationToken.None));
+              await blobFileStorage.UploadImageAsync(ImageStoragePurpose.Products, tooLargeFile, CancellationToken.None));
 
         Assert.NotNull(ex);
         Assert.Equal(StatusCodes.Status413PayloadTooLarge, ex.StatusCode);
@@ -63,7 +63,7 @@ public sealed class UploadImageAsyncTests : ImageStorageServiceTestBase
         // Act
         var blobFileStorage = CreateSut();
         var ex = await Assert.ThrowsAsync<BadRequestException>(() => 
-            blobFileStorage.UploadImageAsync(ImageStoragePurpose.CustomerContent, file));
+            blobFileStorage.UploadImageAsync(ImageStoragePurpose.Products, file));
 
         // Assert
         Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);
@@ -84,7 +84,7 @@ public sealed class UploadImageAsyncTests : ImageStorageServiceTestBase
         // Act
         var blobFileStorage = CreateSut();
         var ex = await Assert.ThrowsAsync<BadRequestException>(() 
-            => blobFileStorage.UploadImageAsync(ImageStoragePurpose.CustomerContent, file));
+            => blobFileStorage.UploadImageAsync(ImageStoragePurpose.Products, file));
 
         // Assert
         Assert.Equal(StatusCodes.Status400BadRequest, ex.StatusCode);

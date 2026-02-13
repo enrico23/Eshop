@@ -12,7 +12,7 @@ public sealed class GetImageAsyncTests : ImageStorageServiceTestBase
 
         // Act & Assert
         await Assert.ThrowsAsync<BadRequestException>(async () =>
-            await blobFileStorage.GetImageAsync(ImageStoragePurpose.CustomerContent, string.Empty, CancellationToken.None));
+            await blobFileStorage.GetImageAsync(ImageStoragePurpose.Products, string.Empty, CancellationToken.None));
     }
 
     [Fact]
@@ -26,7 +26,7 @@ public sealed class GetImageAsyncTests : ImageStorageServiceTestBase
 
         // Act & Assert
         await Assert.ThrowsAsync<FileNotFoundException>(async () =>
-            await blobFileStorage.GetImageAsync(ImageStoragePurpose.CustomerContent, "fakename.jpg", CancellationToken.None));
+            await blobFileStorage.GetImageAsync(ImageStoragePurpose.Products, "fakename.jpg", CancellationToken.None));
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public sealed class GetImageAsyncTests : ImageStorageServiceTestBase
 
         // BlobDownloadInfo creation via factory
         var downloadInfo = BlobsModelFactory.BlobDownloadInfo(
-            content: expectedStream, 
+            content: expectedStream,
             contentType: expectedContentType);
 
         var downloadResponse = Substitute.For<Response>();
@@ -53,7 +53,7 @@ public sealed class GetImageAsyncTests : ImageStorageServiceTestBase
         var sut = CreateSut();
 
         // Act
-        var (stream, contentType) = await sut.GetImageAsync(ImageStoragePurpose.CustomerContent, "image.png", CancellationToken.None);
+        var (stream, contentType) = await sut.GetImageAsync(ImageStoragePurpose.Products, "image.png", CancellationToken.None);
 
         // Assert
         Assert.Same(expectedStream, stream);

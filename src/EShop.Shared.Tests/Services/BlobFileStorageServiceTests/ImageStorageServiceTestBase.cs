@@ -14,7 +14,7 @@ public abstract class ImageStorageServiceTestBase
     //};
 
     protected IBlobContainerResolver Containers = Substitute.For<IBlobContainerResolver>();
-    // protected BlobContainerClient BlobContainerClient = Substitute.For<BlobContainerClient>();
+    protected BlobContainerClient BlobContainerClient = Substitute.For<BlobContainerClient>();
 
     protected BlobClient BlobClient = Substitute.For<BlobClient>();
 
@@ -22,7 +22,16 @@ public abstract class ImageStorageServiceTestBase
 
     protected ImageStorageService CreateSut()
     {
-        // BlobContainerClient.GetBlobClient(Arg.Any<string>()).Returns(BlobClient);
+        Options.Value.Returns(new ImageStorageServiceOptions
+        {
+            MaxUploadSizeBytes = 5 * 1024 * 1024,
+            ProductImagesContainer = "product-images",
+            CategoryImagesContainer = "category-images"
+        });
+
+        Containers.Get(Arg.Any<ImageStoragePurpose>()).Returns(BlobContainerClient);
+        BlobContainerClient.GetBlobClient(Arg.Any<string>()).Returns(BlobClient);
+
         return new ImageStorageService(Containers, Options);
     }
 

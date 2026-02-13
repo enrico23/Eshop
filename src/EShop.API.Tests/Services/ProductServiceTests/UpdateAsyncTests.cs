@@ -75,7 +75,7 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
         form.File = FormFileHelpers.CreateFakeFormFile();
         form.Sku = "SKU-1";
 
-        _imageStorage.UploadImageAsync(ImageStoragePurpose.CustomerContent, form.File, ct).Returns("https://cdn/new.png");
+        _imageStorage.UploadImageAsync(ImageStoragePurpose.Products, form.File, ct).Returns("https://cdn/new.png");
 
         var sut = CreateSut();
 
@@ -89,13 +89,12 @@ public sealed class UpdateAsyncTests : ProductServiceTestBase
            ct);
 
         
-        await _imageStorage.Received(1).UploadImageAsync(ImageStoragePurpose.CustomerContent, form.File, ct);
+        await _imageStorage.Received(1).UploadImageAsync(ImageStoragePurpose.Products, form.File, ct);
 
         await _repo.DidNotReceiveWithAnyArgs().SkuInUseAsync(default!, default, default);
 
         await _unitOfWork.Received(1).SaveChangesAsync(ct);
 
-    
         Assert.Contains(product.Images, i => i.Url == "https://cdn/new.png");
     }
 }

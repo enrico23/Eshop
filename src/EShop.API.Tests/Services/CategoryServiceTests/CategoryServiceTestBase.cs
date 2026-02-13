@@ -13,6 +13,9 @@ public abstract class CategoryServiceTestBase
     internal readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
     internal readonly ISqlServerExceptionsHelper _sqlServerExceptionsHelper = Substitute.For<ISqlServerExceptionsHelper>();
     internal readonly IImageStorageService _imageStorageService = Substitute.For<IImageStorageService>();
+    private readonly IEventPublisher _eventPublisher = Substitute.For<IEventPublisher>();
+    private readonly ICorrelationIdAccessor _correlationIdAccessor = Substitute.For<ICorrelationIdAccessor>();
+
     internal IFixture Fixture = FixtureFactory.CreateWithFormFile();
 
     protected Task TestAsync(
@@ -27,7 +30,9 @@ public abstract class CategoryServiceTestBase
             _mapper, 
             _unitOfWork, 
             _sqlServerExceptionsHelper,
-            _imageStorageService);
+            _imageStorageService,
+            _eventPublisher,
+            _correlationIdAccessor);
        
         try
         {

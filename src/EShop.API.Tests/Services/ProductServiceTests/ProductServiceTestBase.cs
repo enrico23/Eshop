@@ -30,7 +30,7 @@ public abstract class ProductServiceTestBase
         if (imageUrls.Length > 0)
         {
             var specs = imageUrls
-                .Select((u, idx) => new ProductImageSpec(Url: u, AltText: "alt", IsPrimary: idx == 0))
+                .Select((u, idx) => new CatalogImageSpec(Url: u, AltText: "alt", IsPrimary: idx == 0))
                 .ToImmutableList();
 
             p.ReplaceImages(specs);
