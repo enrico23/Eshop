@@ -63,3 +63,6 @@ Diagnostics/
 
 # If you ever also store a local dotnet install here
 .dotnet/
+
+# Repo-local temp folder (dotnet/VS workload install temp artifacts, etc.)
+.tmp/
