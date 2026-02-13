@@ -31,6 +31,20 @@ app.UseExceptionHandler(new ExceptionHandlerOptions
 }
 ```
 
+## DbUpdateConcurrencyException handling
+
+`DbUpdateConcurrencyException` is handled by `ConcurrencyExceptionHandler` and
+returned as `409 Conflict`:
+
+```json
+{
+  "status": 409,
+  "title": "Concurrency conflict.",
+  "detail": "The resource was modified by another request. Refresh and retry.",
+  "type": "https://httpstatuses.com/409"
+}
+```
+
 ## ProblemDetails enrichment
 
 The API enriches ProblemDetails responses with:

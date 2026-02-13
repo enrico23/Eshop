@@ -42,6 +42,10 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
           .HasDefaultValueSql("SYSUTCDATETIME()");
 
         builder.Property(p => p.UpdatedUtc);
+        
+        builder.Property(p => p.RowVersion)
+            .IsRowVersion()
+            .IsConcurrencyToken();
 
         builder
             .HasOne(p => p.Category)

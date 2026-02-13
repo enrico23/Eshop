@@ -26,6 +26,7 @@ public partial class Program
         builder.AddServiceDefaults();
 
         builder.Services.AddExceptionHandler<DomainExceptionHandler>();
+        builder.Services.AddExceptionHandler<ConcurrencyExceptionHandler>();
         builder.Services.AddProblemDetails(options =>
         {
             options.CustomizeProblemDetails = context =>

@@ -13,6 +13,10 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.Property(c => c.Name).IsRequired().HasMaxLength(200);
         builder.Property(p => p.CreatedUtc).IsRequired().HasDefaultValueSql("SYSUTCDATETIME()");
         builder.Property(p => p.UpdatedUtc);
+        
+        builder.Property(p => p.RowVersion)
+            .IsRowVersion()
+            .IsConcurrencyToken();
 
         builder.Ignore(c => c.Images);
         var categoryImages = builder.OwnsMany<CatalogImage>("_images", img =>

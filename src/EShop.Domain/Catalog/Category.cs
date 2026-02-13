@@ -9,6 +9,8 @@ public sealed class Category : AuditableEntity, IEntity<Guid>
     public string Name { get; private set; } = default!;
 
     public ICollection<Product> Products { get; private set; } = [];
+    
+    public byte[] RowVersion { get; private set; } = Array.Empty<byte>();
 
     private readonly List<CatalogImage> _images = [];
     private readonly CatalogImageCollection _imageCollection;
