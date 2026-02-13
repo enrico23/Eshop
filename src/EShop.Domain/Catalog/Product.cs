@@ -24,6 +24,8 @@ public sealed class Product : AuditableEntity, IEntity<Guid>
     public Guid CategoryId { get; private set; }
 
     public Category? Category { get; private set; }
+    
+    public byte[] RowVersion { get; private set; } = Array.Empty<byte>();
 
     private readonly List<CatalogImage> _images = new();
     private readonly CatalogImageCollection _imageCollection;
