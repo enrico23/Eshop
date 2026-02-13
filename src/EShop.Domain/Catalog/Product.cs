@@ -26,10 +26,12 @@ public sealed class Product : AuditableEntity, IEntity<Guid>
     public Category? Category { get; private set; }
 
     private readonly List<CatalogImage> _images = new();
+    private readonly CatalogImageCollection _imageCollection;
     public IReadOnlyCollection<CatalogImage> Images => _images.AsReadOnly();
 
     public Product()
     {
+        _imageCollection = new CatalogImageCollection("product", _images);
     }
 
     public static Product Create(string name, ProductDescription description, Money price, StockQuantity stock, Guid categoryId, Sku sku)
@@ -140,102 +142,11 @@ public sealed class Product : AuditableEntity, IEntity<Guid>
 
     #region Product Images
 
-    public CatalogImage AddImage(string url, string? altText = null)
-    {
-        if (_images.Any(i => i.Url == url))
-            throw new DomainException("This image is already associated with the product.");
-
-        var nextSortOrder = _images.Count == 0
-            ? 0
-            : _images.Max(i => i.SortOrder) + 1;
-
-        var isPrimary = !_images.Any(i => i.IsPrimary);
-
-        var image = CatalogImage.Create(url, altText, nextSortOrder, isPrimary);
-
-        _images.Add(image);
-
-        return image;
-    }
-
-    public void RemoveImage(Guid imageId)
-    {
-        var image = _images.SingleOrDefault(i => i.Id == imageId)
-            ?? throw new DomainException("Image not found.");
-
-        var wasPrimary = image.IsPrimary;
-        _images.Remove(image);
-
-        // if we removed the primary image, optionally promote another one
-        if (wasPrimary && _images.Any())
-        {
-            var firstBySort = _images.OrderBy(i => i.SortOrder).First();
-            SetPrimaryImage(firstBySort.Id);
-        }
-    }
-
-    public void SetPrimaryImage(Guid imageId)
-    {
-        var image = _images.SingleOrDefault(i => i.Id == imageId)
-            ?? throw new DomainException("Image not found.");
-
-        foreach (var img in _images)
-        {
-            img.SetPrimary(img.Id == image.Id);
-        }
-    }
-
-    public void ReorderImages(IReadOnlyList<Guid> orderedIds)
-    {
-        if (orderedIds.Count != _images.Count ||
-            orderedIds.Except(_images.Select(i => i.Id)).Any())
-        {
-            throw new DomainException("Invalid image ordering.");
-        }
-
-        var orderMap = orderedIds
-            .Select((id, index) => (id, index))
-            .ToDictionary(x => x.id, x => x.index);
-
-        foreach (var img in _images)
-        {
-            img.ChangeSortOrder(orderMap[img.Id]);
-        }
-    }
-
-    public void ReplaceImages(IReadOnlyList<CatalogImageSpec> newImages)
-    {
-        ArgumentNullException.ThrowIfNull(newImages);
-
-        _images.Clear();
-
-        if (newImages.Count == 0)
-            return;
-
-        var primaryCount = newImages.Count(i => i.IsPrimary);
-        if (primaryCount > 1)
-            throw new DomainException("Only one primary image is allowed.");
-
-        CatalogImage? requestedPrimary = null;
-
-        foreach (var spec in newImages)
-        {
-            var image = AddImage(spec.Url, spec.AltText);
-
-            if (spec.IsPrimary && requestedPrimary is null)
-            {
-                requestedPrimary = image;
-            }
-        }
-
-        if (requestedPrimary is not null)
-            SetPrimaryImage(requestedPrimary.Id);
-    }
+    public CatalogImage AddImage(string url, string? altText = null) => _imageCollection.Add(url, altText);
+    public void RemoveImage(Guid imageId) => _imageCollection.Remove(imageId);
+    public void SetPrimaryImage(Guid imageId) => _imageCollection.SetPrimary(imageId);
+    public void ReorderImages(IReadOnlyList<Guid> orderedIds) => _imageCollection.Reorder(orderedIds);
+    public void ReplaceImages(IReadOnlyList<CatalogImageSpec> newImages) => _imageCollection.Replace(newImages);
 
     #endregion
 }
-
-public sealed record CatalogImageSpec(
-    string Url,
-    string? AltText,
-    bool IsPrimary);
