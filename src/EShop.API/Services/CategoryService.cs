@@ -4,13 +4,16 @@ using EShop.Data.Repositories;
 using EShop.Domain;
 using EShop.Domain.Catalog;
 using EShop.Domain.Exceptions;
+using EShop.Shared.Eventing;
 using EShop.Shared.Exceptions;
+using EShop.Shared.Observability.Correlation;
 using EShop.Shared.Representations;
 using EShop.Shared.Representations.Category;
 using EShop.Shared.Services;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Immutable;
 
 namespace EShop.API.Services;
 
@@ -38,7 +41,9 @@ public sealed class CategoryService(
     IMapper mapper,
     IUnitOfWork unitOfWork,
     ISqlServerExceptionsHelper sqlServerExceptionsHelper,
-    IImageStorageService imageStorageService) 
+    IImageStorageService imageStorageService,
+    IEventPublisher eventPublisher,
+    ICorrelationIdAccessor correlationIdAccessor) 
     : ICategoryService
 {
     private readonly IExtendedCategoryRepository _categoryRepository = categoryRepository;
@@ -47,6 +52,8 @@ public sealed class CategoryService(
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly ISqlServerExceptionsHelper _sqlServerExceptionsHelper = sqlServerExceptionsHelper;
     private readonly IImageStorageService _imageStorageService = imageStorageService;
+    private readonly IEventPublisher _eventPublisher = eventPublisher;
+    private readonly ICorrelationIdAccessor _correlationIdAccessor = correlationIdAccessor;
 
     public async Task<Shared.Representations.PagedResult<CategoryDto>> GetPagedAsync(
         int page, int pageSize,
@@ -92,13 +99,20 @@ public sealed class CategoryService(
 
         if (categoryFormModel.File is not null)
         {
-            // todo: SendDeleteCommand for image
+            foreach (var image in entity.Images)
+                await SendDeleteCommandAsync(image.Url, ct);
 
-            //var newUrl = await _imageStorageService.UploadImageAsync(
-            //   ImageStoragePurpose.Categories, 
-            //   categoryFormModel.File, ct);
+            var newUrl = await _imageStorageService.UploadImageAsync(
+               ImageStoragePurpose.Categories,
+               categoryFormModel.File, ct);
 
-            //entity.AddImage(newUrl);
+            entity.AddImage(newUrl);
+
+            var newImages = new List<CatalogImageSpec> {
+                new(Url: newUrl, AltText: categoryFormModel.Name, IsPrimary: true)
+            }.ToImmutableList();
+
+            entity.ReplaceImages(newImages!);
         }
 
         await _unitOfWork.SaveChangesAsync(ct);
@@ -150,5 +164,18 @@ public sealed class CategoryService(
         await _unitOfWork.SaveChangesAsync(ct);
 
         return true;
+    }
+
+    private async Task SendDeleteCommandAsync(string imageUrl, CancellationToken ct)
+    {
+        {
+            await _eventPublisher.PublishAsync(
+                "images-queue",
+                new EventEnvelope<DeleteImageRequest>(
+                    Type: "image.deleted",
+                    Data: new DeleteImageRequest(ImageStoragePurpose.Categories, imageUrl),
+                    CorrelationId: _correlationIdAccessor.CorrelationId,
+                    Source: "eshop.api"), ct);
+        }
     }
 }
