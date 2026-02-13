@@ -16,7 +16,7 @@ public sealed class ImagesController(IImageStorageService imageStorageService) :
         [FromQuery] ImageStoragePurpose purpose = ImageStoragePurpose.Products, 
         CancellationToken ct = default)
     {
-        var result = await imageStorageService.GetImageAsync(ImageStoragePurpose.Products, imageId, ct);
+        var result = await imageStorageService.GetImageAsync(purpose, imageId, ct);
         return File(result.Stream, result.ContentType);
     }
 }
