@@ -141,7 +141,7 @@
             await _grid.ReloadAsync();
     }
 
-    private static ProductImageDto? GetPrimaryOrFirstImage(ProductDto product)
+    private static CatalogImageDto? GetPrimaryOrFirstImage(ProductDto product)
     {
         if (product.Images is null || product.Images.Count == 0)
             return null;
@@ -150,5 +150,5 @@
             ?? product.Images.OrderBy(i => i.SortOrder).First();
     }
 
-    private string GetImageUrl(string url) => $"{ApiClientConfig.BaseUrl}/api/images/{url}";
+    private string GetImageUrl(string url) => $"{ApiClientConfig.BaseUrl}/api/images/{url}?purpose=Products";
 }

@@ -182,6 +182,6 @@ public abstract class ProductUpsertBase : ComponentBase
     protected string GetImage(string url)
     {
         var baseUrl = ApiClientConfig.BaseUrl;
-        return $"{baseUrl}/api/images/{url}";
+        return $"{baseUrl}/api/images/{url}?purpose=products";
     }
 }

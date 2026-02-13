@@ -85,16 +85,25 @@ else
                                         <MudItem xs="12">
                                             <MudPaper Class="pa-3" Elevation="0" Outlined="true">
                                                 <MudText Typo="Typo.subtitle1" Class="mb-2">Primary Image</MudText>
-                                                @if (UpsertModel.Image != null)
+                                                @if (UpsertModel.Images is { Count: > 0 })
                                                 {
                                                     <MudGrid Spacing="2">
                                                         
                                                         
                                                             <MudItem xs="6" sm="4" lg="3">
                                                                 <MudPaper Class="pa-2" Outlined="true">
-                                                                    <div class="img-frame">
-                                                                        <img src="@GetImage(UpsertModel.Image.Url)" alt="@UpsertModel.Image.AltText" class="img-cover" />
-                                                                    </div>
+                                                                    @foreach (var image in UpsertModel.Images.OrderBy(i => i.SortOrder))
+                                                                    {
+                                                                        <MudItem xs="6" sm="4" lg="3">
+                                                                            <MudPaper Class="pa-2" Outlined="true">
+                                                                                <div class="img-frame">
+                                                                                    <img src="@GetImage(image.Url)"
+                                                                                            alt="@image.AltText"
+                                                                                            class="img-cover" />
+                                                                                </div>
+                                                                            </MudPaper>
+                                                                        </MudItem>
+                                                                    }
                                                                 </MudPaper>
                                                             </MudItem>
                                                         
@@ -181,7 +190,8 @@ else
             PageTitle = "Create Category";
             UpsertModel = new CategoryUpsertViewModel
             {
-                Name = string.Empty
+                Name = string.Empty,
+                Images = null
             };
         }
         else
@@ -199,9 +209,10 @@ else
 
                 PageTitle = $"Edit Category {Category.Name}";
 
-                UpsertModel = new CategoryUpsertViewModel()
+                UpsertModel = new CategoryUpsertViewModel
                 {
-                    Name = Category.Name
+                    Name = Category.Name,
+                    Images = Category.Images
                 };
 
             }
@@ -294,6 +305,6 @@ else
     protected string GetImage(string url)
     {
         var baseUrl = ApiClientConfig.BaseUrl;
-        return $"{baseUrl}/api/images/{url}";
+        return $"{baseUrl}/api/images/{url}?purpose=Categories";
     }
 }
