@@ -8,8 +8,8 @@ namespace EShop.Shared.Services;
 
 public enum ImageStoragePurpose
 {
-    CustomerContent = 0,
-    UiAssets = 1
+    Categories = 0,
+    Products = 1
 }
 
 public interface IBlobContainerResolver
@@ -26,8 +26,8 @@ public sealed class BlobContainerResolver(
     public BlobContainerClient Get(ImageStoragePurpose purpose) =>
         purpose switch
         {
-            ImageStoragePurpose.CustomerContent => serviceClient.GetBlobContainerClient(_opt.CustomerContainer),
-            ImageStoragePurpose.UiAssets => serviceClient.GetBlobContainerClient(_opt.UiAssetsContainer),
+            ImageStoragePurpose.Products => serviceClient.GetBlobContainerClient(_opt.ProductImagesContainer),
+            ImageStoragePurpose.Categories => serviceClient.GetBlobContainerClient(_opt.CategoryImagesContainer),
             _ => throw new ArgumentOutOfRangeException(nameof(purpose), purpose, "Unknown storage purpose.")
         };
 }
