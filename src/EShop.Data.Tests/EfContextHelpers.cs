@@ -1,6 +1,4 @@
-﻿using EShop.Data;
-
-namespace EShop.Shared.Testing;
+﻿namespace EShop.Shared.Testing;
 
 internal static class EfContextHelpers
 {
