@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\EShop.API\EShop.API.csproj" />
     <ProjectReference Include="..\EShop.BlobStorageInitializer\EShop.BlobStorageInitializer.csproj" />
+    <ProjectReference Include="..\EShop.Functions\EShop.Functions.csproj" />
     <ProjectReference Include="..\EShop.Gateway\EShop.Gateway.csproj" />
     <ProjectReference Include="..\EShop.ImagesQueueWorker\EShop.ImagesQueueWorker.csproj" />
     <ProjectReference Include="..\EShop.MigrationService\EShop.MigrationService.csproj" />

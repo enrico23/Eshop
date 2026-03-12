@@ -58,6 +58,11 @@ var realmConfig = File.Exists(realmConfigPath);
 if (realmConfig)
     keycloak.WithRealmImport(realmConfigPath);
 
+// AZURE FUNCTIONS
+var azureFunctions = builder
+    .AddAzureFunctionsProject<Projects.EShop_Functions>("functions")
+    .WithExternalHttpEndpoints();
+
 // APPLICATION PROJECTS
 if (!dependenciesOnly)
 {

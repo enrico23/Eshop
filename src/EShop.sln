@@ -87,6 +87,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "keycloak", "keycloak", "{FB
 		..\docs\security\keycloak\keycloak-setup.md = ..\docs\security\keycloak\keycloak-setup.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EShop.Functions", "EShop.Functions\EShop.Functions.csproj", "{3AC350AF-E616-4E66-90A1-C1DD499E0BD4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -277,6 +279,18 @@ Global
 		{DDBF38B4-DC03-464E-AB27-E14C6BF38656}.Release|x64.Build.0 = Release|Any CPU
 		{DDBF38B4-DC03-464E-AB27-E14C6BF38656}.Release|x86.ActiveCfg = Release|Any CPU
 		{DDBF38B4-DC03-464E-AB27-E14C6BF38656}.Release|x86.Build.0 = Release|Any CPU
+		{3AC350AF-E616-4E66-90A1-C1DD499E0BD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AC350AF-E616-4E66-90A1-C1DD499E0BD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AC350AF-E616-4E66-90A1-C1DD499E0BD4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3AC350AF-E616-4E66-90A1-C1DD499E0BD4}.Debug|x64.Build.0 = Debug|Any CPU
+		{3AC350AF-E616-4E66-90A1-C1DD499E0BD4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3AC350AF-E616-4E66-90A1-C1DD499E0BD4}.Debug|x86.Build.0 = Debug|Any CPU
+		{3AC350AF-E616-4E66-90A1-C1DD499E0BD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AC350AF-E616-4E66-90A1-C1DD499E0BD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AC350AF-E616-4E66-90A1-C1DD499E0BD4}.Release|x64.ActiveCfg = Release|Any CPU
+		{3AC350AF-E616-4E66-90A1-C1DD499E0BD4}.Release|x64.Build.0 = Release|Any CPU
+		{3AC350AF-E616-4E66-90A1-C1DD499E0BD4}.Release|x86.ActiveCfg = Release|Any CPU
+		{3AC350AF-E616-4E66-90A1-C1DD499E0BD4}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
