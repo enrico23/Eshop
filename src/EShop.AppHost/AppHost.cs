@@ -28,7 +28,9 @@ var websiteDb = sql.AddDatabase("WebsiteDb");
 // EF MIGRATIONS
 var migrationWorkerService = builder.AddProject<Projects.EShop_MigrationService>("EfCoreMigratorJob")
     .WithReference(catalogDb)
-    .WaitFor(catalogDb);
+    .WaitFor(catalogDb)
+    .WithReference(websiteDb)
+    .WaitFor(websiteDb);
 if (seedSampleData)
     migrationWorkerService = migrationWorkerService.WithEnvironment("SeedSampleData", "true");
 

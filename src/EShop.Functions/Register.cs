@@ -1,3 +1,4 @@
+using EShop.Domain.Websites;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -35,5 +36,3 @@ public class Register
         return new OkObjectResult($"Website url: {website?.Url} ");
     }
 }
-
-public record Website(Guid Id, string Url, string? XPathExpression);

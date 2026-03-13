@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EShop.MigrationService;
 
-public class MigratorService(
+public class CatalogDbMigratorService(
     IServiceProvider serviceProvider, 
     IHostApplicationLifetime hostApplicationLifetime,
     IConfiguration configuration,
-     ILogger<MigratorService> logger) 
+     ILogger<CatalogDbMigratorService> logger) 
         : BackgroundService
 {
     private readonly bool seedSampleData = configuration.GetValue<bool>("SeedSampleData");
@@ -107,7 +107,6 @@ public class MigratorService(
             await dbContext.SaveChangesAsync(ct);
         });
     }
-
 
     private static string GenerateUniqueName(string[] adjectives, string[] nouns, HashSet<string> used, Random rng)
     {
