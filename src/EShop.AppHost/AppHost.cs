@@ -19,16 +19,16 @@ var blobStorageInitializer = builder.AddProject<Projects.EShop_BlobStorageInitia
     .WaitFor(azureBlobStorage);
 
 // SQL SERVER & DB SETUP
-var databaseName = "CatalogDb";
 var password = builder.AddParameter("password", secret: true);
 var sql = builder.AddSqlServer("SqlServerInstance", port:14347, password: password)
     .WithLifetime(ContainerLifetime.Persistent); ;
-var db = sql.AddDatabase(databaseName);
+var catalogDb = sql.AddDatabase("CatalogDb");
+var websiteDb = sql.AddDatabase("WebsiteDb");
 
 // EF MIGRATIONS
 var migrationWorkerService = builder.AddProject<Projects.EShop_MigrationService>("EfCoreMigratorJob")
-    .WithReference(db)
-    .WaitFor(db);
+    .WithReference(catalogDb)
+    .WaitFor(catalogDb);
 if (seedSampleData)
     migrationWorkerService = migrationWorkerService.WithEnvironment("SeedSampleData", "true");
 
@@ -61,6 +61,7 @@ if (realmConfig)
 // AZURE FUNCTIONS
 var azureFunctions = builder
     .AddAzureFunctionsProject<Projects.EShop_Functions>("functions")
+    .WithReference(websiteDb)
     .WithExternalHttpEndpoints();
 
 // APPLICATION PROJECTS
@@ -68,8 +69,8 @@ if (!dependenciesOnly)
 {
     // API CONFIGURATION
     var catalogApi = builder.AddProject<Projects.EShop_API>("CatalogApi")
-           .WaitFor(db)
-           .WithReference(db)
+           .WaitFor(catalogDb)
+           .WithReference(catalogDb)
            .WaitFor(migrationWorkerService)
            .WaitFor(azureBlobStorage)
            .WithReference(azureBlobStorage)
