@@ -14,7 +14,7 @@ This solution uses:
 - Azure Service Bus for image processing workflows
 - .NET Aspire for local orchestration and observability defaults
 
-## Achitecture
+## Architecture
 
 [Architecture Overview](docs/architecture.md)
 
@@ -45,7 +45,7 @@ staying within the .NET stack.
 - [EF Core Migrations](docs/api/efcore.md)
 - [Error Handling](docs/api/errorhandling.md)
 - [Azure Blob Storage](docs/azure-blob-storage.md)
-- [Observability](docs/observability.md
+- [Observability](docs/observability.md)
 
 
 ## Authentication & Authorization

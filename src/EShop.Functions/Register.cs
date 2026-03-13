@@ -1,6 +1,5 @@
 using EShop.Domain.Websites;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Extensions.Sql;
 using Microsoft.Extensions.Configuration;
@@ -25,14 +24,16 @@ public class Register
     }
 
     [Function(nameof(Register))]
-    [SqlOutput("dto.Websites", "WebsiteDb")]
-    public async Task<IActionResult> RunAsync([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequest req)
+    [SqlOutput("dbo.Websites", "WebsiteDb")]
+    public async Task<Website?> RunAsync([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequest req)
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
         string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-        Website? website = JsonSerializer.Deserialize<Website>(requestBody, _options);
-
-        return new OkObjectResult($"Website url: {website?.Url} ");
+        Website? deserializedWebsite = JsonSerializer.Deserialize<Website>(requestBody, _options);
+        
+        return deserializedWebsite == null 
+            ? null 
+            : new Website(Guid.NewGuid(), deserializedWebsite.Url, deserializedWebsite.XPathExpression);
     }
 }

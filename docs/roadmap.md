@@ -74,11 +74,12 @@ Goal: make filtering and data shaping more elastic for UI screens.
 - [ ] Accessibility basics (labels, focus states, contrast)
 
 ## Reliability & observability
-- [ ] OpenTelemetry tracing (API + Web) + Aspire dashboard visibility
-- [ ] Structured logging with correlation IDs
-- [ ] Health checks (API + dependencies)
+- [x] OpenTelemetry tracing (API + Web) + Aspire dashboard visibility
+- [x] Structured logging with correlation IDs
+- [x] Health checks (API + dependencies)
 
 ## Testing
+- [x] Service and repository test projects for domain, API, data, and shared components
 - [ ] API integration tests for filtering/paging
 - [ ] Minimal UI/component tests for critical flows (optional)
 

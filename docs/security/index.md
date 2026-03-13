@@ -23,7 +23,7 @@ Before applying this configuration:
 - Required client roles must be present
 
 Refer to:
-- `docs/keycloak/keycloak-realm-contract.md`
+- `docs/security/keycloak/keycloak-realm-contract.md`
 
 ---
 
@@ -56,6 +56,7 @@ This results in **partial restoration** when the Keycloak data volume is deleted
 4. Update Blazor user secrets:
    ```bash
    dotnet user-secrets set "Keycloak:ClientSecret" "<new-secret>"
+   ```
 
 ## Architecture Overview
 
@@ -187,5 +188,4 @@ public sealed class AccessTokenHandler : DelegatingHandler
         return await base.SendAsync(request, cancellationToken);
     }
 }
-
 

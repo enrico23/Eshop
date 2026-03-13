@@ -103,18 +103,21 @@ app.MapGet("/whoami", (HttpContext ctx) =>
     });
 });
 
-app.MapGet("/debug/token", async (HttpContext ctx) =>
+if (app.Environment.IsDevelopment())
 {
-    var accessToken = await ctx.GetTokenAsync("access_token");
-    var idToken = await ctx.GetTokenAsync("id_token");
-
-    return Results.Json(new
+    app.MapGet("/debug/token", async (HttpContext ctx) =>
     {
-        HasAccessToken = !string.IsNullOrWhiteSpace(accessToken),
-        AccessToken = accessToken,
-        IdToken = idToken
-    });
-})
-.RequireAuthorization();
+        var accessToken = await ctx.GetTokenAsync("access_token");
+        var idToken = await ctx.GetTokenAsync("id_token");
+
+        return Results.Json(new
+        {
+            HasAccessToken = !string.IsNullOrWhiteSpace(accessToken),
+            AccessToken = accessToken,
+            IdToken = idToken
+        });
+    })
+    .RequireAuthorization();
+}
 
 app.Run();
